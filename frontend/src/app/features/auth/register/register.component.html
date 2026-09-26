@@ -1,0 +1,195 @@
+<div class="register-container">
+
+  <div class="register-card">
+
+    <div class="register-header">
+      <h2>Create Account</h2>
+      <p>Register to continue</p>
+    </div>
+
+    <form
+      [formGroup]="registerForm"
+      (ngSubmit)="onSubmit()"
+    >
+      <div class="form-group">
+
+        <label for="name">
+          Name
+        </label>
+
+        <input
+          id="name"
+          type="text"
+          formControlName="name"
+          placeholder="Enter your name"
+        />
+
+        <small
+          class="error"
+          *ngIf="name?.touched && name?.hasError('required')"
+        >
+          Name is required
+        </small>
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="email">
+          Email
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="Enter your email"
+        />
+
+        <small
+          class="error"
+          *ngIf="email?.touched && email?.hasError('required')"
+        >
+          Email is required
+        </small>
+
+        <small
+          class="error"
+          *ngIf="email?.touched && email?.hasError('email')"
+        >
+          Please enter a valid email
+        </small>
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="mobile">
+          Mobile
+        </label>
+
+        <input
+          id="mobile"
+          type="text"
+          formControlName="mobile"
+          placeholder="Enter 10 digit mobile number"
+          maxlength="10"
+        />
+
+        <small
+          class="error"
+          *ngIf="mobile?.touched && mobile?.hasError('required')"
+        >
+          Mobile number is required
+        </small>
+
+        <small
+          class="error"
+          *ngIf="mobile?.touched && mobile?.hasError('pattern')"
+        >
+          Mobile number must contain 10 digits
+        </small>
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="password">
+          Password
+        </label>
+
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="Enter password"
+        />
+
+        <small
+          class="error"
+          *ngIf="password?.touched && password?.hasError('required')"
+        >
+          Password is required
+        </small>
+
+        <small
+          class="error"
+          *ngIf="password?.touched && password?.hasError('minlength')"
+        >
+          Password must be at least 8 characters
+        </small>
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="confirm_password">
+          Confirm Password
+        </label>
+
+        <input
+          id="confirm_password"
+          type="password"
+          formControlName="confirm_password"
+          placeholder="Confirm your password"
+        />
+
+        <small
+          class="error"
+          *ngIf="
+            confirmPassword?.touched &&
+            confirmPassword?.hasError('required')
+          "
+        >
+          Confirm password is required
+        </small>
+
+        <small
+          class="error"
+          *ngIf="
+            confirmPassword?.touched &&
+            confirmPassword?.hasError('passwordMismatch')
+          "
+        >
+          Passwords do not match
+        </small>
+
+      </div>
+
+      <div
+        class="error-message"
+        *ngIf="errorMessage"
+      >
+        {{ errorMessage }}
+      </div>
+
+      <div
+        class="success-message"
+        *ngIf="successMessage"
+      >
+        {{ successMessage }}
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="isLoading"
+      >
+        {{ isLoading ? 'Registering...' : 'Register' }}
+      </button>
+
+    </form>
+
+
+    <div class="login-link">
+
+      <span>Already have an account?</span>
+
+      <a routerLink="/login">
+        Login
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
