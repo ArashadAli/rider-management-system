@@ -103,6 +103,8 @@ export class RegisterComponent {
 
         this.isLoading = false;
 
+        console.log("error while registering the user : ", error)
+
         this.errorMessage =
           error?.error?.message ||
           'Something went wrong. Please try again.';

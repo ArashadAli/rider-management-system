@@ -1,0 +1,153 @@
+<div class="app-layout">
+
+  <header class="header">
+
+    <button
+      class="menu-btn"
+      type="button"
+      (click)="toggleSidebar()"
+    >
+      ☰
+    </button>
+
+    <div class="header-logo">
+      <h2>Jeebly</h2>
+    </div>
+
+    <div class="user-section">
+
+      <div class="user-info">
+
+        <div class="user-avatar">
+          {{ userInitial }}
+        </div>
+
+        <div class="user-details">
+
+          <span class="user-name">
+            {{ userName }}
+          </span>
+
+          <span class="user-role">
+            Administrator
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="logout-btn"
+        (click)="logoutUser()"
+      >
+        Logout
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <div class="app-body">
+
+
+    <aside
+      class="sidebar"
+      [class.sidebar-open]="sidebarOpen"
+    >
+
+      <nav class="sidebar-nav">
+
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-item"
+          (click)="closeSidebarOnMobile()"
+        >
+          <span class="nav-icon">▦</span>
+          <span>Dashboard</span>
+        </a>
+
+
+        <a
+          routerLink="/orders"
+          routerLinkActive="active"
+          class="nav-item"
+          (click)="closeSidebarOnMobile()"
+        >
+          <span class="nav-icon">▤</span>
+          <span>Orders</span>
+        </a>
+
+
+        <a
+          routerLink="/riders"
+          routerLinkActive="active"
+          class="nav-item"
+          (click)="closeSidebarOnMobile()"
+        >
+          <span class="nav-icon">♙</span>
+          <span>Riders</span>
+        </a>
+
+
+        <a
+          routerLink="/manage"
+          routerLinkActive="active"
+          class="nav-item"
+          (click)="closeSidebarOnMobile()"
+        >
+          <span class="nav-icon">⚙</span>
+          <span>Manage</span>
+        </a>
+
+
+        <a
+          routerLink="/settings"
+          routerLinkActive="active"
+          class="nav-item"
+          (click)="closeSidebarOnMobile()"
+        >
+          <span class="nav-icon">☷</span>
+          <span>Settings</span>
+        </a>
+
+      </nav>
+
+
+      <div class="sidebar-bottom">
+
+        <button
+          type="button"
+          class="sidebar-logout"
+          (click)="logoutUser()"
+        >
+          Logout
+        </button>
+
+      </div>
+
+    </aside>
+
+    <div
+      class="sidebar-overlay"
+      *ngIf="sidebarOpen"
+      (click)="closeSidebar()"
+    ></div>
+
+    <main class="main-content">
+
+      <div class="breadcrumb">
+        Dashboard
+      </div>
+
+      <router-outlet></router-outlet>
+
+    </main>
+
+  </div>
+
+</div>

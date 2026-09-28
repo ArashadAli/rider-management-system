@@ -16,6 +16,11 @@ export class ApiService {
   }
 
   post<T>(url: string, data: any) {
+    // console.log("url : ", url)
+    // console.log("data", data)
+
+    // console.log(`complete backend req url : ${this.baseUrl}${url}`)
+
     return this.http.post<T>(`${this.baseUrl}${url}`, data);
   }
 

@@ -4,7 +4,10 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import {
   RegisterResponse,
-  LoginResponse
+  LoginResponse,
+  ProfileResponse,
+  DashboardResponse,
+  LogoutResponse
 } from '../models/auth-response.model';
 
 @Injectable({
@@ -16,15 +19,33 @@ export class AuthService {
 
   register(user: any): Observable<RegisterResponse> {
     return this.apiService.post<RegisterResponse>(
-      '/users/register',
+      '/auth/register',
       user
     );
   }
 
   login(credentials: any): Observable<LoginResponse> {
     return this.apiService.post<LoginResponse>(
-      '/users/login',
+      '/auth/login',
       credentials
     );
+  }
+
+  dashboard(): Observable<DashboardResponse> {
+    return this.apiService.get<DashboardResponse>(
+      '/users/dashboard',
+    )
+  }
+
+  profile(): Observable<ProfileResponse> {
+    return this.apiService.get<ProfileResponse>(
+      '/users/me'
+    )
+  }
+
+  logout(): Observable<LogoutResponse> {
+    return this.apiService.get<LogoutResponse>(
+      '/auth/logout'
+    )
   }
 }

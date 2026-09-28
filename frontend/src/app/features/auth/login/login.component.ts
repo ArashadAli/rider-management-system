@@ -65,8 +65,10 @@ export class LoginComponent {
 
         this.isLoading = false;
 
+        // console.log("user loggedin successfully : ", response)
+
           if(response.success) this.router.navigate(['/dashboard'])
-          else this.router.navigate(['/login'])
+          // else this.router.navigate(['/login'])
       },
 
       error: (error) => {
