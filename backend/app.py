@@ -2,6 +2,7 @@ from flask import Flask
 from flask_jwt_extended import JWTManager
 from routes.user import user_bp
 from routes.auth import auth_bp
+from routes.order import order_bp
 from config.connectDB import db
 from dotenv import load_dotenv
 from flask_cors import CORS
@@ -16,7 +17,7 @@ app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = int( os.getenv("SECRET_KEY_EXPIRY"))
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies"]
-app.config["JWT_COOKIE_SECURE"] = False
+app.config["JWT_COOKIE_SECURE"] = os.getenv("JWT_COOKIE_SECURE", "False").lower() == "true"
 app.config["JWT_COOKIE_HTTPONLY"] = True
 
 jwt = JWTManager(app)
@@ -42,15 +43,13 @@ with app.app_context():
 
 
 # Auth Route
-
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
+# User Route
 app.register_blueprint(user_bp, url_prefix="/api/users")
 
-
-@app.route("/")
-def hello():
-    return "Hello, World!"
+# Order Route
+app.register_blueprint(order_bp, url_prefix="/api/orders")
 
 
 if __name__ == "__main__":
