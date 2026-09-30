@@ -27,7 +27,7 @@ jwt = JWTManager(app)
 
 CORS(
     app,
-    origins= ["http://localhost:4200"],
+    origins= ["http://localhost:4200","http://172.16.1.29:8080"],
     supports_credentials= True
 )
 
