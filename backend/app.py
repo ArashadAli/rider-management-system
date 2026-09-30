@@ -19,6 +19,7 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = int( os.getenv("SECRET_KEY_EXPIRY"))
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies"]
 app.config["JWT_COOKIE_SECURE"] = os.getenv("JWT_COOKIE_SECURE", "False").lower() == "true"
 app.config["JWT_COOKIE_HTTPONLY"] = True
+app.config["JWT_COOKIE_SAMESITE"] = "None"
 
 jwt = JWTManager(app)
 
