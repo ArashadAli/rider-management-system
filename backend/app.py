@@ -28,7 +28,7 @@ jwt = JWTManager(app)
 
 CORS(
     app,
-    origins= ["http://localhost:4200","http://172.16.1.29:8080", "http://localhost:8080", "https://rider-management-system.vercel.app","https://rider-management-system-8ldwruhvn-arashadalis-projects.vercel.app"],
+    origins= ["http://localhost:4200","http://172.16.1.29:8080", "http://localhost:8080", "https://rider-management-system-lyart.vercel.app"],
     supports_credentials= True
 )
 
