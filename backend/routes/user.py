@@ -1,6 +1,6 @@
 from flask import Blueprint
 from middleware.auth_middleware import token_required
-from flask import jsonify
+from controllers.user_controllers import user_dashboard, user_profile
 
 user_bp = Blueprint("api/users", __name__)
 
@@ -9,21 +9,11 @@ user_bp = Blueprint("api/users", __name__)
 @token_required
 
 def dashboard(user_email):
-    print("user email : ", user_email)
-
-    return jsonify({
-        "message": "token verified",
-        "success": True
-    }), 200
+    return user_dashboard(user_email)
 
 @user_bp.route("/me", methods= ["GET"])
 @token_required
 
 def profile(user_email):
-
-    return jsonify({
-        "message":"valid user",
-        "success": True,
-        "user_email": user_email
-    }), 200
+    return user_profile(user_email)
 

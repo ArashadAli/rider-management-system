@@ -27,6 +27,12 @@ const routes: Routes = [
         loadComponent: () =>
           import('./features/dashboard/dashboard.component')
             .then(m => m.DashboardComponent)
+      },
+      {
+        path: 'orders',
+        loadComponent: () =>
+          import('./features/orders/orders.component')
+            .then(m => m.OrdersComponent)
       }
     ],
   },

@@ -16,6 +16,7 @@ export class LoginComponent {
   isLoading = false;
   successMessage = '';
   errorMessage = '';
+  showPassword = false;
 
   constructor(
     private fb: FormBuilder,
@@ -92,5 +93,9 @@ export class LoginComponent {
 
   get rememberMe() {
     return this.loginForm.get('rememberMe');
+  }
+
+  togglePassword(): void { 
+    this.showPassword = !this.showPassword; 
   }
 }

@@ -7,27 +7,16 @@
       <p>Register to continue</p>
     </div>
 
-    <form
-      [formGroup]="registerForm"
-      (ngSubmit)="onSubmit()"
-    >
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
 
         <label for="name">
           Name
         </label>
 
-        <input
-          id="name"
-          type="text"
-          formControlName="name"
-          placeholder="Enter your name"
-        />
+        <input id="name" type="text" formControlName="name" placeholder="Enter your name" />
 
-        <small
-          class="error"
-          *ngIf="name?.touched && name?.hasError('required')"
-        >
+        <small class="error" *ngIf="name?.touched && name?.hasError('required')">
           Name is required
         </small>
 
@@ -39,24 +28,13 @@
           Email
         </label>
 
-        <input
-          id="email"
-          type="email"
-          formControlName="email"
-          placeholder="Enter your email"
-        />
+        <input id="email" type="email" formControlName="email" placeholder="Enter your email" />
 
-        <small
-          class="error"
-          *ngIf="email?.touched && email?.hasError('required')"
-        >
+        <small class="error" *ngIf="email?.touched && email?.hasError('required')">
           Email is required
         </small>
 
-        <small
-          class="error"
-          *ngIf="email?.touched && email?.hasError('email')"
-        >
+        <small class="error" *ngIf="email?.touched && email?.hasError('email')">
           Please enter a valid email
         </small>
 
@@ -68,29 +46,19 @@
           Mobile
         </label>
 
-        <input
-          id="mobile"
-          type="text"
-          formControlName="mobile"
-          placeholder="Enter 10 digit mobile number"
-          maxlength="10"
-        />
+        <input id="mobile" type="text" formControlName="mobile" placeholder="Enter 10 digit mobile number"
+          maxlength="10" />
 
-        <small
-          class="error"
-          *ngIf="mobile?.touched && mobile?.hasError('required')"
-        >
+        <small class="error" *ngIf="mobile?.touched && mobile?.hasError('required')">
           Mobile number is required
         </small>
 
-        <small
-          class="error"
-          *ngIf="mobile?.touched && mobile?.hasError('pattern')"
-        >
+        <small class="error" *ngIf="mobile?.touched && mobile?.hasError('pattern')">
           Mobile number must contain 10 digits
         </small>
 
       </div>
+
 
       <div class="form-group">
 
@@ -98,24 +66,22 @@
           Password
         </label>
 
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          placeholder="Enter password"
-        />
+        <div class="password-wrapper">
 
-        <small
-          class="error"
-          *ngIf="password?.touched && password?.hasError('required')"
-        >
+          <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+            placeholder="Enter password" />
+
+          <button type="button" class="password-toggle" (click)="togglePassword()">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+
+        </div>
+
+        <small class="error" *ngIf="password?.touched && password?.hasError('required')">
           Password is required
         </small>
 
-        <small
-          class="error"
-          *ngIf="password?.touched && password?.hasError('minlength')"
-        >
+        <small class="error" *ngIf="password?.touched && password?.hasError('minlength')">
           Password must be at least 8 characters
         </small>
 
@@ -127,53 +93,44 @@
           Confirm Password
         </label>
 
-        <input
-          id="confirm_password"
-          type="password"
-          formControlName="confirm_password"
-          placeholder="Confirm your password"
-        />
+        <div class="password-wrapper">
 
-        <small
-          class="error"
-          *ngIf="
-            confirmPassword?.touched &&
-            confirmPassword?.hasError('required')
-          "
-        >
+          <input id="confirm_password" [type]="showConfirmPassword ? 'text' : 'password'"
+            formControlName="confirm_password" placeholder="Confirm your password" />
+
+          <button type="button" class="password-toggle" (click)="toggleConfirmPassword()">
+            {{ showConfirmPassword ? 'Hide' : 'Show' }}
+          </button>
+
+        </div>
+
+        <small class="error" *ngIf="
+      confirmPassword?.touched &&
+      confirmPassword?.hasError('required')
+    ">
           Confirm password is required
         </small>
 
-        <small
-          class="error"
-          *ngIf="
-            confirmPassword?.touched &&
-            confirmPassword?.hasError('passwordMismatch')
-          "
-        >
+        <small class="error" *ngIf="
+      confirmPassword?.touched &&
+      confirmPassword?.hasError('passwordMismatch')
+    ">
           Passwords do not match
         </small>
 
       </div>
 
-      <div
-        class="error-message"
-        *ngIf="errorMessage"
-      >
+
+
+      <div class="error-message" *ngIf="errorMessage">
         {{ errorMessage }}
       </div>
 
-      <div
-        class="success-message"
-        *ngIf="successMessage"
-      >
+      <div class="success-message" *ngIf="successMessage">
         {{ successMessage }}
       </div>
 
-      <button
-        type="submit"
-        [disabled]="isLoading"
-      >
+      <button type="submit" [disabled]="isLoading">
         {{ isLoading ? 'Registering...' : 'Register' }}
       </button>
 

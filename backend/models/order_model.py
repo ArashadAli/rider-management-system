@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from config.connectDB import db
 
 
@@ -13,6 +15,11 @@ class Order(db.Model):
         db.String(50),
         nullable=False,
         unique=True
+    )
+
+    order_item = db.Column(
+        db.String(100),
+        nullable=False
     )
 
     customer_name = db.Column(
@@ -47,7 +54,14 @@ class Order(db.Model):
     )
 
     rider_id = db.Column(
-        db.Integer,
-        db.ForeignKey("riders.id"),
-        nullable=True
+    db.String(36),
+    db.ForeignKey("riders.id"),
+    nullable=True
+
     )
+
+    created_at = db.Column(
+    db.DateTime(timezone=True),
+    nullable=False,
+    default=lambda: datetime.now(timezone.utc)
+)

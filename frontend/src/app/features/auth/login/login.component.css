@@ -64,6 +64,48 @@
   font-size: 12px;
 }
 
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding: 11px 65px 11px 11px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.password-wrapper input:focus {
+  outline: none;
+  border-color: #163758;
+}
+
+.password-wrapper input::-ms-reveal,
+.password-wrapper input::-ms-clear {
+  display: none;
+}
+
+.password-wrapper input::-webkit-credentials-auto-fill-button,
+.password-wrapper input::-webkit-textfield-decoration-container,
+.password-wrapper input::-webkit-password-reveal-button {
+  display: none;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: auto;
+  padding: 0;
+  background: transparent;
+  color: #163758;
+  font-size: 12px;
+}
+
+
 .remember-me {
   margin-bottom: 18px;
 }

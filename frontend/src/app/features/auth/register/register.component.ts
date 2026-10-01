@@ -21,6 +21,8 @@ export class RegisterComponent {
   isLoading = false;
   successMessage = '';
   errorMessage = '';
+  showPassword = false; 
+  showConfirmPassword = false;
 
   constructor(
     private fb: FormBuilder,
@@ -96,6 +98,8 @@ export class RegisterComponent {
           this.successMessage = response.message;
 
           this.registerForm.reset();
+
+          this.router.navigate(["/login"])
         }
       },
 
@@ -103,7 +107,7 @@ export class RegisterComponent {
 
         this.isLoading = false;
 
-        console.log("error while registering the user : ", error)
+        // console.log("error while registering the user : ", error)
 
         this.errorMessage =
           error?.error?.message ||
@@ -130,5 +134,11 @@ export class RegisterComponent {
 
   get confirmPassword() {
     return this.registerForm.get('confirm_password');
+  }
+  togglePassword(): void { 
+    this.showPassword = !this.showPassword; 
+  } 
+  toggleConfirmPassword(): void { 
+    this.showConfirmPassword = !this.showConfirmPassword; 
   }
 }

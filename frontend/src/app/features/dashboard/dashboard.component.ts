@@ -18,6 +18,7 @@ export class DashboardComponent implements OnInit {
 
     this.authService.dashboard().subscribe({
       next: (response) => {
+        console.log("loggedin user : ", response)
       },
 
       error: (error) => {

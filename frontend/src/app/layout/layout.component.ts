@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
+import { Router } from '@angular/router';
+import { get } from 'http';
 
 @Component({
   selector: 'app-layout',
@@ -13,15 +15,37 @@ import { AuthService } from '../core/services/auth.service';
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.css']
 })
-export class LayoutComponent {
+export class LayoutComponent implements OnInit {
 
   sidebarOpen = false;
 
-  userName = 'Arashad Ali';
+  userName = '';
+  userInfo: any
 
   constructor(
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private route: Router
+  ) {
+
+  }
+
+  ngOnInit(): void {
+    this.getAll()
+  }
+
+
+
+  getAll() {
+    this.authService.profile().subscribe({
+      next: (response) => {
+        this.userInfo = response;
+        this.userName = this.userInfo.user.name
+      },
+      error: (error) => {
+        console.error('Profile failed', error);
+      }
+    });
+  }
 
   get userInitial(): string {
     return this.userName
@@ -49,6 +73,7 @@ export class LayoutComponent {
 
       next: (response) => {
         console.log('Logout successful', response);
+        if (response.success) this.route.navigate(['/login'])
       },
 
       error: (error) => {

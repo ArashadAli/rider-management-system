@@ -1,7 +1,6 @@
 from flask import Blueprint
 from middleware.auth_middleware import token_required
-from flask import jsonify
-from controllers.order_controllers import create_Order
+from controllers.order_controllers import create_Order, allOrders
 
 order_bp = Blueprint("api/orders", __name__)
 
@@ -12,3 +11,10 @@ order_bp = Blueprint("api/orders", __name__)
 
 def create_order(user_email):
     return create_Order(user_email)
+
+
+@order_bp.route("/allOrders", methods=["GET"])
+@token_required
+
+def get_all_orders(user_email):
+    return allOrders(user_email)
