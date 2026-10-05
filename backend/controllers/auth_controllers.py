@@ -166,3 +166,19 @@ def logoutUser():
     unset_access_cookies(response)
 
     return response, 200
+
+
+def get_csrf_token():
+
+    csrf_token = request.cookies.get("csrf_access_token")
+
+    if not csrf_token:
+        return jsonify({
+            "success": False,
+            "message": "CSRF token not found"
+        }), 401
+
+    return jsonify({
+        "success": True,
+        "csrf_token": csrf_token
+    }), 200

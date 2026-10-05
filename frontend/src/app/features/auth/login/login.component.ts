@@ -68,6 +68,14 @@ export class LoginComponent {
 
         // console.log("user loggedin successfully : ", response)
 
+        this.authService.getCsrfToken().subscribe({
+          next: (tokenResponse) => {
+            if (tokenResponse.success) {
+              localStorage.setItem('csrf_token', tokenResponse.csrf_token);
+            }
+          }
+        });
+
           if(response.success) this.router.navigate(['/dashboard'])
           // else this.router.navigate(['/login'])
       },

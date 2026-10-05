@@ -32,3 +32,8 @@ export interface LogoutResponse {
   message: string,
   success: boolean
 }
+
+export interface TokenResponse {
+  "success": boolean,
+  "csrf_token": string
+}

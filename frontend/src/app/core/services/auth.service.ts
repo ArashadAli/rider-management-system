@@ -7,7 +7,8 @@ import {
   LoginResponse,
   ProfileResponse,
   DashboardResponse,
-  LogoutResponse
+  LogoutResponse,
+  TokenResponse
 } from '../models/auth-response.model';
 
 @Injectable({
@@ -46,6 +47,12 @@ export class AuthService {
   logout(): Observable<LogoutResponse> {
     return this.apiService.get<LogoutResponse>(
       '/auth/logout'
+    )
+  }
+
+  getCsrfToken(): Observable<TokenResponse> {
+    return this.apiService.get<TokenResponse>(
+      '/auth/csrf-token'
     )
   }
 }

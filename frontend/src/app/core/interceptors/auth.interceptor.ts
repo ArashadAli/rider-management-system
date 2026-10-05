@@ -17,7 +17,7 @@ export class CredentialsInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
 
-    const csrfToken = this.getCookie("csrf_access_token");
+    const csrfToken = localStorage.getItem('csrf_token');
 
     console.log("CSRF Token:", csrfToken);
     console.log("COOKIES:", document.cookie);
@@ -37,21 +37,6 @@ export class CredentialsInterceptor implements HttpInterceptor {
     console.log("req headers:", authReq.headers);
 
     return next.handle(authReq);
-  }
-
-  private getCookie(name: string): string | null {
-
-    const cookies = document.cookie.split(";");
-
-    for (const cookie of cookies) {
-      const [key, value] = cookie.trim().split("=");
-
-      if (key === name) {
-        return decodeURIComponent(value);
-      }
-    }
-
-    return null;
   }
 }
 
