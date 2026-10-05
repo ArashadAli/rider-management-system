@@ -24,3 +24,10 @@ export interface OrderResponse {
     has_previous: boolean;
   };
 }
+
+
+export interface AllOrdersResponse {
+  success: boolean;
+  message: string;
+  data: Order[];
+}

@@ -5,12 +5,15 @@ import { AuthService } from '../core/services/auth.service';
 import { Router } from '@angular/router';
 import { get } from 'http';
 
+import { GlobalLoaderComponent } from '../shared/components/global-loader/global-loader.component';
+
 @Component({
   selector: 'app-layout',
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule
+    RouterModule, 
+    GlobalLoaderComponent
   ],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.css']

@@ -19,8 +19,8 @@ export class CredentialsInterceptor implements HttpInterceptor {
 
     const csrfToken = localStorage.getItem('csrf_token');
 
-    console.log("CSRF Token:", csrfToken);
-    console.log("COOKIES:", document.cookie);
+    // console.log("CSRF Token:", csrfToken);
+    // console.log("COOKIES:", document.cookie);
 
     let authReq = req.clone({
       withCredentials: true
@@ -34,7 +34,7 @@ export class CredentialsInterceptor implements HttpInterceptor {
       });
     }
 
-    console.log("req headers:", authReq.headers);
+    // console.log("req headers:", authReq.headers);
 
     return next.handle(authReq);
   }

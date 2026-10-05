@@ -134,26 +134,8 @@ def create_Order(user_email):
 
 
 def allOrders(user_email):
-
     try:
-        page = request.args.get("page", 1, type=int)
-        limit = request.args.get("limit", 10, type=int)
-
-        if page < 1:
-            page = 1
-
-        if limit not in [10, 25, 50]:
-            limit = 10
-
-        pagination = (
-            Order.query
-            .order_by(Order.created_at.desc())
-            .paginate(
-                page=page,
-                per_page=limit,
-                error_out=False
-            )
-        )
+        orders = Order.query.order_by(Order.created_at.desc()).all()
 
         orders_list = [
             {
@@ -168,28 +150,84 @@ def allOrders(user_email):
                 "created_at": order.created_at.isoformat() if order.created_at else None,
                 "rider_id": order.rider_id
             }
-            for order in pagination.items
+            for order in orders
         ]
 
         return jsonify({
             "success": True,
             "message": "Orders retrieved successfully",
-            "data": {
-                "orders": orders_list,
-                "current_page": pagination.page,
-                "page_size": pagination.per_page,
-                "total_orders": pagination.total,
-                "total_pages": pagination.pages,
-                "has_next": pagination.has_next,
-                "has_previous": pagination.has_prev
-            }
+            "data": orders_list
         }), 200
 
     except Exception as e:
 
-        print("Get orders error:", e)
+        # print("Get all orders error:", repr(e))
 
         return jsonify({
             "success": False,
             "message": "Failed to retrieve orders"
         }), 500
+
+    
+
+
+def getOrderForPagination(user_email):
+    try:
+            page = request.args.get("page", 1, type=int)
+            limit = request.args.get("limit", 10, type=int)
+    
+            if page < 1:
+                page = 1
+    
+            if limit not in [10, 25, 50]:
+                limit = 10
+    
+            pagination = (
+                Order.query
+                .order_by(Order.created_at.desc())
+                .paginate(
+                    page=page,
+                    per_page=limit,
+                    error_out=False
+                )
+            )
+    
+            orders_list = [
+                {
+                    "order_id": order.order_id,
+                    "order_item": order.order_item,
+                    "customer_name": order.customer_name,
+                    "customer_mobile": order.customer_mobile,
+                    "pickup_address": order.pickup_address,
+                    "delivery_address": order.delivery_address,
+                    "amount": float(order.amount),
+                    "status": order.status,
+                    "created_at": order.created_at.isoformat() if order.created_at else None,
+                    "rider_id": order.rider_id
+                }
+                for order in pagination.items
+            ]
+    
+            return jsonify({
+                "success": True,
+                "message": "Orders retrieved successfully",
+                "data": {
+                    "orders": orders_list,
+                    "current_page": pagination.page,
+                    "page_size": pagination.per_page,
+                    "total_orders": pagination.total,
+                    "total_pages": pagination.pages,
+                    "has_next": pagination.has_next,
+                    "has_previous": pagination.has_prev
+                }
+            }), 200
+    
+    except Exception as e:
+    
+            print("Get orders error:", e)
+    
+            return jsonify({
+                "success": False,
+                "message": "Failed to retrieve orders"
+            }), 500
+    

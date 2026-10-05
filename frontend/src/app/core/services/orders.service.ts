@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { ApiService } from './api.service';
-import { OrderResponse } from '../models/order-response.model';
+import { OrderResponse, AllOrdersResponse } from '../models/order-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +20,13 @@ export class OrdersService {
 
   getOrders(page: number, limit: number): Observable<OrderResponse> {
     return this.apiService.get<OrderResponse>(
-      `/orders/allOrders?page=${page}&limit=${limit}`
+      `/orders/pagination?page=${page}&limit=${limit}`
+    );
+  }
+
+  getAllOrders(): Observable<AllOrdersResponse> {
+    return this.apiService.get<AllOrdersResponse>(
+      `/orders/allOrders`
     );
   }
 

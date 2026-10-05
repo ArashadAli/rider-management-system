@@ -1,8 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy
+} from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { OrdersService } from '../../core/services/orders.service';
 import { Order } from '../../core/models/order-response.model';
+
+import { LoaderService } from 'src/app/core/services/loader.service';
+
+import { Subject } from 'rxjs';
+import {
+  takeUntil,
+  finalize
+} from 'rxjs/operators';
 
 interface Rider {
   id: number;
@@ -19,7 +33,9 @@ interface Rider {
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css']
 })
-export class OrdersComponent implements OnInit {
+export class OrdersComponent implements OnInit, OnDestroy {
+
+  private destroy$ = new Subject<void>();
 
   showCreateOrder = false;
 
@@ -70,7 +86,8 @@ export class OrdersComponent implements OnInit {
   };
 
   constructor(
-    private ordersService: OrdersService
+    private ordersService: OrdersService,
+    private loaderService: LoaderService
   ) {}
 
   ngOnInit(): void {
@@ -82,8 +99,16 @@ export class OrdersComponent implements OnInit {
 
   loadOrders(): void {
 
+    this.loaderService.show();
+
     this.ordersService
       .getOrders(this.currentPage, this.pageSize)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.loaderService.hide();
+        })
+      )
       .subscribe({
         next: (response) => {
 
@@ -105,6 +130,12 @@ export class OrdersComponent implements OnInit {
           console.error('Error loading orders:', error);
         }
       });
+  }
+
+  ngOnDestroy(): void {
+
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   openCreateOrder(): void {

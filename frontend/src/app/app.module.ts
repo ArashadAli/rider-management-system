@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-import { ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -11,6 +11,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { PageNotFoundComponent } from './not-found/not-found.component';
 import { AuthInterceptor, CredentialsInterceptor } from './core/interceptors/auth.interceptor';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { GlobalLoaderComponent } from './shared/components/global-loader/global-loader.component';
 
 
 @NgModule({
@@ -18,7 +19,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
     AppComponent,
     RegisterComponent,
     LoginComponent,
-    PageNotFoundComponent
+    PageNotFoundComponent,
   ],
 
   imports: [
@@ -26,6 +27,8 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
     AppRoutingModule,
     HttpClientModule,
     ReactiveFormsModule,
+    FormsModule,
+    GlobalLoaderComponent,
   ],
 
   providers: [

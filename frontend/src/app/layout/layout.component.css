@@ -256,6 +256,8 @@
   padding: 30px;
 
   min-height: calc(100vh - 70px);
+
+  position: relative;
 }
 
 

@@ -89,6 +89,56 @@ def create_Rider(user_email):
 
 def allRiders(user_email):
     try:
+        page = request.args.get("page", 1, type=int)
+        limit = request.args.get("limit", 10, type=int)
+
+        if page < 1:
+            page = 1
+
+        if limit < 1:
+            limit = 10
+
+        pagination = Rider.query.paginate(
+            page=page,
+            per_page=limit,
+            error_out=False
+        )
+
+        rider_list = []
+
+        for rider in pagination.items:
+            rider_data = {
+                "id": str(rider.id),
+                "name": rider.name,
+                "email": rider.email,
+                "mobile": rider.mobile,
+                "status": rider.status,
+                "availability": rider.availability
+            }
+
+            rider_list.append(rider_data)
+
+        return jsonify({
+            "success": True,
+            "message": "Riders retrieved successfully",
+            "data": {
+                "riders": rider_list
+            },
+            "pagination": {
+                "page": pagination.page,
+                "limit": pagination.per_page,
+                "total": pagination.total,
+                "pages": pagination.pages
+            }
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "Failed to retrieve riders",
+            "error": str(e)
+        }), 500
+    try:
         riders = Rider.query.all()
 
         rider_list = []

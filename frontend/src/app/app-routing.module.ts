@@ -33,7 +33,13 @@ const routes: Routes = [
         loadComponent: () =>
           import('./features/orders/orders.component')
             .then(m => m.OrdersComponent)
-      }
+      },
+      {
+        path: 'riders',
+        loadComponent: () =>
+          import('./features/riders/riders.component')
+            .then(m => m.RidersComponent)
+      },
     ],
   },
   {

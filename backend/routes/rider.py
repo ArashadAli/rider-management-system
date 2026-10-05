@@ -13,8 +13,8 @@ def create_rider(user_email):
     return create_Rider(user_email)
 
 
-# @rider_bp.route("/allRiders", methods=["GET"])
-# @token_required
+@rider_bp.route("/allRiders", methods=["GET"])
+@token_required
 
 def get_all_riders(user_email):
     return allRiders(user_email)
