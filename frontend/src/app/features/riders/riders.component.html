@@ -1,369 +1,465 @@
-
 <div class="min-h-full p-4 md:p-6">
 
-  <!-- Header -->
-  <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-      <div>
-          <h1 class="text-2xl font-bold text-[#163758]">
-              Riders
-          </h1>
+        <div>
+            <h1 class="text-2xl font-bold text-[#163758]">
+                Riders
+            </h1>
 
-          <p class="mt-1 text-sm text-gray-500">
-              Manage all riders
-          </p>
-      </div>
+            <p class="mt-1 text-sm text-gray-500">
+                Manage all riders
+            </p>
+        </div>
 
-      <button type="button" (click)="openCreateModal()"
-          class="rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c7193f]">
-          + Create Rider
-      </button>
+        <button type="button" (click)="openCreateModal()"
+            class="rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c7193f]">
+            + Create Rider
+        </button>
 
-  </div>
+    </div>
 
 
-  <!-- Filter Section -->
-  <div class="mb-6 rounded-xl bg-white p-5 shadow-sm">
+    <form [formGroup]="filterForm">
 
-      <div class="mb-4 flex items-center justify-between">
+        <div class="mb-6 rounded-xl bg-white p-5 shadow-sm">
 
-          <h2 class="text-base font-semibold text-[#163758]">
-              Filters
-          </h2>
+            <div class="mb-4 flex items-center justify-between">
 
-          <button type="button" (click)="resetFilters()" class="text-sm font-medium text-[#DC1D47] hover:underline">
-              Reset
-          </button>
+                <h2 class="text-base font-semibold text-[#163758]">
+                    Filters
+                </h2>
 
-      </div>
+                <button type="button" (click)="resetFilters()"
+                    class="text-sm font-medium text-[#DC1D47] hover:underline">
+                    Reset
+                </button>
 
+            </div>
 
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 
-          <!-- Email -->
-          <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                  Email
-              </label>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 
-              <input type="text" [(ngModel)]="filters.email" placeholder="Enter email"
-                  class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
-          </div>
+                <!-- Search -->
 
+                <div>
 
-          <!-- Mobile -->
-          <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                  Mobile Number
-              </label>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                        Search
+                    </label>
 
-              <input type="text" [(ngModel)]="filters.mobile" placeholder="Enter mobile number"
-                  class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
-          </div>
+                    <input type="text" formControlName="search" placeholder="Name, email or mobile"
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
 
+                </div>
 
-          <!-- Status -->
-          <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                  Status
-              </label>
 
-              <select [(ngModel)]="filters.status"
-                  class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]">
-                  <option value="">All Status</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-              </select>
-          </div>
+                <!-- Status -->
 
+                <div>
 
-          <!-- Availability -->
-          <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                  Availability
-              </label>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                        Status
+                    </label>
 
-              <select [(ngModel)]="filters.availability"
-                  class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]">
-                  <option value="">All Availability</option>
-                  <option value="available">Available</option>
-                  <option value="unavailable">Unavailable</option>
-              </select>
-          </div>
+                    <select formControlName="status"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]">
 
-      </div>
+                        <option value="">
+                            All Status
+                        </option>
 
+                        <option value="active">
+                            Active
+                        </option>
 
-      <div class="mt-4 flex justify-end">
+                        <option value="inactive">
+                            Inactive
+                        </option>
 
-          <button type="button" (click)="applyFilters()"
-              class="rounded-lg bg-[#163758] px-5 py-2.5 text-sm font-medium text-white transition hover:bg-[#102b43]">
-              Apply Filters
-          </button>
+                    </select>
 
-      </div>
+                </div>
 
-  </div>
 
+                <!-- Availability -->
 
-  <!-- Riders Table -->
-  <div class="overflow-hidden rounded-xl bg-white shadow-sm">
+                <div>
 
-      <div class="overflow-x-auto">
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                        Availability
+                    </label>
 
-          <table class="min-w-full">
+                    <select formControlName="availability"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]">
 
-              <thead class="bg-[#163758]">
+                        <option value="">
+                            All Availability
+                        </option>
 
-                  <tr>
+                        <option value="available">
+                            Available
+                        </option>
 
-                      <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
-                          Rider ID
-                      </th>
+                        <option value="unavailable">
+                            Unavailable
+                        </option>
 
-                      <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
-                          Name
-                      </th>
+                    </select>
 
-                      <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
-                          Email
-                      </th>
+                </div>
 
-                      <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
-                          Mobile
-                      </th>
 
-                      <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
-                          Status
-                      </th>
+                <!-- Sort By -->
 
-                      <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
-                          Availability
-                      </th>
+                <div>
 
-                      <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
-                          Action
-                      </th>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                        Sort By
+                    </label>
 
-                  </tr>
+                    <select formControlName="sortBy"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]">
 
-              </thead>
+                        <option value="created_at">
+                            Created Date
+                        </option>
 
+                        <option value="name">
+                            Name
+                        </option>
 
-              <tbody class="divide-y divide-gray-100">
+                        <option value="email">
+                            Email
+                        </option>
 
-                  <!-- Loading -->
-                  <tr *ngIf="loading">
+                        <option value="mobile">
+                            Mobile
+                        </option>
 
-                      <td colspan="7" class="px-5 py-10 text-center text-sm text-gray-500">
-                          Loading riders...
-                      </td>
+                        <option value="status">
+                            Status
+                        </option>
 
-                  </tr>
+                        <option value="availability">
+                            Availability
+                        </option>
 
+                    </select>
 
-                  <!-- Riders -->
-                  <tr *ngFor="let rider of riders" class="transition hover:bg-gray-50">
+                </div>
 
-                      <td class="px-5 py-4 text-sm font-mono text-gray-600">
-                          {{ rider.id }}
-                      </td>
 
-                      <td class="px-5 py-4 text-sm font-medium text-gray-800">
-                          {{ rider.name }}
-                      </td>
+                <!-- Sort Order -->
 
-                      <td class="px-5 py-4 text-sm text-gray-600">
-                          {{ rider.email }}
-                      </td>
+                <div>
 
-                      <td class="px-5 py-4 text-sm text-gray-600">
-                          {{ rider.mobile }}
-                      </td>
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                        Sort Order
+                    </label>
 
+                    <select formControlName="sortOrder"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]">
 
-                      <td class="px-5 py-4">
+                        <option value="asc">
+                            Ascending
+                        </option>
 
-                          <span *ngIf="rider.status === 'active'"
-                              class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
-                              Active
-                          </span>
+                        <option value="desc">
+                            Descending
+                        </option>
 
-                          <span *ngIf="rider.status === 'inactive'"
-                              class="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
-                              Inactive
-                          </span>
+                    </select>
 
-                      </td>
+                </div>
 
+            </div>
 
-                      <td class="px-5 py-4">
+        </div>
 
-                          <span *ngIf="rider.availability === 'available'"
-                              class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-                              Available
-                          </span>
+    </form>
 
-                          <span *ngIf="rider.availability !== 'available'"
-                              class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
-                              {{ rider.availability }}
-                          </span>
 
-                      </td>
+    <div class="overflow-hidden rounded-xl bg-white shadow-sm">
 
+        <div class="overflow-x-auto">
 
-                      <td class="px-5 py-4 text-center">
+            <table class="min-w-full">
 
-                          <button type="button" (click)="toggleStatus(rider)" [ngClass]="
+                <thead class="bg-[#163758]">
+
+                    <tr>
+
+                        <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
+                            Rider ID
+                        </th>
+
+                        <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
+                            Name
+                        </th>
+
+                        <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
+                            Email
+                        </th>
+
+                        <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
+                            Mobile
+                        </th>
+
+                        <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
+                            Status
+                        </th>
+
+                        <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
+                            Availability
+                        </th>
+
+                        <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
+                            Rider Profile
+                        </th>
+
+
+                        <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody class="divide-y divide-gray-100">
+
+                    <tr *ngIf="loading">
+
+                        <td colspan="8" class="px-5 py-10 text-center text-sm text-gray-500">
+                            Loading riders...
+                        </td>
+
+                    </tr>
+
+
+                    <tr *ngFor="let rider of riders" class="transition hover:bg-gray-50">
+
+                        <td class="px-5 py-4 text-sm font-mono text-gray-600">
+                            {{ rider.id }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm font-medium text-gray-800">
+                            {{ rider.name }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-600">
+                            {{ rider.email }}
+                        </td>
+
+                        <td class="px-5 py-4 text-sm text-gray-600">
+                            {{ rider.mobile }}
+                        </td>
+
+
+                        <td class="px-5 py-4">
+
+                            <span *ngIf="rider.status === 'active'"
+                                class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                                Active
+                            </span>
+
+                            <span *ngIf="rider.status === 'inactive'"
+                                class="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+                                Inactive
+                            </span>
+
+                        </td>
+
+
+                        <td class="px-5 py-4">
+
+                            <span *ngIf="rider.availability === 'available'"
+                                class="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                                Available
+                            </span>
+
+                            <span *ngIf="rider.availability !== 'available'"
+                                class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+                                {{ rider.availability }}
+                            </span>
+
+                        </td>
+
+                        <td class="px-5 py-4 text-center">
+                            <button type="button" (click)="viewRider(rider)"
+                                class="rounded-lg border border-[#163758] px-3 py-1.5 text-xs font-medium text-[#163758] transition hover:bg-[#163758] hover:text-white">
+                                View Profile
+                            </button>
+                        </td>
+
+
+                        <td class="px-5 py-4 text-center">
+
+                            <button type="button" (click)="toggleStatus(rider)" [ngClass]="
                 rider.status === 'active'
                   ? 'border-red-200 text-red-600 hover:bg-red-50'
                   : 'border-green-200 text-green-600 hover:bg-green-50'
               " class="rounded-lg border px-3 py-1.5 text-xs font-medium transition">
-                              {{ rider.status === 'active' ? 'Deactivate' : 'Activate' }}
-                          </button>
+                                {{ rider.status === 'active' ? 'Deactivate' : 'Activate' }}
+                            </button>
 
-                      </td>
+                        </td>
 
-                  </tr>
-
-
-                  <!-- Empty -->
-                  <tr *ngIf="!loading && riders.length === 0">
-
-                      <td colspan="7" class="px-5 py-12 text-center text-sm text-gray-500">
-                          No riders found
-                      </td>
-
-                  </tr>
-
-              </tbody>
-
-          </table>
-
-      </div>
+                    </tr>
 
 
-      <!-- Pagination -->
-      <div *ngIf="!loading && totalPages > 0"
-          class="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <tr *ngIf="!loading && riders.length === 0">
 
-          <p class="text-sm text-gray-500">
-              Showing page
-              <span class="font-medium text-gray-700">
-                  {{ currentPage }}
-              </span>
-              of
-              <span class="font-medium text-gray-700">
-                  {{ totalPages }}
-              </span>
-          </p>
+                        <td colspan="8" class="px-5 py-12 text-center text-sm text-gray-500">
+                            No riders found
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div *ngIf="!loading && totalPages > 0"
+            class="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+
+            <div class="flex items-center gap-2 text-sm text-gray-500">
+                <span>Show</span>
+
+                <select [(ngModel)]="pageSize" (change)="onPageSizeChange()"
+                    class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-[#163758]">
+                    <option [ngValue]="5">5</option>
+                    <option [ngValue]="10">10</option>
+                    <option [ngValue]="20">20</option>
+                    <option [ngValue]="50">50</option>
+                    <option [ngValue]="100">100</option>
+                </select>
+
+                <span>per page</span>
+            </div>
 
 
-          <div class="flex items-center gap-2">
+            <p class="text-sm text-gray-500">
+                Showing page
+                <span class="font-medium text-gray-700">
+                    {{ currentPage }}
+                </span>
+                of
+                <span class="font-medium text-gray-700">
+                    {{ totalPages }}
+                </span>
+            </p>
 
-              <button type="button" (click)="previousPage()" [disabled]="currentPage === 1"
-                  class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
-                  Previous
-              </button>
+            <div class="flex items-center gap-2">
+
+                <button type="button" (click)="previousPage()" [disabled]="currentPage === 1"
+                    class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+                    Previous
+                </button>
 
 
-              <button *ngFor="let page of [].constructor(totalPages); let i = index" type="button"
-                  (click)="goToPage(i + 1)" [ngClass]="
-          currentPage === i + 1
-            ? 'bg-[#163758] text-white'
-            : 'text-gray-600 hover:bg-gray-100'
-        " class="rounded-lg px-3 py-2 text-sm font-medium">
-                  {{ i + 1 }}
-              </button>
+                <button *ngFor="let page of [].constructor(totalPages); let i = index" type="button"
+                    (click)="goToPage(i + 1)" [ngClass]="
+        currentPage === i + 1
+          ? 'bg-[#163758] text-white'
+          : 'text-gray-600 hover:bg-gray-100'
+      " class="rounded-lg px-3 py-2 text-sm font-medium">
+                    {{ i + 1 }}
+                </button>
 
 
-              <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages"
-                  class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
-                  Next
-              </button>
+                <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages"
+                    class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+                    Next
+                </button>
 
-          </div>
+            </div>
 
-      </div>
+        </div>
 
-  </div>
+    </div>
 
 </div>
 
 
-<!-- Create Rider Modal -->
 <div *ngIf="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 
-  <div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
+    <div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
 
-      <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
 
-          <div>
-              <h2 class="text-lg font-bold text-[#163758]">
-                  Create Rider
-              </h2>
+            <div>
+                <h2 class="text-lg font-bold text-[#163758]">
+                    Create Rider
+                </h2>
 
-              <p class="mt-1 text-xs text-gray-500">
-                  Add a new rider
-              </p>
-          </div>
+                <p class="mt-1 text-xs text-gray-500">
+                    Add a new rider
+                </p>
+            </div>
 
-          <button type="button" (click)="closeCreateModal()" class="text-2xl text-gray-400 hover:text-gray-600">
-              ×
-          </button>
+            <button type="button" (click)="closeCreateModal()" class="text-2xl text-gray-400 hover:text-gray-600">
+                ×
+            </button>
 
-      </div>
-
-
-      <div class="space-y-4 px-6 py-6">
-
-          <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                  Name
-              </label>
-
-              <input type="text" [ngModel]="newRider.name" (ngModelChange)="newRider.name = $event"
-                  placeholder="Enter rider name"
-                  class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
-          </div>
+        </div>
 
 
-          <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                  Email
-              </label>
+        <div class="space-y-4 px-6 py-6">
 
-              <input type="email" [ngModel]="newRider.email" (ngModelChange)="newRider.email = $event" placeholder="Enter email"
-                  class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
-          </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                    Name
+                </label>
 
-
-          <div>
-              <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                  Mobile Number
-              </label>
-
-              <input type="text" [ngModel]="newRider.mobile" (ngModelChange)="newRider.mobile = $event" placeholder="Enter mobile number" maxlength="10"
-                  class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
-          </div>
-
-      </div>
+                <input type="text" [ngModel]="newRider.name" (ngModelChange)="newRider.name = $event"
+                    placeholder="Enter rider name"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
+            </div>
 
 
-      <div class="flex justify-end gap-3 border-t border-gray-100 px-6 py-4">
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                    Email
+                </label>
 
-          <button type="button" (click)="closeCreateModal()"
-              class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
-              Cancel
-          </button>
+                <input type="email" [ngModel]="newRider.email" (ngModelChange)="newRider.email = $event"
+                    placeholder="Enter email"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
+            </div>
 
-          <button type="button" (click)="createRider()"
-              class="rounded-lg bg-[#DC1D47] px-5 py-2 text-sm font-semibold text-white hover:bg-[#c7193f]">
-              Create Rider
-          </button>
 
-      </div>
+            <div>
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                    Mobile Number
+                </label>
 
-  </div>
+                <input type="text" [ngModel]="newRider.mobile" (ngModelChange)="newRider.mobile = $event"
+                    placeholder="Enter mobile number" maxlength="10"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
+            </div>
+
+        </div>
+
+
+        <div class="flex justify-end gap-3 border-t border-gray-100 px-6 py-4">
+
+            <button type="button" (click)="closeCreateModal()"
+                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                Cancel
+            </button>
+
+            <button type="button" (click)="createRider()"
+                class="rounded-lg bg-[#DC1D47] px-5 py-2 text-sm font-semibold text-white hover:bg-[#c7193f]">
+                Create Rider
+            </button>
+
+        </div>
+
+    </div>
 
 </div>

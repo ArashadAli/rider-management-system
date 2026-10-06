@@ -137,13 +137,9 @@ getRecentOrders(): void {
   this.recentOrders = [...this.orders]
     .sort((a, b) => {
 
-      const dateA = a.created_at
-        ? new Date(a.created_at).getTime()
-        : 0;
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
 
-      const dateB = b.created_at
-        ? new Date(b.created_at).getTime()
-        : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
 
       return dateB - dateA;
     })

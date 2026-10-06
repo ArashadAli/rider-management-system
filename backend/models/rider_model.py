@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 import uuid
 
 from config.connectDB import db
@@ -28,6 +29,37 @@ class Rider(db.Model):
         db.String(15),
         nullable=False,
         unique=True
+    )
+
+    vehicle_type = db.Column(
+        db.String(50),
+        nullable=True,
+        default=None
+    )
+
+    vehicle_number = db.Column(
+        db.String(50),
+        nullable=True,
+        default=None
+    )
+
+    profile_image_url = db.Column(
+        db.Text,
+        nullable=True,
+        default=None
+    )
+
+    created_at = db.Column(
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc)
+    )
+
+    updated_at = db.Column(
+        db.DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
     )
 
     status = db.Column(

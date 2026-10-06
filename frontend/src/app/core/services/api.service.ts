@@ -31,4 +31,8 @@ export class ApiService {
   delete<T>(url: string) {
     return this.http.delete<T>(`${this.baseUrl}${url}`);
   }
+
+  patch<T>(url: string, data: any) {
+    return this.http.patch<T>(`${this.baseUrl}${url}`, data);
+  }
 }
