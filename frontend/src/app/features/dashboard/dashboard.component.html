@@ -18,7 +18,6 @@
     class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5 mb-6"
   >
 
-    <!-- Total Orders -->
 
     <div
       class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow"
@@ -74,9 +73,6 @@
 
     </div>
 
-
-    <!-- Active Riders -->
-
     <div
       class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow"
     >
@@ -131,9 +127,6 @@
 
     </div>
 
-
-    <!-- Pending Orders -->
-
     <div
       class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow"
     >
@@ -185,9 +178,6 @@
       </div>
 
     </div>
-
-
-    <!-- Delivered Orders -->
 
     <div
       class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow"
@@ -244,13 +234,10 @@
   </div>
 
 
-  <!-- ================= CHARTS ================= -->
-
   <div
     class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-6"
   >
 
-    <!-- ORDER STATUS CHART -->
 
     <div
       class="bg-white border border-gray-200 rounded-xl p-5"
@@ -270,9 +257,6 @@
         </p>
 
       </div>
-
-
-      <!-- Pending -->
 
       <div class="mb-5">
 
@@ -307,8 +291,6 @@
       </div>
 
 
-      <!-- Delivered -->
-
       <div class="mb-5">
 
         <div class="flex justify-between mb-2">
@@ -342,8 +324,6 @@
       </div>
 
 
-      <!-- Assigned -->
-
       <div class="mb-5">
 
         <div class="flex justify-between mb-2">
@@ -376,8 +356,6 @@
 
       </div>
 
-
-      <!-- Cancelled -->
 
       <div>
 
@@ -414,8 +392,6 @@
     </div>
 
 
-    <!-- RIDER OVERVIEW -->
-
     <div
       class="bg-white border border-gray-200 rounded-xl p-5"
     >
@@ -438,7 +414,6 @@
 
       <div class="flex items-center gap-8">
 
-        <!-- Donut -->
 
         <div class="relative w-36 h-36 flex-shrink-0">
 
@@ -471,8 +446,6 @@
 
         </div>
 
-
-        <!-- Rider Stats -->
 
         <div class="flex-1 space-y-5">
 
@@ -549,9 +522,6 @@
     </div>
 
   </div>
-
-
-  <!-- ================= ORDER SUMMARY ================= -->
 
   <div
     class="bg-white border border-gray-200 rounded-xl p-5 mb-6"
@@ -672,9 +642,6 @@
 
   </div>
 
-
-  <!-- ================= RECENT ACTIVITY ================= -->
-
   <div
     class="bg-white border border-gray-200 rounded-xl overflow-hidden"
   >
@@ -695,9 +662,6 @@
       </p>
 
     </div>
-
-
-    <!-- Desktop Table -->
 
     <div class="hidden md:block overflow-x-auto">
 
@@ -831,9 +795,6 @@
 
           </tr>
 
-
-          <!-- Empty -->
-
           <tr *ngIf="recentOrders.length === 0">
 
             <td
@@ -854,9 +815,6 @@
       </table>
 
     </div>
-
-
-    <!-- Mobile Cards -->
 
     <div class="md:hidden divide-y divide-gray-100">
 

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { Router } from '@angular/router';
-import { get } from 'http';
 
 import { GlobalLoaderComponent } from '../shared/components/global-loader/global-loader.component';
 
@@ -75,12 +74,17 @@ export class LayoutComponent implements OnInit {
     this.authService.logout().subscribe({
 
       next: (response) => {
-        console.log('Logout successful', response);
-        if (response.success) this.route.navigate(['/login'])
+        // console.log('Logout successful', response);
+        if (response.success) {
+          localStorage.removeItem('csrf_token');
+          this.route.navigate(['/login'])
+        }
       },
 
       error: (error) => {
         console.error('Logout failed', error);
+        localStorage.removeItem('csrf_token');
+        this.route.navigate(['/login'])
       }
 
     });

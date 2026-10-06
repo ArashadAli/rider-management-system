@@ -48,6 +48,7 @@ export class AuthInterceptor implements HttpInterceptor {
             catchError((error : HttpErrorResponse) => {
 
                 if(error.status === 401) {
+                    localStorage.removeItem('csrf_token');
                     this.router.navigate(['/login'])
                 }
 

@@ -40,11 +40,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   isLoading = false;
 
-  /*
-   * Demo rider data.
-   *
-   * Replace this with your Riders API later.
-   */
   riderStats = {
     totalRiders: 12,
     activeRiders: 8,
