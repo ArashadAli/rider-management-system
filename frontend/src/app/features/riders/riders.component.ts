@@ -9,6 +9,8 @@ import {
 } from 'src/app/core/models/rider-response.model';
 import { Subject, of } from 'rxjs';
 import { takeUntil, finalize, debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
+import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-riders',
@@ -16,7 +18,8 @@ import { takeUntil, finalize, debounceTime, distinctUntilChanged, switchMap, cat
   imports: [
     CommonModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    BreadcrumbComponent
   ],
   templateUrl: './riders.component.html',
   styleUrls: ['./riders.component.css']
@@ -46,13 +49,20 @@ export class RidersComponent implements OnInit, OnDestroy {
     mobile: ''
   };
 
+
+  showProfileModal = false;
+  selectedRider: Rider | null = null;
+
   constructor(
     private ridersService: RidersService,
     private loaderService: LoaderService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
   ) { }
 
   ngOnInit(): void {
+
     this.filterForm = this.fb.group({
       search: [''],
       status: [''],
@@ -60,8 +70,24 @@ export class RidersComponent implements OnInit, OnDestroy {
       sortBy: ['created_at'],
       sortOrder: ['desc']
     });
+
     this.getPaginatedRiders();
     this.setupFilterListeners();
+
+    this.activatedRoute.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+
+        const riderId = params.get('id');
+
+        if (riderId) {
+          this.openRiderProfile(riderId);
+        } else {
+          this.showProfileModal = false;
+          this.selectedRider = null;
+        }
+
+      });
   }
 
   setupFilterListeners(): void {
@@ -318,9 +344,40 @@ export class RidersComponent implements OnInit, OnDestroy {
     })
   }
 
+  openRiderProfile(riderId: string): void {
+
+    const rider = this.riders.find(
+      item => item.id === riderId
+    );
+
+    console.log("rider from open profile:", rider);
+
+    if (!rider) {
+      return;
+    }
+
+    this.selectedRider = rider;
+    this.showProfileModal = true;
+  }
+
+  closeRiderProfile(): void {
+
+    this.showProfileModal = false;
+    this.selectedRider = null;
+
+    this.router.navigate(['/riders']);
+
+  }
+
   viewRider(rider: Rider): void {
-    // Implementation for viewing rider profile
-    console.log('Viewing rider:', rider);
+
+    this.router.navigate([
+      '/riders',
+      rider.id
+    ]);
+
+    this.openRiderProfile(rider.id);
+
   }
 
 }

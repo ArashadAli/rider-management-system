@@ -1,5 +1,7 @@
 <div class="min-h-full p-4 md:p-6">
 
+    <!-- <app-breadcrumb></app-breadcrumb> -->
+
     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
         <div>
@@ -40,8 +42,6 @@
 
             <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 
-                <!-- Search -->
-
                 <div>
 
                     <label class="mb-1.5 block text-sm font-medium text-gray-700">
@@ -53,8 +53,6 @@
 
                 </div>
 
-
-                <!-- Status -->
 
                 <div>
 
@@ -82,8 +80,6 @@
                 </div>
 
 
-                <!-- Availability -->
-
                 <div>
 
                     <label class="mb-1.5 block text-sm font-medium text-gray-700">
@@ -109,8 +105,6 @@
 
                 </div>
 
-
-                <!-- Sort By -->
 
                 <div>
 
@@ -149,8 +143,6 @@
 
                 </div>
 
-
-                <!-- Sort Order -->
 
                 <div>
 
@@ -217,7 +209,6 @@
                         <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
                             Rider Profile
                         </th>
-
 
                         <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
                             Action
@@ -287,21 +278,24 @@
 
                         </td>
 
+
                         <td class="px-5 py-4 text-center">
+
                             <button type="button" (click)="viewRider(rider)"
                                 class="rounded-lg border border-[#163758] px-3 py-1.5 text-xs font-medium text-[#163758] transition hover:bg-[#163758] hover:text-white">
                                 View Profile
                             </button>
+
                         </td>
 
 
                         <td class="px-5 py-4 text-center">
 
                             <button type="button" (click)="toggleStatus(rider)" [ngClass]="
-                rider.status === 'active'
-                  ? 'border-red-200 text-red-600 hover:bg-red-50'
-                  : 'border-green-200 text-green-600 hover:bg-green-50'
-              " class="rounded-lg border px-3 py-1.5 text-xs font-medium transition">
+                                    rider.status === 'active'
+                                        ? 'border-red-200 text-red-600 hover:bg-red-50'
+                                        : 'border-green-200 text-green-600 hover:bg-green-50'
+                                " class="rounded-lg border px-3 py-1.5 text-xs font-medium transition">
                                 {{ rider.status === 'active' ? 'Deactivate' : 'Activate' }}
                             </button>
 
@@ -324,35 +318,64 @@
 
         </div>
 
+
         <div *ngIf="!loading && totalPages > 0"
             class="flex flex-col gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
 
             <div class="flex items-center gap-2 text-sm text-gray-500">
-                <span>Show</span>
+
+                <span>
+                    Show
+                </span>
 
                 <select [(ngModel)]="pageSize" (change)="onPageSizeChange()"
                     class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-[#163758]">
-                    <option [ngValue]="5">5</option>
-                    <option [ngValue]="10">10</option>
-                    <option [ngValue]="20">20</option>
-                    <option [ngValue]="50">50</option>
-                    <option [ngValue]="100">100</option>
+
+                    <option [ngValue]="5">
+                        5
+                    </option>
+
+                    <option [ngValue]="10">
+                        10
+                    </option>
+
+                    <option [ngValue]="20">
+                        20
+                    </option>
+
+                    <option [ngValue]="50">
+                        50
+                    </option>
+
+                    <option [ngValue]="100">
+                        100
+                    </option>
+
                 </select>
 
-                <span>per page</span>
+                <span>
+                    per page
+                </span>
+
             </div>
 
 
             <p class="text-sm text-gray-500">
+
                 Showing page
+
                 <span class="font-medium text-gray-700">
                     {{ currentPage }}
                 </span>
+
                 of
+
                 <span class="font-medium text-gray-700">
                     {{ totalPages }}
                 </span>
+
             </p>
+
 
             <div class="flex items-center gap-2">
 
@@ -364,10 +387,10 @@
 
                 <button *ngFor="let page of [].constructor(totalPages); let i = index" type="button"
                     (click)="goToPage(i + 1)" [ngClass]="
-        currentPage === i + 1
-          ? 'bg-[#163758] text-white'
-          : 'text-gray-600 hover:bg-gray-100'
-      " class="rounded-lg px-3 py-2 text-sm font-medium">
+                        currentPage === i + 1
+                            ? 'bg-[#163758] text-white'
+                            : 'text-gray-600 hover:bg-gray-100'
+                    " class="rounded-lg px-3 py-2 text-sm font-medium">
                     {{ i + 1 }}
                 </button>
 
@@ -393,6 +416,7 @@
         <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
 
             <div>
+
                 <h2 class="text-lg font-bold text-[#163758]">
                     Create Rider
                 </h2>
@@ -400,6 +424,7 @@
                 <p class="mt-1 text-xs text-gray-500">
                     Add a new rider
                 </p>
+
             </div>
 
             <button type="button" (click)="closeCreateModal()" class="text-2xl text-gray-400 hover:text-gray-600">
@@ -412,6 +437,7 @@
         <div class="space-y-4 px-6 py-6">
 
             <div>
+
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">
                     Name
                 </label>
@@ -419,10 +445,12 @@
                 <input type="text" [ngModel]="newRider.name" (ngModelChange)="newRider.name = $event"
                     placeholder="Enter rider name"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
+
             </div>
 
 
             <div>
+
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">
                     Email
                 </label>
@@ -430,10 +458,12 @@
                 <input type="email" [ngModel]="newRider.email" (ngModelChange)="newRider.email = $event"
                     placeholder="Enter email"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
+
             </div>
 
 
             <div>
+
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">
                     Mobile Number
                 </label>
@@ -441,6 +471,7 @@
                 <input type="text" [ngModel]="newRider.mobile" (ngModelChange)="newRider.mobile = $event"
                     placeholder="Enter mobile number" maxlength="10"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
+
             </div>
 
         </div>
@@ -456,6 +487,115 @@
             <button type="button" (click)="createRider()"
                 class="rounded-lg bg-[#DC1D47] px-5 py-2 text-sm font-semibold text-white hover:bg-[#c7193f]">
                 Create Rider
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div *ngIf="showProfileModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
+    (click)="closeRiderProfile()">
+
+    <div class="w-full max-w-lg rounded-2xl bg-white shadow-xl" (click)="$event.stopPropagation()">
+
+        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
+
+            <div>
+
+                <h2 class="text-lg font-bold text-[#163758]">
+                    Rider Profile
+                </h2>
+
+                <p class="mt-1 text-xs text-gray-500">
+                    Rider details
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div *ngIf="selectedRider" class="space-y-5 px-6 py-6">
+
+            <div>
+
+                <p class="text-xs font-medium text-gray-500">
+                    Name
+                </p>
+
+                <p class="mt-1 text-sm font-semibold text-[#163758]">
+                    {{ selectedRider.name }}
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <p class="text-xs font-medium text-gray-500">
+                    Email
+                </p>
+
+                <p class="mt-1 text-sm text-gray-700">
+                    {{ selectedRider.email }}
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <p class="text-xs font-medium text-gray-500">
+                    Mobile
+                </p>
+
+                <p class="mt-1 text-sm text-gray-700">
+                    {{ selectedRider.mobile }}
+                </p>
+
+            </div>
+
+
+            <div class="grid grid-cols-2 gap-4">
+
+                <div>
+
+                    <p class="text-xs font-medium text-gray-500">
+                        Status
+                    </p>
+
+                    <p class="mt-1 text-sm font-semibold text-[#163758]">
+                        {{ selectedRider.status }}
+                    </p>
+
+                </div>
+
+
+                <div>
+
+                    <p class="text-xs font-medium text-gray-500">
+                        Availability
+                    </p>
+
+                    <p class="mt-1 text-sm font-semibold text-[#163758]">
+                        {{ selectedRider.availability }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="flex justify-end border-t border-gray-100 px-6 py-4">
+
+            <button type="button" (click)="closeRiderProfile()"
+                class="rounded-lg bg-[#DC1D47] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#c7193f]">
+                Close
             </button>
 
         </div>

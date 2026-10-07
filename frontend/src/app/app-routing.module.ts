@@ -38,6 +38,22 @@ const routes: Routes = [
       },
       {
         path: 'riders',
+        children: [
+          {
+            path: '',
+            data: { breadcrumb: 'Riders' },
+            loadComponent: () =>
+              import('./features/riders/riders.component')
+                .then(m => m.RidersComponent)
+          },
+          {
+            path: ':id',
+            data: { breadcrumb: 'Rider Profile' },
+            loadComponent: () =>
+              import('./features/riders/riders.component')
+                .then(m => m.RidersComponent)
+          }
+        ],
         loadComponent: () =>
           import('./features/riders/riders.component')
             .then(m => m.RidersComponent)

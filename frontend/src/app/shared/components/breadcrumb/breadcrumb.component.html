@@ -1,0 +1,23 @@
+<nav class="mb-5 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
+
+    <a routerLink="/dashboard" class="text-gray-500 transition hover:text-[#DC1D47]">
+        Home
+    </a>
+
+    <ng-container *ngFor="let breadcrumb of breadcrumbs; let last = last">
+
+        <span class="text-gray-400">
+            /
+        </span>
+
+        <a *ngIf="!last" [routerLink]="breadcrumb.url" class="text-gray-500 transition hover:text-[#DC1D47]">
+            {{ breadcrumb.label }}
+        </a>
+
+        <span *ngIf="last" class="font-medium text-[#163758]">
+            {{ breadcrumb.label }}
+        </span>
+
+    </ng-container>
+
+</nav>
