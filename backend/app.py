@@ -47,7 +47,14 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+    inspector = db.inspect(db.engine)
 
+    if inspector.has_table("riders"):
+        print("RIDER TABLE EXISTS")
+        print("RIDER COLUMNS:")
+
+        for column in inspector.get_columns("riders"):
+            print(column["name"])
 # Auth Route
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 
