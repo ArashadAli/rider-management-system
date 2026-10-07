@@ -1,0 +1,51 @@
+<header
+  class="fixed top-0 left-0 right-0 z-50 h-[70px] bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-7">
+
+  <div class="flex items-center gap-3">
+
+    <button
+      type="button"
+      (click)="toggleSidebar()"
+      class="md:hidden text-2xl font-semibold text-[#163758]">
+      ☰
+    </button>
+
+    <h2 class="text-xl md:text-2xl font-bold text-[#163758]">
+      Jeebly
+    </h2>
+
+  </div>
+
+  <div class="flex items-center gap-3 md:gap-5">
+
+    <div class="flex items-center gap-2.5">
+
+      <div
+        class="w-10 h-10 rounded-full bg-[#DC1D47] text-white flex items-center justify-center text-lg font-semibold">
+        {{ userInitial }}
+      </div>
+
+      <div class="hidden md:flex flex-col gap-0.5">
+
+        <span class="text-sm font-semibold text-[#163758]">
+          {{ userName }}
+        </span>
+
+        <span class="text-xs text-gray-500">
+          Administrator
+        </span>
+
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      (click)="logoutUser()"
+      class="hidden md:block rounded-md px-2.5 py-2 text-sm font-semibold text-[#DC1D47] transition hover:bg-[#fff0f3]">
+      Logout
+    </button>
+
+  </div>
+
+</header>

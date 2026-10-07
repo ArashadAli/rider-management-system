@@ -47,17 +47,17 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-    print("MODEL COLUMNS:")
-    for column in Rider.__table__.columns:
-        print(column.name)
+    # print("MODEL COLUMNS:")
+    # for column in Rider.__table__.columns:
+    #     print(column.name)
 
-    inspector = db.inspect(db.engine)
+    # inspector = db.inspect(db.engine)
 
-    if inspector.has_table("riders"):
-        print("DATABASE COLUMNS:")
-        for column in inspector.get_columns("riders"):
-            print(column["name"])
-            
+    # if inspector.has_table("riders"):
+    #     print("DATABASE COLUMNS:")
+    #     for column in inspector.get_columns("riders"):
+    #         print(column["name"])
+
 # Auth Route
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
 

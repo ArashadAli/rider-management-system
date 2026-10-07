@@ -25,7 +25,7 @@ export interface DashboardResponse {
 export interface ProfileResponse {
   message: string,
   success: boolean,
-  user_email: string
+  user: User
 }
 
 export interface LogoutResponse {

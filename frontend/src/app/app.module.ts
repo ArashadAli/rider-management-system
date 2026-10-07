@@ -12,6 +12,7 @@ import { PageNotFoundComponent } from './not-found/not-found.component';
 import { AuthInterceptor, CredentialsInterceptor } from './core/interceptors/auth.interceptor';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { GlobalLoaderComponent } from './shared/components/global-loader/global-loader.component';
+import { ManageComponent } from './features/manage/manage.component';
 
 
 @NgModule({

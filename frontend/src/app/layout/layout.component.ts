@@ -1,59 +1,24 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../core/services/auth.service';
-import { Router } from '@angular/router';
 
+import { HeaderComponent } from './header/header.component';
+import { SidebarComponent } from './sidebar/sidebar.component';
 import { GlobalLoaderComponent } from '../shared/components/global-loader/global-loader.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
   imports: [
-    CommonModule,
-    RouterModule, 
+    RouterModule,
+    HeaderComponent,
+    SidebarComponent,
     GlobalLoaderComponent
   ],
-  templateUrl: './layout.component.html',
-  styleUrls: ['./layout.component.css']
+  templateUrl: './layout.component.html'
 })
-export class LayoutComponent implements OnInit {
+export class LayoutComponent {
 
   sidebarOpen = false;
-
-  userName = '';
-  userInfo: any
-
-  constructor(
-    private authService: AuthService,
-    private route: Router
-  ) {
-
-  }
-
-  ngOnInit(): void {
-    this.getAll()
-  }
-
-
-
-  getAll() {
-    this.authService.profile().subscribe({
-      next: (response) => {
-        this.userInfo = response;
-        this.userName = this.userInfo.user.name
-      },
-      error: (error) => {
-        console.error('Profile failed', error);
-      }
-    });
-  }
-
-  get userInitial(): string {
-    return this.userName
-      ? this.userName.charAt(0).toUpperCase()
-      : 'U';
-  }
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
@@ -61,33 +26,5 @@ export class LayoutComponent implements OnInit {
 
   closeSidebar(): void {
     this.sidebarOpen = false;
-  }
-
-  closeSidebarOnMobile(): void {
-    if (window.innerWidth <= 768) {
-      this.sidebarOpen = false;
-    }
-  }
-
-  logoutUser(): void {
-
-    this.authService.logout().subscribe({
-
-      next: (response) => {
-        // console.log('Logout successful', response);
-        if (response.success) {
-          localStorage.removeItem('csrf_token');
-          this.route.navigate(['/login'])
-        }
-      },
-
-      error: (error) => {
-        console.error('Logout failed', error);
-        localStorage.removeItem('csrf_token');
-        this.route.navigate(['/login'])
-      }
-
-    });
-
   }
 }

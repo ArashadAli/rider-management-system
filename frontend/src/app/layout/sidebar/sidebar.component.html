@@ -1,0 +1,112 @@
+<aside
+  class="fixed top-[70px] bottom-0 left-0 z-40 w-[240px] bg-[#163758] px-3.5 py-6 flex flex-col justify-between transition-transform duration-300 -translate-x-full md:translate-x-0"
+  [class.translate-x-0]="sidebarOpen">
+
+  <nav class="flex flex-col gap-1.5">
+
+    <a
+      routerLink="/dashboard"
+      routerLinkActive="bg-[#DC1D47] text-white font-semibold"
+      [routerLinkActiveOptions]="{ exact: true }"
+      (click)="closeOnMobile()"
+      class="flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-medium text-[#dbe5ee] transition hover:bg-[#DC1D47] hover:text-white">
+
+      <span class="w-[22px] text-center text-lg">
+        ▦
+      </span>
+
+      <span>
+        Dashboard
+      </span>
+
+    </a>
+
+
+    <a
+      routerLink="/orders"
+      routerLinkActive="bg-[#DC1D47] text-white font-semibold"
+      (click)="closeOnMobile()"
+      class="flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-medium text-[#dbe5ee] transition hover:bg-[#DC1D47] hover:text-white">
+
+      <span class="w-[22px] text-center text-lg">
+        ▤
+      </span>
+
+      <span>
+        Orders
+      </span>
+
+    </a>
+
+
+    <a
+      routerLink="/riders"
+      routerLinkActive="bg-[#DC1D47] text-white font-semibold"
+      (click)="closeOnMobile()"
+      class="flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-medium text-[#dbe5ee] transition hover:bg-[#DC1D47] hover:text-white">
+
+      <span class="w-[22px] text-center text-lg">
+        ♙
+      </span>
+
+      <span>
+        Riders
+      </span>
+
+    </a>
+
+
+    <a
+      routerLink="/manage"
+      routerLinkActive="bg-[#DC1D47] text-white font-semibold"
+      (click)="closeOnMobile()"
+      class="flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-medium text-[#dbe5ee] transition hover:bg-[#DC1D47] hover:text-white">
+
+      <span class="w-[22px] text-center text-lg">
+        ⚙
+      </span>
+
+      <span>
+        Manage
+      </span>
+
+    </a>
+
+
+    <a
+      routerLink="/settings"
+      routerLinkActive="bg-[#DC1D47] text-white font-semibold"
+      (click)="closeOnMobile()"
+      class="flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-medium text-[#dbe5ee] transition hover:bg-[#DC1D47] hover:text-white">
+
+      <span class="w-[22px] text-center text-lg">
+        ☷
+      </span>
+
+      <span>
+        Settings
+      </span>
+
+    </a>
+
+  </nav>
+
+
+  <div class="border-t border-white/15 pt-5">
+
+    <button
+      type="button"
+      class="w-full rounded-lg border border-white/25 px-3.5 py-2.5 text-sm font-medium text-white transition hover:bg-[#DC1D47] hover:border-[#DC1D47]">
+      Logout
+    </button>
+
+  </div>
+
+</aside>
+
+
+<div
+  *ngIf="sidebarOpen"
+  class="fixed inset-0 top-[70px] z-30 bg-black/35 md:hidden"
+  (click)="closeSidebar.emit()">
+</div>

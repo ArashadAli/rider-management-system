@@ -7,6 +7,8 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { PageNotFoundComponent } from './not-found/not-found.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { LayoutComponent } from './layout/layout.component';
+import { ManageComponent } from './features/manage/manage.component';
+import { SettingsComponent } from './features/settings/settings.component';
 
 const routes: Routes = [
   {
@@ -40,6 +42,18 @@ const routes: Routes = [
           import('./features/riders/riders.component')
             .then(m => m.RidersComponent)
       },
+      {
+        path: 'manage',
+        loadComponent: () =>
+          import('./features/manage/manage.component')
+            .then(m => m.ManageComponent)
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./features/settings/settings.component')
+            .then(m => m.SettingsComponent)
+      }
     ],
   },
   {
