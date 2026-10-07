@@ -297,7 +297,7 @@ def update_Rider_Status(user_email, rider_id):
         }), 500
 
 
-# get Active riders based on status
+# get Active riders based on status 
 
 def get_Active_Riders(user_email):
     try:
