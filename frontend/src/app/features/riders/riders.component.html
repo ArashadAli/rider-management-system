@@ -1,11 +1,13 @@
 <div class="min-h-full p-4 md:p-6">
 
-    <!-- <app-breadcrumb></app-breadcrumb> -->
+    <div class="mb-3">
+        <app-breadcrumb></app-breadcrumb>
+    </div>
 
-    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
         <div>
-            <h1 class="text-2xl font-bold text-[#163758]">
+            <h1 class="text-xl font-bold text-[#163758]">
                 Riders
             </h1>
 
@@ -14,8 +16,8 @@
             </p>
         </div>
 
-        <button type="button" (click)="openCreateModal()"
-            class="rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c7193f]">
+        <button type="button" (click)="openCreateDrawer()"
+            class="rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c7193f] sm:w-auto">
             + Create Rider
         </button>
 
@@ -176,7 +178,7 @@
 
         <div class="overflow-x-auto">
 
-            <table class="min-w-full">
+            <table class="min-w-[1000px] w-full">
 
                 <thead class="bg-[#163758]">
 
@@ -206,12 +208,22 @@
                             Availability
                         </th>
 
-                        <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
-                            Rider Profile
+                        <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
+                            View
+                        </th>
+
+
+                        <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
+                            Edit
+                        </th>
+
+
+                        <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
+                            Delete
                         </th>
 
                         <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
-                            Action
+                            Status Action
                         </th>
 
                     </tr>
@@ -283,7 +295,26 @@
 
                             <button type="button" (click)="viewRider(rider)"
                                 class="rounded-lg border border-[#163758] px-3 py-1.5 text-xs font-medium text-[#163758] transition hover:bg-[#163758] hover:text-white">
-                                View Profile
+                                View
+                            </button>
+
+                        </td>
+
+
+                        <td class="px-5 py-4 text-center">
+
+                            <button type="button" (click)="openEditDrawer(rider)"
+                                class="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-600 transition hover:bg-blue-50">
+                                Edit
+                            </button>
+
+                        </td>
+
+                        <td class="px-5 py-4 text-center">
+
+                            <button type="button" (click)="deleteRider(rider)"
+                                class="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50">
+                                Delete
                             </button>
 
                         </td>
@@ -408,198 +439,17 @@
 
 </div>
 
+<!-- Rider Drawer -->
+<div *ngIf="drawerOpen" class="fixed inset-0 z-[100] bg-black/40" (click)="closeDrawer()">
 
-<div *ngIf="showCreateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <aside
+        class="absolute right-0 top-0 flex h-full w-full flex-col overflow-hidden bg-white shadow-2xl sm:w-[85%] md:w-[600px] lg:w-[680px]"
+        (click)="$event.stopPropagation()">
 
-    <div class="w-full max-w-md rounded-2xl bg-white shadow-xl">
+        <app-rider-form class="flex h-full min-h-0 flex-col" [mode]="drawerMode" [riderId]="selectedRiderId"
+            (close)="closeDrawer()" (saved)="getPaginatedRiders()">
+        </app-rider-form>
 
-        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-
-            <div>
-
-                <h2 class="text-lg font-bold text-[#163758]">
-                    Create Rider
-                </h2>
-
-                <p class="mt-1 text-xs text-gray-500">
-                    Add a new rider
-                </p>
-
-            </div>
-
-            <button type="button" (click)="closeCreateModal()" class="text-2xl text-gray-400 hover:text-gray-600">
-                ×
-            </button>
-
-        </div>
-
-
-        <div class="space-y-4 px-6 py-6">
-
-            <div>
-
-                <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                    Name
-                </label>
-
-                <input type="text" [ngModel]="newRider.name" (ngModelChange)="newRider.name = $event"
-                    placeholder="Enter rider name"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
-
-            </div>
-
-
-            <div>
-
-                <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                    Email
-                </label>
-
-                <input type="email" [ngModel]="newRider.email" (ngModelChange)="newRider.email = $event"
-                    placeholder="Enter email"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
-
-            </div>
-
-
-            <div>
-
-                <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                    Mobile Number
-                </label>
-
-                <input type="text" [ngModel]="newRider.mobile" (ngModelChange)="newRider.mobile = $event"
-                    placeholder="Enter mobile number" maxlength="10"
-                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758]" />
-
-            </div>
-
-        </div>
-
-
-        <div class="flex justify-end gap-3 border-t border-gray-100 px-6 py-4">
-
-            <button type="button" (click)="closeCreateModal()"
-                class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">
-                Cancel
-            </button>
-
-            <button type="button" (click)="createRider()"
-                class="rounded-lg bg-[#DC1D47] px-5 py-2 text-sm font-semibold text-white hover:bg-[#c7193f]">
-                Create Rider
-            </button>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<div *ngIf="showProfileModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
-    (click)="closeRiderProfile()">
-
-    <div class="w-full max-w-lg rounded-2xl bg-white shadow-xl" (click)="$event.stopPropagation()">
-
-        <div class="flex items-center justify-between border-b border-gray-100 px-6 py-5">
-
-            <div>
-
-                <h2 class="text-lg font-bold text-[#163758]">
-                    Rider Profile
-                </h2>
-
-                <p class="mt-1 text-xs text-gray-500">
-                    Rider details
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <div *ngIf="selectedRider" class="space-y-5 px-6 py-6">
-
-            <div>
-
-                <p class="text-xs font-medium text-gray-500">
-                    Name
-                </p>
-
-                <p class="mt-1 text-sm font-semibold text-[#163758]">
-                    {{ selectedRider.name }}
-                </p>
-
-            </div>
-
-
-            <div>
-
-                <p class="text-xs font-medium text-gray-500">
-                    Email
-                </p>
-
-                <p class="mt-1 text-sm text-gray-700">
-                    {{ selectedRider.email }}
-                </p>
-
-            </div>
-
-
-            <div>
-
-                <p class="text-xs font-medium text-gray-500">
-                    Mobile
-                </p>
-
-                <p class="mt-1 text-sm text-gray-700">
-                    {{ selectedRider.mobile }}
-                </p>
-
-            </div>
-
-
-            <div class="grid grid-cols-2 gap-4">
-
-                <div>
-
-                    <p class="text-xs font-medium text-gray-500">
-                        Status
-                    </p>
-
-                    <p class="mt-1 text-sm font-semibold text-[#163758]">
-                        {{ selectedRider.status }}
-                    </p>
-
-                </div>
-
-
-                <div>
-
-                    <p class="text-xs font-medium text-gray-500">
-                        Availability
-                    </p>
-
-                    <p class="mt-1 text-sm font-semibold text-[#163758]">
-                        {{ selectedRider.availability }}
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="flex justify-end border-t border-gray-100 px-6 py-4">
-
-            <button type="button" (click)="closeRiderProfile()"
-                class="rounded-lg bg-[#DC1D47] px-5 py-2 text-sm font-semibold text-white transition hover:bg-[#c7193f]">
-                Close
-            </button>
-
-        </div>
-
-    </div>
+    </aside>
 
 </div>

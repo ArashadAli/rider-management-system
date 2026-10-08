@@ -1,0 +1,17 @@
+:host {
+    display: block;
+}
+
+@keyframes drawerSlideIn {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.drawer-animation {
+    animation: drawerSlideIn 0.25s ease-out;
+}

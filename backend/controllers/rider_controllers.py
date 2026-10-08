@@ -1,49 +1,70 @@
 from flask import request, jsonify
 from models.rider_model import Rider
 from config.connectDB import db
-# from sqlalchemy import or_
-
 from utils.email_mobile_validate import validate_email, validate_mobile
+
+import cloudinary.uploader
 
 
 def create_Rider(user_email):
 
     try:
 
-        data = request.get_json()
+        name = request.form.get("name")
+        email = request.form.get("email")
+        mobile = request.form.get("mobile")
+        vehicle_type = request.form.get("vehicle_type")
+        vehicle_number = request.form.get("vehicle_number")
 
-        if not data:
-            return jsonify({
-                "success": False,
-                "message": "Request body is required"
-            }), 400
+        status = request.form.get("status") or "active"
+        availability = request.form.get("availability") or "available"
 
-        name = data.get("name")
-        email = data.get("email")
-        mobile = data.get("mobile")
-        vehicle_type = data.get("vehicle_type")
-        vehicle_number = data.get("vehicle_number")
-        profile_image_url = data.get("profile_image_url")
+        profile_image = request.files.get("profile_image")
 
         if not name or not email or not mobile:
-
             return jsonify({
                 "success": False,
                 "message": "Name, email and mobile are required"
             }), 400
 
-        if not validate_email(email):
+        if not vehicle_type:
+            return jsonify({
+                "success": False,
+                "message": "Vehicle type is required"
+            }), 400
 
+        if not vehicle_number:
+            return jsonify({
+                "success": False,
+                "message": "Vehicle number is required"
+            }), 400
+
+        if not validate_email(email):
             return jsonify({
                 "success": False,
                 "message": "Invalid email format"
             }), 400
 
         if not validate_mobile(mobile):
-
             return jsonify({
                 "success": False,
                 "message": "Invalid mobile format"
+            }), 400
+
+        allowed_status = ["active", "inactive"]
+
+        if status not in allowed_status:
+            return jsonify({
+                "success": False,
+                "message": "Invalid status"
+            }), 400
+
+        allowed_availability = ["available", "unavailable"]
+
+        if availability not in allowed_availability:
+            return jsonify({
+                "success": False,
+                "message": "Invalid availability"
             }), 400
 
         existing_email = Rider.query.filter_by(
@@ -51,7 +72,6 @@ def create_Rider(user_email):
         ).first()
 
         if existing_email:
-
             return jsonify({
                 "success": False,
                 "message": "Rider with this email already exists"
@@ -62,19 +82,30 @@ def create_Rider(user_email):
         ).first()
 
         if existing_mobile:
-
             return jsonify({
                 "success": False,
                 "message": "Rider with this mobile number already exists"
             }), 409
 
-        rider = Rider(
+        profile_image_url = None
 
+        if profile_image:
+
+            result = cloudinary.uploader.upload(
+                profile_image,
+                folder="riders"
+            )
+
+            profile_image_url = result.get("secure_url")
+
+        rider = Rider(
             name=name,
             email=email,
             mobile=mobile,
             vehicle_type=vehicle_type,
             vehicle_number=vehicle_number,
+            status=status,
+            availability=availability,
             profile_image_url=profile_image_url
         )
 
@@ -82,12 +113,13 @@ def create_Rider(user_email):
 
         db.session.commit()
 
-        return jsonify({
 
+        print("New rider created:", rider.id)
+
+        return jsonify({
             "success": True,
             "message": "Rider created successfully",
             "data": {
-
                 "rider": {
                     "id": str(rider.id),
                     "name": rider.name,
@@ -101,23 +133,18 @@ def create_Rider(user_email):
                     "created_at": rider.created_at.isoformat(),
                     "updated_at": rider.updated_at.isoformat()
                 }
-
             }
-
         }), 201
-
 
     except Exception as e:
 
         db.session.rollback()
 
         return jsonify({
-
             "success": False,
             "message": "Failed to create rider",
             "error": str(e)
         }), 500
-
 
 def allRiders(user_email):
         return jsonify({
@@ -334,3 +361,187 @@ def get_Active_Riders(user_email):
             "message": "Failed to retrieve active riders",
             "error": str(e)
         }), 500
+
+
+def get_Rider(user_email, rider_id):
+    try:
+        rider = Rider.query.get(rider_id)
+
+        if not rider:
+            return jsonify({
+                "success": False,
+                "message": "Rider not found"
+            }), 404
+
+        rider_data = {
+            "id": str(rider.id),
+            "name": rider.name,
+            "email": rider.email,
+            "mobile": rider.mobile,
+            "vehicle_type": rider.vehicle_type,
+            "vehicle_number": rider.vehicle_number,
+            "status": rider.status,
+            "availability": rider.availability,
+            "profile_image_url": rider.profile_image_url,
+            "created_at": rider.created_at.isoformat(),
+            "updated_at": rider.updated_at.isoformat()
+        }
+
+        return jsonify({
+            "success": True,
+            "message": "Rider retrieved successfully",
+            "data": {
+                "rider": rider_data
+            }
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "Failed to retrieve rider",
+            "error": str(e)
+        }), 500
+
+
+
+def update_Rider(user_email, rider_id):
+
+    try:
+
+        rider = Rider.query.get(rider_id)
+
+        if not rider:
+            return jsonify({
+                "success": False,
+                "message": "Rider not found"
+            }), 404
+
+        name = request.form.get("name")
+        email = request.form.get("email")
+        mobile = request.form.get("mobile")
+        vehicle_type = request.form.get("vehicle_type")
+        vehicle_number = request.form.get("vehicle_number")
+        status = request.form.get("status")
+        availability = request.form.get("availability")
+
+        profile_image = request.files.get("profile_image")
+
+        if not any([
+            name,
+            email,
+            mobile,
+            vehicle_type,
+            vehicle_number,
+            status,
+            availability,
+            profile_image
+        ]):
+            return jsonify({
+                "success": False,
+                "message": "No data provided for update"
+            }), 400
+
+        if email:
+
+            if not validate_email(email):
+                return jsonify({
+                    "success": False,
+                    "message": "Invalid email format"
+                }), 400
+
+            existing_email = Rider.query.filter(
+                Rider.email == email,
+                Rider.id != rider_id
+            ).first()
+
+            if existing_email:
+                return jsonify({
+                    "success": False,
+                    "message": "Rider with this email already exists"
+                }), 409
+
+            rider.email = email
+
+        if mobile:
+
+            if not validate_mobile(mobile):
+                return jsonify({
+                    "success": False,
+                    "message": "Invalid mobile format"
+                }), 400
+
+            existing_mobile = Rider.query.filter(
+                Rider.mobile == mobile,
+                Rider.id != rider_id
+            ).first()
+
+            if existing_mobile:
+                return jsonify({
+                    "success": False,
+                    "message": "Rider with this mobile number already exists"
+                }), 409
+
+            rider.mobile = mobile
+
+        if name:
+            rider.name = name
+
+        if vehicle_type:
+            rider.vehicle_type = vehicle_type
+
+        if vehicle_number:
+            rider.vehicle_number = vehicle_number
+
+        if status:
+
+            allowed_status = ["active", "inactive"]
+
+            if status not in allowed_status:
+                return jsonify({
+                    "success": False,
+                    "message": "Invalid status"
+                }), 400
+
+            rider.status = status
+
+        if availability:
+
+            allowed_availability = [
+                "available",
+                "unavailable"
+            ]
+
+            if availability not in allowed_availability:
+                return jsonify({
+                    "success": False,
+                    "message": "Invalid availability"
+                }), 400
+
+            rider.availability = availability
+
+        if profile_image:
+
+            result = cloudinary.uploader.upload(
+                profile_image,
+                folder="riders"
+            )
+
+            rider.profile_image_url = result.get("secure_url")
+
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Rider updated successfully"
+        }), 200
+
+    except Exception as e:
+
+        db.session.rollback()
+
+        return jsonify({
+            "success": False,
+            "message": "Failed to update rider",
+            "error": str(e)
+        }), 500
+

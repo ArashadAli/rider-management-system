@@ -14,6 +14,9 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { GlobalLoaderComponent } from './shared/components/global-loader/global-loader.component';
 import { ManageComponent } from './features/manage/manage.component';
 
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ToastrModule } from 'ngx-toastr';
+
 
 @NgModule({
   declarations: [
@@ -30,6 +33,16 @@ import { ManageComponent } from './features/manage/manage.component';
     ReactiveFormsModule,
     FormsModule,
     GlobalLoaderComponent,
+
+    BrowserAnimationsModule,
+
+    ToastrModule.forRoot({
+      positionClass: 'toast-top-right',
+      timeOut: 3000,
+      progressBar: true,
+      closeButton: true,
+      preventDuplicates: true
+    })
   ],
 
   providers: [

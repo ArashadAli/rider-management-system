@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from 'src/app/core/services/toast.service';
 
 @Component({
   selector: 'login-page',
@@ -21,7 +22,8 @@ export class LoginComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) {
     this.loginForm = this.fb.group({
       email: [
@@ -76,7 +78,10 @@ export class LoginComponent {
           }
         });
 
-          if(response.success) this.router.navigate(['/dashboard'])
+          if(response.success) {
+            this.toastService.success(response.message)
+            this.router.navigate(['/dashboard'])
+          }
           // else this.router.navigate(['/login'])
       },
 

@@ -17,7 +17,7 @@ export class RidersService {
     private apiService: ApiService
   ) {}
 
-  createRider(riderDetails: CreateRiderResponse): Observable<OneRiderResponse> {
+  createRider(riderDetails: FormData): Observable<OneRiderResponse> {
     
     return this.apiService.post<OneRiderResponse>(
       '/riders/create',

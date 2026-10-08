@@ -1,0 +1,262 @@
+<div class="flex h-full min-h-0 flex-col overflow-hidden bg-white">
+
+    <!-- Header -->
+    <div class="flex shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4">
+
+        <div>
+
+            <h2 class="text-lg font-bold text-[#163758]">
+                {{ drawerTitle }}
+            </h2>
+
+            <p class="mt-1 text-xs text-gray-500">
+                {{ drawerSubtitle }}
+            </p>
+
+        </div>
+
+        <button type="button" (click)="close.emit()"
+            class="flex h-9 w-9 items-center justify-center rounded-lg text-xl text-gray-400 transition hover:bg-gray-100 hover:text-gray-700">
+            ×
+        </button>
+
+    </div>
+
+
+    <!-- Body -->
+    <div class="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+
+        <form [formGroup]="riderForm" (ngSubmit)="submit()" class="space-y-5">
+
+            <!-- Profile Image -->
+            <div>
+
+                <label class="mb-2 block text-sm font-medium text-gray-700">
+                    Profile Image
+                </label>
+
+                <div
+                    class="flex flex-col items-center gap-4 rounded-xl border border-dashed border-gray-300 p-5 sm:flex-row">
+
+                    <div
+                        class="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-100">
+
+                        <img *ngIf="imagePreview" [src]="imagePreview" alt="Preview"
+                            class="h-full w-full object-cover" />
+
+                        <img *ngIf="!imagePreview && existingImageUrl" [src]="existingImageUrl" alt="Rider"
+                            class="h-full w-full object-cover" />
+
+                        <span *ngIf="!imagePreview && !existingImageUrl" class="text-2xl font-bold text-gray-400">
+                            {{ riderForm.get('name')?.value?.charAt(0) || '?' }}
+                        </span>
+
+                    </div>
+
+
+                    <div *ngIf="mode !== 'view'" class="w-full">
+
+                        <input type="file" accept="image/*" (change)="onImageSelected($event)"
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#163758] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-[#102b45]" />
+
+                        <p class="mt-2 text-xs text-gray-400">
+                            JPG, PNG or WEBP
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Name -->
+            <div>
+
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                    Name
+                </label>
+
+                <input type="text" formControlName="name" placeholder="Enter rider name"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
+
+                <p *ngIf="isInvalid('name')" class="mt-1 text-xs text-red-500">
+                    {{ getErrorMessage('name') }}
+                </p>
+
+            </div>
+
+
+            <!-- Email -->
+            <div>
+
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                    Email
+                </label>
+
+                <input type="email" formControlName="email" placeholder="Enter email"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
+
+                <p *ngIf="isInvalid('email')" class="mt-1 text-xs text-red-500">
+                    {{ getErrorMessage('email') }}
+                </p>
+
+            </div>
+
+
+            <!-- Mobile -->
+            <div>
+
+                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                    Mobile Number
+                </label>
+
+                <input type="text" maxlength="10" formControlName="mobile" placeholder="Enter mobile number"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
+
+                <p *ngIf="isInvalid('mobile')" class="mt-1 text-xs text-red-500">
+                    {{ getErrorMessage('mobile') }}
+                </p>
+
+            </div>
+
+
+            <!-- Vehicle -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                <div>
+
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                        Vehicle Type
+                    </label>
+
+                    <select formControlName="vehicle_type"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100">
+
+                        <option value="">
+                            Select vehicle
+                        </option>
+
+                        <option value="bike">
+                            Bike
+                        </option>
+
+                        <option value="scooter">
+                            Scooter
+                        </option>
+
+                        <option value="car">
+                            Car
+                        </option>
+
+                        <option value="van">
+                            Van
+                        </option>
+
+                    </select>
+
+                    <p *ngIf="isInvalid('vehicle_type')" class="mt-1 text-xs text-red-500">
+                        Vehicle type is required
+                    </p>
+
+                </div>
+
+
+                <div>
+
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                        Vehicle Number
+                    </label>
+
+                    <input type="text" formControlName="vehicle_number" placeholder="e.g. HR01AB1234"
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm uppercase outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
+
+                    <p *ngIf="isInvalid('vehicle_number')" class="mt-1 text-xs text-red-500">
+                        Vehicle number is required
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- Status / Availability -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                <div>
+
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                        Status
+                    </label>
+
+                    <select formControlName="status"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100">
+
+                        <option value="active">
+                            Active
+                        </option>
+
+                        <option value="inactive">
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div>
+
+                    <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                        Availability
+                    </label>
+
+                    <select formControlName="availability"
+                        class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100">
+
+                        <option value="available">
+                            Available
+                        </option>
+
+                        <option value="unavailable">
+                            Unavailable
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- Footer -->
+    <div class="flex shrink-0 flex-col-reverse gap-2 border-t border-gray-200 px-5 py-4 sm:flex-row sm:justify-end">
+
+        <button type="button" (click)="close.emit()"
+            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 sm:w-auto">
+            Close
+        </button>
+
+
+        <!-- View mode -->
+        <button *ngIf="mode === 'view'" type="button" (click)="enableEdit()"
+            class="w-full rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#c7193f] sm:w-auto">
+            Edit Rider
+        </button>
+
+
+        <!-- Create/Edit -->
+        <button *ngIf="mode !== 'view'" type="button" (click)="submit()" [disabled]="loading"
+            class="w-full rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c7193f] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto">
+
+            {{ mode === 'create' ? 'Create Rider' : 'Update Rider' }}
+
+        </button>
+
+    </div>
+
+</div>

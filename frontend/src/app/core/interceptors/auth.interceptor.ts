@@ -1,13 +1,15 @@
 import { Injectable } from "@angular/core";
 import {
-    HttpInterceptor,
-    HttpRequest,
-    HttpHandler,
-    HttpEvent,
-    HttpErrorResponse
+  HttpInterceptor,
+  HttpRequest,
+  HttpHandler,
+  HttpEvent,
+  HttpErrorResponse
 } from '@angular/common/http'
 import { catchError, Observable, throwError } from "rxjs";
 import { Router } from "@angular/router";
+
+import { ToastService } from "../services/toast.service";
 
 @Injectable()
 export class CredentialsInterceptor implements HttpInterceptor {
@@ -42,18 +44,124 @@ export class CredentialsInterceptor implements HttpInterceptor {
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
-    constructor(private router : Router) {}
-    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        return next.handle(req).pipe(
-            catchError((error : HttpErrorResponse) => {
 
-                if(error.status === 401) {
-                    localStorage.removeItem('csrf_token');
-                    this.router.navigate(['/login'])
-                }
+  constructor(
+    private router: Router,
+    private toastService: ToastService
+  ) { }
 
-                return throwError(() => error)
-            })
-        )
-    }
+  intercept(
+    req: HttpRequest<any>,
+    next: HttpHandler
+  ): Observable<HttpEvent<any>> {
+
+    return next.handle(req).pipe(
+
+      catchError((error: HttpErrorResponse) => {
+
+        // Get backend message
+        const message =
+          error.error?.message ||
+          'Something went wrong. Please try again.';
+
+        switch (error.status) {
+
+          case 400:
+
+            this.toastService.error(
+              message,
+              'Bad Request'
+            );
+
+            break;
+
+
+          case 401:
+
+            localStorage.removeItem('csrf_token');
+
+            this.toastService.error(
+              message || 'Please login again.',
+              'Unauthorized'
+            );
+
+            this.router.navigate(['/login']);
+
+            break;
+
+
+          case 403:
+
+            this.toastService.error(
+              message || 'You do not have permission.',
+              'Access Denied'
+            );
+
+            break;
+
+
+          case 404:
+
+            this.toastService.error(
+              message,
+              'Not Found'
+            );
+
+            break;
+
+
+          case 409:
+
+            this.toastService.error(
+              message,
+              'Conflict'
+            );
+
+            break;
+
+
+          case 422:
+
+            this.toastService.error(
+              message,
+              'Validation Error'
+            );
+
+            break;
+
+
+          case 500:
+
+            this.toastService.error(
+              message,
+              'Server Error'
+            );
+
+            break;
+
+
+          case 0:
+
+            this.toastService.error(
+              'Unable to connect to the server.',
+              'Network Error'
+            );
+
+            break;
+
+
+          default:
+
+            this.toastService.error(
+              message,
+              'Error'
+            );
+
+            break;
+        }
+        // Send error back to component
+        return throwError(() => error);
+      })
+    );
+  }
 }

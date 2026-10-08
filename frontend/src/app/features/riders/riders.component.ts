@@ -4,13 +4,15 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angul
 import { RidersService } from 'src/app/core/services/riders.service';
 import { LoaderService } from 'src/app/core/services/loader.service';
 import {
-  Rider,
-  CreateRiderResponse
+  Rider
 } from 'src/app/core/models/rider-response.model';
 import { Subject, of } from 'rxjs';
 import { takeUntil, finalize, debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
 import { ActivatedRoute, Router } from '@angular/router';
+
+import { ToastService } from 'src/app/core/services/toast.service';
+import { RiderFormComponent } from './rider-form/rider-form.component';
 
 @Component({
   selector: 'app-riders',
@@ -19,7 +21,8 @@ import { ActivatedRoute, Router } from '@angular/router';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    BreadcrumbComponent
+    BreadcrumbComponent,
+    RiderFormComponent
   ],
   templateUrl: './riders.component.html',
   styleUrls: ['./riders.component.css']
@@ -32,7 +35,6 @@ export class RidersComponent implements OnInit, OnDestroy {
   riders: Rider[] = [];
 
   loading = false;
-  showCreateModal = false;
   currentPage = 1;
   pageSize = 5;
   totalPages = 0;
@@ -43,22 +45,19 @@ export class RidersComponent implements OnInit, OnDestroy {
   sortBy = 'created_at';
   sortOrder = 'desc';
 
-  newRider: CreateRiderResponse = {
-    name: '',
-    email: '',
-    mobile: ''
-  };
+  drawerOpen = false;
 
+  drawerMode: 'create' | 'view' | 'edit' = 'create';
 
-  showProfileModal = false;
-  selectedRider: Rider | null = null;
+  selectedRiderId: string | null = null;
 
   constructor(
     private ridersService: RidersService,
     private loaderService: LoaderService,
     private fb: FormBuilder,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private toastService: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -81,10 +80,12 @@ export class RidersComponent implements OnInit, OnDestroy {
         const riderId = params.get('id');
 
         if (riderId) {
-          this.openRiderProfile(riderId);
+          this.drawerMode = 'view';
+          this.selectedRiderId = riderId;
+          this.drawerOpen = true;
         } else {
-          this.showProfileModal = false;
-          this.selectedRider = null;
+          this.drawerOpen = false;
+          this.selectedRiderId = null;
         }
 
       });
@@ -218,6 +219,8 @@ export class RidersComponent implements OnInit, OnDestroy {
 
         if (response.success) {
 
+          this.toastService.success(response.message)
+
           this.riders =
             response.data.riders;
 
@@ -242,48 +245,6 @@ export class RidersComponent implements OnInit, OnDestroy {
     // console.log("RidersComponent destroyed");
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  openCreateModal(): void {
-    this.newRider = {
-      name: '',
-      email: '',
-      mobile: ''
-    };
-
-    this.showCreateModal = true;
-  }
-
-  closeCreateModal(): void {
-    this.showCreateModal = false;
-  }
-
-  createRider(): void {
-
-    if (
-      !this.newRider.name ||
-      !this.newRider.email ||
-      !this.newRider.mobile
-    ) {
-      return;
-    }
-
-    this.ridersService
-      .createRider(this.newRider)
-      .subscribe({
-        next: (response) => {
-
-          if (response.success) {
-            this.closeCreateModal();
-            this.getPaginatedRiders();
-          }
-
-        },
-
-        error: (error) => {
-          console.error('Failed to create rider:', error);
-        }
-      });
   }
 
   resetFilters(): void {
@@ -333,6 +294,7 @@ export class RidersComponent implements OnInit, OnDestroy {
     this.ridersService.updateRiderStatus(rider.id).subscribe({
       next: (response) => {
         if (response.success) {
+          this.toastService.success(response.message)
           this.getPaginatedRiders();
         }
       },
@@ -344,39 +306,44 @@ export class RidersComponent implements OnInit, OnDestroy {
     })
   }
 
-  openRiderProfile(riderId: string): void {
-
-    const rider = this.riders.find(
-      item => item.id === riderId
-    );
-
-    console.log("rider from open profile:", rider);
-
-    if (!rider) {
-      return;
-    }
-
-    this.selectedRider = rider;
-    this.showProfileModal = true;
+  openCreateDrawer(): void {
+    this.drawerMode = 'create';
+    this.selectedRiderId = null;
+    this.drawerOpen = true;
   }
 
-  closeRiderProfile(): void {
+  openViewDrawer(rider: Rider): void {
+    this.drawerMode = 'view';
+    this.selectedRiderId = rider.id;
+    this.drawerOpen = true;
+  }
 
-    this.showProfileModal = false;
-    this.selectedRider = null;
+  openEditDrawer(rider: Rider): void {
+    this.drawerMode = 'edit';
+    this.selectedRiderId = rider.id;
+    this.drawerOpen = true;
+  }
 
-    this.router.navigate(['/riders']);
-
+  closeDrawer(): void {
+    this.drawerOpen = false;
+    this.selectedRiderId = null;
   }
 
   viewRider(rider: Rider): void {
+    // this.router.navigate(['/riders', rider.id]);
 
-    this.router.navigate([
-      '/riders',
-      rider.id
-    ]);
+    this.openViewDrawer(rider);
+  }
 
-    this.openRiderProfile(rider.id);
+  deleteRider(rider: Rider): void {
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${rider.name}?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
 
   }
 
