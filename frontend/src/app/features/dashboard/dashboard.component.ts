@@ -1,21 +1,17 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from 'src/app/core/services/auth.service';
-import { Router } from '@angular/router';
+
 import { LoaderService } from 'src/app/core/services/loader.service';
+import { DashboardService } from 'src/app/core/services/dashboard.service';
 
 import { Subject } from 'rxjs';
-import { takeUntil, finalize } from 'rxjs/operators';
+import { takeUntil, finalize, retry } from 'rxjs/operators';
 
-import { OrdersService } from 'src/app/core/services/orders.service';
-import { AllOrdersResponse, Order } from 'src/app/core/models/order-response.model';
-
-interface DashboardStats {
-  totalOrders: number;
-  activeRiders: number;
-  pendingOrders: number;
-  deliveredOrders: number;
-}
+import {
+  DashboardData,
+  DashboardOrder,
+  DashboardRider
+} from 'src/app/core/models/dashboard-response.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -27,160 +23,55 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  orders: Order[] = [];
+  dashboard: DashboardData | null = null;
 
-  stats: DashboardStats = {
-    totalOrders: 0,
-    activeRiders: 0,
-    pendingOrders: 0,
-    deliveredOrders: 0
-  };
-
-  recentOrders: Order[] = [];
+  recentOrders: DashboardOrder[] = [];
+  recentRiders: DashboardRider[] = [];
 
   isLoading = false;
 
-  riderStats = {
-    totalRiders: 12,
-    activeRiders: 8,
-    inactiveRiders: 4
-  };
-
   constructor(
-    private authService: AuthService,
-    private router: Router,
     private loaderService: LoaderService,
-    private ordersService: OrdersService
-  ) {}
+    private dashboardService: DashboardService
+  ) { }
 
   ngOnInit(): void {
     this.loadDashboard();
   }
 
   loadDashboard(): void {
-
     this.loaderService.show();
     this.isLoading = true;
 
-    this.ordersService
-      .getAllOrders()
+    this.dashboardService
+      .getDashboardStats()
       .pipe(
+        retry(2),
         takeUntil(this.destroy$),
-
         finalize(() => {
           this.loaderService.hide();
           this.isLoading = false;
         })
       )
       .subscribe({
-
-        next: (response: AllOrdersResponse) => {
-
-          // console.log('Dashboard orders:', response);
-
+        next: (response) => {
           if (response.success && response.data) {
-
-            this.orders = response.data;
-
-            this.calculateDashboardStats();
-
-            this.getRecentOrders();
-
+            this.dashboard = response.data;
+            this.recentOrders = response.data.recent_orders;
+            this.recentRiders = response.data.recent_riders;
           }
-
         },
-
         error: (error) => {
-
           console.error(
-            'Dashboard orders fetching error:',
+            'Dashboard fetching error:',
             error
           );
-
         }
-
       });
   }
 
-  calculateDashboardStats(): void {
-
-    const pendingOrders = this.orders.filter(
-      order =>
-        order.status?.toLowerCase() === 'pending'
-    );
-
-    const deliveredOrders = this.orders.filter(
-      order =>
-        order.status?.toLowerCase() === 'delivered'
-    );
-
-    this.stats = {
-
-      totalOrders: this.orders.length,
-
-      activeRiders: this.riderStats.activeRiders,
-
-      pendingOrders: pendingOrders.length,
-
-      deliveredOrders: deliveredOrders.length
-
-    };
-  }
-
-getRecentOrders(): void {
-
-  this.recentOrders = [...this.orders]
-    .sort((a, b) => {
-
-      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
-
-      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
-
-      return dateB - dateA;
-    })
-    .slice(0, 5);
-
-}
-
-  getStatusCount(status: string): number {
-
-    return this.orders.filter(
-      order =>
-        order.status?.toLowerCase() === status.toLowerCase()
-    ).length;
-  }
-
-  getStatusPercentage(status: string): number {
-
-    if (!this.orders.length) {
-      return 0;
-    }
-
-    const count = this.getStatusCount(status);
-
-    return Math.round(
-      (count / this.orders.length) * 100
-    );
-  }
-
-  getStatusBarWidth(status: string): string {
-
-    return `${this.getStatusPercentage(status)}%`;
-  }
-
-  getOrderAmount(): number {
-
-    return this.orders.reduce(
-      (total, order) =>
-        total + Number(order.amount || 0),
-      0
-    );
-  }
-
   getOrderStatusClass(status: string): string {
-
     switch (status?.toLowerCase()) {
-
       case 'delivered':
         return 'bg-green-50 text-green-700';
 
@@ -198,29 +89,19 @@ getRecentOrders(): void {
     }
   }
 
-  getActivityText(order: Order): string {
+  getRiderStatusClass(status: string): string {
+    return status?.toLowerCase() === 'active'
+      ? 'bg-green-50 text-green-700'
+      : 'bg-red-50 text-red-700';
+  }
 
-    switch (order.status?.toLowerCase()) {
-
-      case 'delivered':
-        return 'Order delivered successfully';
-
-      case 'pending':
-        return 'Order is pending';
-
-      case 'assigned':
-        return 'Rider assigned to order';
-
-      case 'cancelled':
-        return 'Order was cancelled';
-
-      default:
-        return 'Order status updated';
-    }
+  getAvailabilityClass(availability: string): string {
+    return availability?.toLowerCase() === 'available'
+      ? 'bg-green-50 text-green-700'
+      : 'bg-gray-100 text-gray-700';
   }
 
   formatDate(date: string | null): string {
-
     if (!date) {
       return '-';
     }
@@ -238,9 +119,7 @@ getRecentOrders(): void {
   }
 
   ngOnDestroy(): void {
-
     this.destroy$.next();
     this.destroy$.complete();
-
   }
 }
