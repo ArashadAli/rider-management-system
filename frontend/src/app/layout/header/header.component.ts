@@ -42,20 +42,4 @@ export class HeaderComponent implements OnInit {
   toggleSidebar(): void {
     this.menuToggle.emit();
   }
-
-  logoutUser(): void {
-    this.authService.logout().subscribe({
-      next: (response) => {
-        if (response.success) {
-          localStorage.removeItem('csrf_token');
-          this.router.navigate(['/login']);
-        }
-      },
-      error: (error) => {
-        console.error('Logout failed', error);
-        localStorage.removeItem('csrf_token');
-        this.router.navigate(['/login']);
-      }
-    });
-  }
 }

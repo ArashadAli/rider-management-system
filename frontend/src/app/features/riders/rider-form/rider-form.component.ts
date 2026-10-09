@@ -34,7 +34,7 @@ import {
 } from 'src/app/core/services/riders.service';
 
 import {
-  ToastService
+  CustomToastService
 } from 'src/app/core/services/toast.service';
 
 import {
@@ -83,7 +83,7 @@ export class RiderFormComponent
   constructor(
     private fb: FormBuilder,
     private ridersService: RidersService,
-    private toastService: ToastService,
+    private toastService: CustomToastService,
     private loaderService: LoaderService
   ) { }
 

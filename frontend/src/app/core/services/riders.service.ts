@@ -82,4 +82,10 @@ export class RidersService {
       updateDetails
     )
   }
+
+  deleteRiderById(riderId: string): Observable<UpdateRiderStatusResponse> {
+    return this.apiService.delete<UpdateRiderStatusResponse>(
+      `/riders/delete-rider/${riderId}`
+    )
+  }
 }

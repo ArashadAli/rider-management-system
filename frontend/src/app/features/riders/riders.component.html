@@ -209,17 +209,7 @@
                         </th>
 
                         <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
-                            View
-                        </th>
-
-
-                        <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
-                            Edit
-                        </th>
-
-
-                        <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
-                            Delete
+                            Actions
                         </th>
 
                         <th class="px-5 py-4 text-center text-xs font-semibold uppercase tracking-wide text-white">
@@ -293,33 +283,49 @@
                             </td>
 
 
-                            <td class="px-5 py-4 text-center">
-
-                                <button type="button" (click)="viewRider(rider)"
-                                    class="rounded-lg border border-[#163758] px-3 py-1.5 text-xs font-medium text-[#163758] transition hover:bg-[#163758] hover:text-white">
-                                    View
-                                </button>
-
-                            </td>
-
 
                             <td class="px-5 py-4 text-center">
+                                <div class="relative inline-block text-left">
 
-                                <button type="button" (click)="openEditDrawer(rider)"
-                                    class="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-600 transition hover:bg-blue-50">
-                                    Edit
-                                </button>
+                                    <!-- Three-dot button -->
+                                    <button type="button" (click)="toggleActionMenu(rider.id)"
+                                        [attr.aria-expanded]="openActionMenuId === rider.id" aria-label="Rider actions"
+                                        class="inline-flex h-9 w-9 items-center justify-center
+             rounded-lg border border-gray-200 text-gray-600
+             hover:bg-gray-100 hover:text-[#163758]">
 
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                            viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                            <circle cx="12" cy="5" r="1.8"></circle>
+                                            <circle cx="12" cy="12" r="1.8"></circle>
+                                            <circle cx="12" cy="19" r="1.8"></circle>
+                                        </svg>
+                                    </button>
+
+                                    <!-- Dropdown menu -->
+                                    <div *ngIf="openActionMenuId === rider.id" class="absolute right-0 top-full z-50 mt-2 w-40
+             rounded-lg border border-gray-200 bg-white py-1
+             text-left shadow-lg">
+
+                                        <button type="button" (click)="onViewRider(rider)" class="block w-full px-4 py-2.5 text-sm text-gray-700
+               hover:bg-gray-50">
+                                            View
+                                        </button>
+
+                                        <button type="button" (click)="onEditRider(rider)" class="block w-full px-4 py-2.5 text-sm text-gray-700
+               hover:bg-gray-50">
+                                            Edit
+                                        </button>
+
+                                        <button type="button" (click)="openDeleteConfirmation(rider)" class="block w-full px-4 py-2.5 text-sm text-red-600
+               hover:bg-red-50">
+                                            Delete
+                                        </button>
+                                    </div>
+
+                                </div>
                             </td>
 
-                            <td class="px-5 py-4 text-center">
-
-                                <button type="button" (click)="deleteRider(rider)"
-                                    class="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-50">
-                                    Delete
-                                </button>
-
-                            </td>
 
 
                             <td class="px-5 py-4 text-center">
@@ -456,4 +462,61 @@
 
     </aside>
 
+</div>
+
+
+<div *ngIf="showDeleteConfirmation" class="fixed inset-0 z-[200] flex items-center justify-center
+         bg-black/40 p-4" (click)="cancelDelete()">
+
+    <div role="dialog" aria-modal="true" aria-labelledby="delete-modal-title"
+        class="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl" (click)="$event.stopPropagation()">
+
+        <div class="flex items-start gap-4">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center
+               rounded-full bg-red-100 text-red-600">
+
+                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" aria-hidden="true">
+
+                    <path d="M3 6h18"></path>
+                    <path d="M8 6V4h8v2"></path>
+                    <path d="m19 6-1 14H6L5 6"></path>
+                    <path d="M10 11v5"></path>
+                    <path d="M14 11v5"></path>
+                </svg>
+            </div>
+
+            <div class="min-w-0 flex-1">
+                <h2 id="delete-modal-title" class="text-lg font-semibold text-gray-900">
+                    Delete Rider?
+                </h2>
+
+                <p class="mt-2 text-sm leading-6 text-gray-500">
+                    Are you sure you want to delete
+                    <span class="font-semibold text-gray-800">
+                        {{ selectedRiderToDelete?.name }}
+                    </span>?
+
+                    This action cannot be undone.
+                </p>
+            </div>
+        </div>
+
+        <div class="mt-7 flex justify-end gap-3">
+            <button type="button" (click)="cancelDelete()" [disabled]="deletingRider" class="rounded-lg border border-gray-300 px-4 py-2.5
+               text-sm font-medium text-gray-700
+               hover:bg-gray-50 disabled:opacity-50">
+                Cancel
+            </button>
+
+            <button type="button" (click)="confirmDeleteRider()" [disabled]="deletingRider" class="rounded-lg bg-[#DC1D47] px-4 py-2.5
+               text-sm font-semibold text-white
+               hover:bg-[#c7193f] disabled:cursor-not-allowed
+               disabled:opacity-60">
+
+                {{ deletingRider ? 'Deleting...' : 'Confirm Delete' }}
+            </button>
+        </div>
+
+    </div>
 </div>

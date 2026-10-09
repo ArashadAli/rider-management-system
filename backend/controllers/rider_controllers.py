@@ -545,3 +545,29 @@ def update_Rider(user_email, rider_id):
             "error": str(e)
         }), 500
 
+
+def delete_Rider(rider_id):
+    try:
+        rider = Rider.query.get(rider_id)
+        if not rider:
+            return jsonify({
+                "success": False,
+                "message": "Rider not found"
+            }), 404
+
+        db.session.delete(rider)
+
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Rider deleted successfully"
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "message": "Server error"
+        }), 500
+

@@ -4,7 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 @Injectable({
     providedIn: 'root'
 })
-export class ToastService {
+export class CustomToastService {
 
     constructor(private toastr: ToastrService) { }
 

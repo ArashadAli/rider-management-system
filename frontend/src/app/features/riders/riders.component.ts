@@ -11,8 +11,9 @@ import { takeUntil, finalize, debounceTime, distinctUntilChanged, switchMap, cat
 import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
 import { ActivatedRoute, Router } from '@angular/router';
 
-import { ToastService } from 'src/app/core/services/toast.service';
+import { CustomToastService } from 'src/app/core/services/toast.service';
 import { RiderFormComponent } from './rider-form/rider-form.component';
+
 
 @Component({
   selector: 'app-riders',
@@ -51,13 +52,18 @@ export class RidersComponent implements OnInit, OnDestroy {
 
   selectedRiderId: string | null = null;
 
+  openActionMenuId: string | null = null;
+  showDeleteConfirmation = false;
+  selectedRiderToDelete: Rider | null = null;
+  deletingRider = false;
+
   constructor(
     private ridersService: RidersService,
     private loaderService: LoaderService,
     private fb: FormBuilder,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private toastService: ToastService
+    private toastService: CustomToastService
   ) { }
 
   ngOnInit(): void {
@@ -324,16 +330,87 @@ export class RidersComponent implements OnInit, OnDestroy {
     this.openViewDrawer(rider);
   }
 
-  deleteRider(rider: Rider): void {
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${rider.name}?`
-    );
 
-    if (!confirmed) {
+  confirmDeleteRider(): void {
+    const rider = this.selectedRiderToDelete;
+
+    if (!rider || this.deletingRider) {
       return;
     }
 
+    this.deletingRider = true;
+
+    this.ridersService.deleteRiderById(rider.id)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.deletingRider = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response?.success) {
+            this.toastService.success(
+              response.message || 'Rider deleted successfully.',
+              'Success'
+            );
+
+            this.showDeleteConfirmation = false;
+            this.selectedRiderToDelete = null;
+            
+            if (this.riders.length === 1 && this.currentPage > 1) {
+              this.currentPage--;
+            }
+
+            this.getPaginatedRiders();
+          } else {
+            this.toastService.error(
+              response?.message || 'Unable to delete rider.',
+              'Error'
+            );
+          }
+        },
+        error: (error) => {
+          console.error('Failed to delete rider:', error);
+
+        }
+      });
+  }
+
+
+  toggleActionMenu(riderId: string): void {
+    this.openActionMenuId =
+      this.openActionMenuId === riderId ? null : riderId;
+  }
+
+  closeActionMenu(): void {
+    this.openActionMenuId = null;
+  }
+
+  onViewRider(rider: Rider): void {
+    this.closeActionMenu();
+    this.viewRider(rider);
+  }
+
+  onEditRider(rider: Rider): void {
+    this.closeActionMenu();
+    this.openEditDrawer(rider);
+  }
+
+  openDeleteConfirmation(rider: Rider): void {
+    this.closeActionMenu();
+    this.selectedRiderToDelete = rider;
+    this.showDeleteConfirmation = true;
+  }
+
+  cancelDelete(): void {
+    if (this.deletingRider) {
+      return;
+    }
+
+    this.showDeleteConfirmation = false;
+    this.selectedRiderToDelete = null;
   }
 
 }

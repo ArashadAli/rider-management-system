@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
-import { ToastService } from 'src/app/core/services/toast.service';
+import { CustomToastService } from 'src/app/core/services/toast.service';
 
 @Component({
   selector: 'login-page',
@@ -23,7 +23,7 @@ export class LoginComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private toastService: ToastService
+    private toastService: CustomToastService
   ) {
     this.loginForm = this.fb.group({
       email: [

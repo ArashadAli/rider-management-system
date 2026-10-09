@@ -1,6 +1,6 @@
 from flask import Blueprint
 from middleware.auth_middleware import token_required
-from controllers.rider_controllers import create_Rider, allRiders, paginate_Riders, update_Rider_Status, get_Active_Riders, get_Rider, update_Rider
+from controllers.rider_controllers import create_Rider, allRiders, paginate_Riders, update_Rider_Status, get_Active_Riders, get_Rider, update_Rider, delete_Rider
 
 rider_bp = Blueprint("api/riders", __name__)
 
@@ -47,3 +47,8 @@ def get_rider(user_email, rider_id):
 @token_required
 def update_rider(user_email, rider_id):
     return update_Rider(user_email, rider_id)
+
+@rider_bp.route("/delete-rider/<rider_id>", methods=["DELETE"])
+@token_required
+def delete_rider(user_email, rider_id):
+    return delete_Rider(rider_id)

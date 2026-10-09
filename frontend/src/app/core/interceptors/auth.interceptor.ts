@@ -9,7 +9,7 @@ import {
 import { catchError, Observable, throwError } from "rxjs";
 import { Router } from "@angular/router";
 
-import { ToastService } from "../services/toast.service";
+import { CustomToastService } from "../services/toast.service";
 
 @Injectable()
 export class CredentialsInterceptor implements HttpInterceptor {
@@ -47,7 +47,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
   constructor(
     private router: Router,
-    private toastService: ToastService
+    private toastService: CustomToastService
   ) { }
 
   intercept(

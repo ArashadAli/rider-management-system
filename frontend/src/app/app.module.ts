@@ -23,7 +23,7 @@ import { ToastrModule } from 'ngx-toastr';
     AppComponent,
     RegisterComponent,
     LoginComponent,
-    PageNotFoundComponent,
+    PageNotFoundComponent
   ],
 
   imports: [

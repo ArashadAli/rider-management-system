@@ -2,3 +2,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.confirm-toast-host {
+  width: 360px !important;
+  max-width: calc(100vw - 32px) !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 12px !important;
+  opacity: 1 !important;
+}
