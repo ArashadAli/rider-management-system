@@ -1,6 +1,5 @@
 <div class="flex h-full min-h-0 flex-col overflow-hidden bg-white">
 
-    <!-- Header -->
     <div class="flex shrink-0 items-center justify-between border-b border-gray-200 px-5 py-4">
 
         <div>
@@ -22,13 +21,10 @@
 
     </div>
 
-
-    <!-- Body -->
     <div class="min-h-0 flex-1 overflow-y-auto px-5 py-5">
 
         <form [formGroup]="riderForm" (ngSubmit)="submit()" class="space-y-5">
 
-            <!-- Profile Image -->
             <div>
 
                 <label class="mb-2 block text-sm font-medium text-gray-700">
@@ -69,8 +65,6 @@
 
             </div>
 
-
-            <!-- Name -->
             <div>
 
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">
@@ -86,8 +80,6 @@
 
             </div>
 
-
-            <!-- Email -->
             <div>
 
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">
@@ -103,8 +95,6 @@
 
             </div>
 
-
-            <!-- Mobile -->
             <div>
 
                 <label class="mb-1.5 block text-sm font-medium text-gray-700">
@@ -120,8 +110,6 @@
 
             </div>
 
-
-            <!-- Vehicle -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
                 <div>
@@ -179,8 +167,6 @@
 
             </div>
 
-
-            <!-- Status / Availability -->
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
                 <div>
@@ -232,8 +218,6 @@
 
     </div>
 
-
-    <!-- Footer -->
     <div class="flex shrink-0 flex-col-reverse gap-2 border-t border-gray-200 px-5 py-4 sm:flex-row sm:justify-end">
 
         <button type="button" (click)="close.emit()"
@@ -241,15 +225,11 @@
             Close
         </button>
 
-
-        <!-- View mode -->
         <button *ngIf="mode === 'view'" type="button" (click)="enableEdit()"
             class="w-full rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#c7193f] sm:w-auto">
             Edit Rider
         </button>
 
-
-        <!-- Create/Edit -->
         <button *ngIf="mode !== 'view'" type="button" (click)="submit()" [disabled]="loading"
             class="w-full rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c7193f] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto">
 

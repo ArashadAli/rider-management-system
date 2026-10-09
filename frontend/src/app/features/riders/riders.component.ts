@@ -96,7 +96,7 @@ export class RidersComponent implements OnInit, OnDestroy {
     this.filterForm.valueChanges
       .pipe(
 
-        debounceTime(600),
+        debounceTime(300),
 
         distinctUntilChanged(
           (previous, current) =>
@@ -107,10 +107,7 @@ export class RidersComponent implements OnInit, OnDestroy {
 
           this.currentPage = 1;
 
-          // console.log('Filters changed:', filters);
-
           this.loading = true;
-          this.loaderService.show();
 
           return this.ridersService
             .getPaginatedRiders(
@@ -137,7 +134,7 @@ export class RidersComponent implements OnInit, OnDestroy {
               finalize(() => {
 
                 this.loading = false;
-                this.loaderService.hide();
+                // this.loaderService.hide();
 
               })
 
@@ -179,7 +176,7 @@ export class RidersComponent implements OnInit, OnDestroy {
     const filters = this.filterForm?.value || {};
 
     this.loading = true;
-    this.loaderService.show();
+    // this.loaderService.show();
 
     this.ridersService
       .getPaginatedRiders(
@@ -197,7 +194,7 @@ export class RidersComponent implements OnInit, OnDestroy {
 
         finalize(() => {
           this.loading = false;
-          this.loaderService.hide();
+          // this.loaderService.hide();
         }),
 
         catchError(error => {
@@ -213,29 +210,21 @@ export class RidersComponent implements OnInit, OnDestroy {
       )
       .subscribe(response => {
 
-        if (!response) {
+        if (!response?.success) {
           return;
         }
 
-        if (response.success) {
+        // this.toastService.success(response.message)
 
-          this.toastService.success(response.message)
+        this.riders = response.data.riders;
 
-          this.riders =
-            response.data.riders;
+        this.currentPage = response.pagination.page;
 
-          this.currentPage =
-            response.pagination.page;
+        this.pageSize = response.pagination.limit;
 
-          this.pageSize =
-            response.pagination.limit;
+        this.totalRiders = response.pagination.total;
 
-          this.totalRiders =
-            response.pagination.total;
-
-          this.totalPages =
-            response.pagination.pages;
-        }
+        this.totalPages = response.pagination.pages;
 
       });
   }
@@ -289,7 +278,7 @@ export class RidersComponent implements OnInit, OnDestroy {
   toggleStatus(rider: Rider): void {
 
     this.loading = true;
-    this.loaderService.show();
+    // this.loaderService.show();
 
     this.ridersService.updateRiderStatus(rider.id).subscribe({
       next: (response) => {
@@ -301,7 +290,7 @@ export class RidersComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Failed to update rider status:', error);
         this.loading = false;
-        this.loaderService.hide();
+        // this.loaderService.hide();
       }
     })
   }

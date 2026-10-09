@@ -1,6 +1,6 @@
 from flask import Blueprint
 from middleware.auth_middleware import token_required
-from controllers.rider_controllers import create_Rider, allRiders, paginate_Riders, update_Rider_Status, get_Active_Riders, get_Rider
+from controllers.rider_controllers import create_Rider, allRiders, paginate_Riders, update_Rider_Status, get_Active_Riders, get_Rider, update_Rider
 
 rider_bp = Blueprint("api/riders", __name__)
 

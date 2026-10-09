@@ -4,6 +4,7 @@ import { ApiService } from './api.service';
 import {
   CreateRiderResponse,
   OneRiderResponse,
+  Rider,
   RiderResponse,
   UpdateRiderStatusResponse
 } from '../models/rider-response.model';
@@ -67,5 +68,18 @@ export class RidersService {
       `/riders/rider-action/${riderId}`,
       {}
     );
+  }
+
+  getRiderById(riderId: string): Observable<OneRiderResponse> {
+    return this.apiService.get<OneRiderResponse>(
+      `/riders/rider/${riderId}`
+    )
+  }
+
+  updateRiderById(riderId: string, updateDetails: FormData): Observable<UpdateRiderStatusResponse> {
+    return this.apiService.put<UpdateRiderStatusResponse>(
+      `rider-update/${riderId}`,
+      updateDetails
+    )
   }
 }

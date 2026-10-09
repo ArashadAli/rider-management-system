@@ -97,9 +97,9 @@ export class RiderFormComponent
       this.mode === 'edit'
     ) {
 
-      // if (this.riderId) {
-      //   this.getRider(this.riderId);
-      // }
+      if (this.riderId) {
+        this.getRider(this.riderId);
+      }
 
     }
 
@@ -163,79 +163,74 @@ export class RiderFormComponent
   }
 
 
-  // getRider(id: string): void {
+  getRider(id: string): void {
 
-  //   this.loading = true;
+    this.loading = true;
 
-  //   this.loaderService.show();
+    // this.loaderService.show();
 
-  //   this.ridersService
-  //     .getRiderById(id)
-  //     .pipe(
+    this.ridersService
+      .getRiderById(id)
+      .pipe(
 
-  //       takeUntil(this.destroy$),
+        takeUntil(this.destroy$),
 
-  //       catchError(error => {
+        catchError(error => {
 
-  //         console.error(
-  //           'Failed to fetch rider:',
-  //           error
-  //         );
+          this.toastService.error(
+            error?.error?.message ||
+            'Failed to fetch rider'
+          );
 
-  //         this.toastService.error(
-  //           error?.error?.message ||
-  //           'Failed to fetch rider'
-  //         );
+          return of(null);
 
-  //         return of(null);
+        }),
 
-  //       }),
+        finalize(() => {
 
-  //       finalize(() => {
+          this.loading = false;
 
-  //         this.loading = false;
+          // this.loaderService.hide();
 
-  //         this.loaderService.hide();
+        })
 
-  //       })
+      )
+      .subscribe(response => {
 
-  //     )
-  //     .subscribe(response => {
+        if (!response?.success) {
+          return;
+        }
 
-  //       if (!response?.success) {
-  //         return;
-  //       }
+        const rider = response.data.rider;
 
-  //       const rider = response.data.rider;
+        this.riderForm.patchValue({
 
-  //       this.riderForm.patchValue({
+          name: rider.name,
 
-  //         name: rider.name,
+          email: rider.email,
 
-  //         email: rider.email,
+          mobile: rider.mobile,
 
-  //         mobile: rider.mobile,
+          vehicle_type: rider.vehicle_type,
 
-  //         vehicle_type: rider.vehicle_type,
+          vehicle_number: rider.vehicle_number,
 
-  //         vehicle_number: rider.vehicle_number,
+          status: rider.status,
 
-  //         status: rider.status,
+          availability: rider.availability
 
-  //         availability: rider.availability
+        });
 
-  //       });
+        this.existingImageUrl =
+          rider.profile_image_url || null;
 
-  //       this.existingImageUrl =
-  //         rider.profile_image_url || null;
+        if (this.mode === 'view') {
+          this.riderForm.disable();
+        }
 
-  //       if (this.mode === 'view') {
-  //         this.riderForm.disable();
-  //       }
+      });
 
-  //     });
-
-  // }
+  }
 
 
   onImageSelected(event: Event): void {
@@ -326,11 +321,8 @@ export class RiderFormComponent
 
 
   enableEdit(): void {
-
     this.mode = 'edit';
-
     this.riderForm.enable();
-
   }
 
 
@@ -348,9 +340,11 @@ export class RiderFormComponent
     }
 
     if (this.mode === 'create') {
-
       this.createRider();
+    }
 
+    if (this.mode === 'edit') {
+      this.createRider();
     }
 
   }
@@ -400,11 +394,6 @@ export class RiderFormComponent
 
         error: error => {
 
-          console.error(
-            'Failed to create rider:',
-            error
-          );
-
           this.toastService.error(
             error?.error?.message ||
             'Failed to create rider'
@@ -417,72 +406,51 @@ export class RiderFormComponent
   }
 
 
-  // updateRider(): void {
+  updateRider(): void {
 
-  //   if (!this.riderId) {
-  //     return;
-  //   }
+    if (!this.riderId) {
+      return;
+    }
 
-  //   const formData =
-  //     this.createFormData();
+    const formData = this.createFormData();
 
-  //   this.loading = true;
+    this.loading = true;
 
-  //   this.loaderService.show();
+    // this.loaderService.show();
 
-  //   this.ridersService
-  //     .updateRider(
-  //       this.riderId,
-  //       formData
-  //     )
-  //     .pipe(
+    this.ridersService.updateRiderById(this.riderId, formData)
+      .pipe(takeUntil(this.destroy$),
+        finalize(() => {
+          this.loading = false;
+          // this.loaderService.hide();
+        })
 
-  //       takeUntil(this.destroy$),
+      )
+      .subscribe({
 
-  //       finalize(() => {
+        next: response => {
 
-  //         this.loading = false;
+          if (response.success) {
 
-  //         this.loaderService.hide();
+            this.toastService.success(
+              response.message
+            );
 
-  //       })
+            this.saved.emit();
 
-  //     )
-  //     .subscribe({
+            this.close.emit();
 
-  //       next: response => {
+          }
 
-  //         if (response.success) {
+        },
 
-  //           this.toastService.success(
-  //             response.message
-  //           );
+        error: error => {
+          this.toastService.error(error?.error?.message || 'Failed to update rider');
+        }
 
-  //           this.saved.emit();
+      });
 
-  //           this.close.emit();
-
-  //         }
-
-  //       },
-
-  //       error: error => {
-
-  //         console.error(
-  //           'Failed to update rider:',
-  //           error
-  //         );
-
-  //         this.toastService.error(
-  //           error?.error?.message ||
-  //           'Failed to update rider'
-  //         );
-
-  //       }
-
-  //     });
-
-  // }
+  }
 
 
   createFormData(): FormData {
