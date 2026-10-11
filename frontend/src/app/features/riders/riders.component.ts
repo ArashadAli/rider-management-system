@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { RidersService } from 'src/app/core/services/riders.service';
 import { LoaderService } from 'src/app/core/services/loader.service';
@@ -110,6 +110,8 @@ export class RidersComponent implements OnInit, OnDestroy {
         ),
 
         switchMap(filters => {
+
+          // this.closeActionMenu()
 
           this.currentPage = 1;
 
@@ -411,6 +413,12 @@ export class RidersComponent implements OnInit, OnDestroy {
 
     this.showDeleteConfirmation = false;
     this.selectedRiderToDelete = null;
+  }
+
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if(this.openActionMenuId) this.openActionMenuId = null
   }
 
 }

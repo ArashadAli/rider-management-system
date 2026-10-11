@@ -2,6 +2,7 @@ from flask import request, jsonify
 from models.rider_model import Rider
 from config.connectDB import db
 from utils.email_mobile_validate import validate_email, validate_mobile
+from utils.image_validator import validate_profile_image
 
 import cloudinary.uploader
 
@@ -91,9 +92,19 @@ def create_Rider(user_email):
 
         if profile_image:
 
+            is_valid, error_message = validate_profile_image(profile_image)
+
+            if not is_valid:
+                return jsonify({
+                    "success": False,
+                    "message": error_message
+                }), 400
+
             result = cloudinary.uploader.upload(
                 profile_image,
-                folder="riders"
+                folder="riders",
+                resource_type="image",
+                allowed_formats=["jpg", "jpeg", "png"]
             )
 
             profile_image_url = result.get("secure_url")
@@ -521,9 +532,19 @@ def update_Rider(user_email, rider_id):
 
         if profile_image:
 
+            is_valid, error_message = validate_profile_image(profile_image)
+
+            if not is_valid:
+                return jsonify({
+                    "success": False,
+                    "message": error_message
+                }), 400
+
             result = cloudinary.uploader.upload(
                 profile_image,
-                folder="riders"
+                folder="riders",
+                resource_type="image",
+                allowed_formats=["jpg", "jpeg", "png"]
             )
 
             rider.profile_image_url = result.get("secure_url")

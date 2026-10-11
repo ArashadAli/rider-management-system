@@ -288,7 +288,7 @@
                                 <div class="relative inline-block text-left">
 
                                     <!-- Three-dot button -->
-                                    <button type="button" (click)="toggleActionMenu(rider.id)"
+                                    <button type="button" (click)=" $event.stopPropagation(); toggleActionMenu(rider.id)"
                                         [attr.aria-expanded]="openActionMenuId === rider.id" aria-label="Rider actions"
                                         class="inline-flex h-9 w-9 items-center justify-center
              rounded-lg border border-gray-200 text-gray-600
