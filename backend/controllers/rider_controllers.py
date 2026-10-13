@@ -335,7 +335,7 @@ def update_Rider_Status(user_email, rider_id):
         }), 500
 
 
-# get Active riders based on status 
+# get Active riders based on status
 
 def get_Active_Riders(user_email):
     try:
@@ -592,3 +592,59 @@ def delete_Rider(rider_id):
             "message": "Server error"
         }), 500
 
+
+def getAll_Available_riders(user_email):
+    try:
+        riders = Rider.query.filter(Rider.status == "active", Rider.availability == "available").all()
+
+        return jsonify({
+            "success": True,
+            "message": "Available riders",
+            "data": [
+                {
+                    "id": str(rider.id),
+                    "name": rider.name,
+                    "email": rider.email,
+                    "mobile": rider.mobile,
+                    "status": rider.status,
+                    "availability": rider.availability
+                }
+
+                for rider in riders
+            ]
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "Server Error",
+            "error": str(e)
+        }), 500
+
+
+def get_Busy_Rider():
+    try:
+        riders = Rider.query.filter(Rider.status == "active", Rider.availability == "busy").all()
+
+        return jsonify({
+            "success": True,
+            "message": "Busy riders",
+            "data": [
+                {
+                    "id": str(rider.id),
+                    "name": rider.name,
+                    "email": rider.email,
+                    "mobile": rider.mobile,
+                    "status": rider.status,
+                    "availability": rider.availability
+                }
+
+                for rider in riders
+            ]
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "Server error",
+            "error": str(e)
+        }), 500

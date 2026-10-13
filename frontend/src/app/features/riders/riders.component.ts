@@ -3,14 +3,11 @@ import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { RidersService } from 'src/app/core/services/riders.service';
 import { LoaderService } from 'src/app/core/services/loader.service';
-import {
-  Rider
-} from 'src/app/core/models/rider-response.model';
+import { Rider } from 'src/app/core/models/rider-response.model';
 import { Subject, of } from 'rxjs';
 import { takeUntil, finalize, debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
 import { ActivatedRoute, Router } from '@angular/router';
-
 import { CustomToastService } from 'src/app/core/services/toast.service';
 import { RiderFormComponent } from './rider-form/rider-form.component';
 
@@ -40,18 +37,12 @@ export class RidersComponent implements OnInit, OnDestroy {
   pageSize = 5;
   totalPages = 0;
   totalRiders = 0;
-
   filterForm!: FormGroup;
-
   sortBy = 'created_at';
   sortOrder = 'desc';
-
   drawerOpen = false;
-
   drawerMode: 'create' | 'view' | 'edit' = 'create';
-
   selectedRiderId: string | null = null;
-
   openActionMenuId: string | null = null;
   showDeleteConfirmation = false;
   selectedRiderToDelete: Rider | null = null;
@@ -78,7 +69,6 @@ export class RidersComponent implements OnInit, OnDestroy {
 
     this.getPaginatedRiders();
     this.setupFilterListeners();
-
     this.activatedRoute.paramMap
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
@@ -89,7 +79,8 @@ export class RidersComponent implements OnInit, OnDestroy {
           this.drawerMode = 'view';
           this.selectedRiderId = riderId;
           this.drawerOpen = true;
-        } else {
+        } 
+        else {
           this.drawerOpen = false;
           this.selectedRiderId = null;
         }
@@ -101,20 +92,14 @@ export class RidersComponent implements OnInit, OnDestroy {
 
     this.filterForm.valueChanges
       .pipe(
-
         debounceTime(300),
-
         distinctUntilChanged(
           (previous, current) =>
             JSON.stringify(previous) === JSON.stringify(current)
         ),
-
         switchMap(filters => {
 
-          // this.closeActionMenu()
-
           this.currentPage = 1;
-
           this.loading = true;
 
           return this.ridersService
@@ -128,30 +113,17 @@ export class RidersComponent implements OnInit, OnDestroy {
               filters.sortOrder
             )
             .pipe(
-
               catchError(error => {
-
-                console.error(
-                  'Failed to fetch riders:',
-                  error
-                );
-
                 return of(null);
               }),
-
               finalize(() => {
-
                 this.loading = false;
                 // this.loaderService.hide();
-
               })
 
             );
-
         }),
-
         takeUntil(this.destroy$)
-
       )
       .subscribe(response => {
 
@@ -160,20 +132,11 @@ export class RidersComponent implements OnInit, OnDestroy {
         }
 
         if (response.success) {
-
           this.riders = response.data.riders;
-
-          this.currentPage =
-            response.pagination.page;
-
-          this.pageSize =
-            response.pagination.limit;
-
-          this.totalRiders =
-            response.pagination.total;
-
-          this.totalPages =
-            response.pagination.pages;
+          this.currentPage = response.pagination.page;
+          this.pageSize = response.pagination.limit;
+          this.totalRiders =  response.pagination.total;
+          this.totalPages = response.pagination.pages;
         }
 
       });
@@ -182,10 +145,8 @@ export class RidersComponent implements OnInit, OnDestroy {
   getPaginatedRiders(): void {
 
     const filters = this.filterForm?.value || {};
-
     this.loading = true;
     // this.loaderService.show();
-
     this.ridersService
       .getPaginatedRiders(
         this.currentPage,
@@ -197,57 +158,37 @@ export class RidersComponent implements OnInit, OnDestroy {
         filters.sortOrder || 'desc'
       )
       .pipe(
-
         takeUntil(this.destroy$),
-
         finalize(() => {
           this.loading = false;
           // this.loaderService.hide();
         }),
 
         catchError(error => {
-
-          console.error(
-            'Failed to fetch riders:',
-            error
-          );
-
           return of(null);
         })
-
       )
       .subscribe(response => {
-
         if (!response?.success) {
           return;
         }
 
         // this.toastService.success(response.message)
-
         this.riders = response.data.riders;
-
         this.currentPage = response.pagination.page;
-
         this.pageSize = response.pagination.limit;
-
         this.totalRiders = response.pagination.total;
-
         this.totalPages = response.pagination.pages;
-
       });
   }
 
   ngOnDestroy(): void {
-
-    // console.log("RidersComponent destroyed");
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   resetFilters(): void {
-
     this.currentPage = 1;
-
     this.filterForm.reset({
       search: '',
       status: '',
@@ -287,7 +228,6 @@ export class RidersComponent implements OnInit, OnDestroy {
 
     this.loading = true;
     // this.loaderService.show();
-
     this.ridersService.updateRiderStatus(rider.id).subscribe({
       next: (response) => {
         if (response.success) {
@@ -328,11 +268,8 @@ export class RidersComponent implements OnInit, OnDestroy {
 
   viewRider(rider: Rider): void {
     // this.router.navigate(['/riders', rider.id]);
-
     this.openViewDrawer(rider);
   }
-
-
 
   confirmDeleteRider(): void {
     const rider = this.selectedRiderToDelete;
@@ -380,10 +317,8 @@ export class RidersComponent implements OnInit, OnDestroy {
       });
   }
 
-
   toggleActionMenu(riderId: string): void {
-    this.openActionMenuId =
-      this.openActionMenuId === riderId ? null : riderId;
+    this.openActionMenuId = this.openActionMenuId === riderId ? null : riderId;
   }
 
   closeActionMenu(): void {

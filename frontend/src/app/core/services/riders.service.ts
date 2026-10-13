@@ -6,7 +6,8 @@ import {
   OneRiderResponse,
   Rider,
   RiderResponse,
-  UpdateRiderStatusResponse
+  UpdateRiderStatusResponse,
+  AvailableRiderResponse
 } from '../models/rider-response.model';
 
 @Injectable({
@@ -86,6 +87,18 @@ export class RidersService {
   deleteRiderById(riderId: string): Observable<UpdateRiderStatusResponse> {
     return this.apiService.delete<UpdateRiderStatusResponse>(
       `/riders/delete-rider/${riderId}`
+    )
+  }
+
+  getAvailableRiders(): Observable<AvailableRiderResponse> {
+    return this.apiService.get<AvailableRiderResponse>(
+      '/riders/available-rider'
+    )
+  }
+
+  getBusyRiders(): Observable<AvailableRiderResponse> {
+    return this.apiService.get<AvailableRiderResponse>(
+      '/riders/busy-rider'
     )
   }
 }

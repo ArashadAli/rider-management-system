@@ -32,9 +32,13 @@ const routes: Routes = [
       },
       {
         path: 'orders',
-        loadComponent: () =>
-          import('./features/orders/orders.component')
-            .then(m => m.OrdersComponent)
+        children: [
+          {
+            path: '',
+            data: { breadcrumb: 'Orders'},
+            loadComponent: () => import('./features/orders/orders.component').then(m => m.OrdersComponent)
+          }
+        ],
       },
       {
         path: 'riders',

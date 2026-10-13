@@ -1,11 +1,5 @@
 import { Injectable } from "@angular/core";
-import {
-  HttpInterceptor,
-  HttpRequest,
-  HttpHandler,
-  HttpEvent,
-  HttpErrorResponse
-} from '@angular/common/http'
+import { HttpInterceptor,HttpRequest,HttpHandler,HttpEvent,HttpErrorResponse } from '@angular/common/http'
 import { catchError, Observable, throwError } from "rxjs";
 import { Router } from "@angular/router";
 
@@ -60,103 +54,36 @@ export class AuthInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
 
         // Get backend message
-        const message =
-          error.error?.message ||
-          'Something went wrong. Please try again.';
-
+        const message = error.error?.message ||'Something went wrong. Please try again.';
         switch (error.status) {
-
           case 400:
-
-            this.toastService.error(
-              message,
-              'Bad Request'
-            );
-
+            this.toastService.error( message,'Bad Request');
             break;
-
-
           case 401:
-
             localStorage.removeItem('csrf_token');
-
-            this.toastService.error(
-              message || 'Please login again.',
-              'Unauthorized'
-            );
-
+            this.toastService.error(message || 'Please login again.','Unauthorized');
             this.router.navigate(['/login']);
-
             break;
-
-
           case 403:
-
-            this.toastService.error(
-              message || 'You do not have permission.',
-              'Access Denied'
-            );
-
+            this.toastService.error(message || 'You do not have permission.','Access Denied');
             break;
-
-
           case 404:
-
-            this.toastService.error(
-              message,
-              'Not Found'
-            );
-
+            this.toastService.error(message,'Not Found');
             break;
-
-
           case 409:
-
-            this.toastService.error(
-              message,
-              'Conflict'
-            );
-
+            this.toastService.error( message,'Conflict');
             break;
-
-
           case 422:
-
-            this.toastService.error(
-              message,
-              'Validation Error'
-            );
-
+            this.toastService.error(message,'Validation Error');
             break;
-
-
           case 500:
-
-            this.toastService.error(
-              message,
-              'Server Error'
-            );
-
+            this.toastService.error(message,'Server Error');
             break;
-
-
           case 0:
-
-            this.toastService.error(
-              'Unable to connect to the server.',
-              'Network Error'
-            );
-
+            this.toastService.error('Unable to connect to the server.','Network Error');
             break;
-
-
           default:
-
-            this.toastService.error(
-              message,
-              'Error'
-            );
-
+            this.toastService.error(message,'Error');
             break;
         }
         // Send error back to component

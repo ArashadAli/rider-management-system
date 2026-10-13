@@ -8,7 +8,8 @@ export interface Order {
   amount: number;
   status: string;
   created_at: string | null;
-  rider_id: number | null;
+  rider_id: string | null;
+  rider_name: string | null
 }
 
 export interface OrderResponse {
@@ -30,4 +31,9 @@ export interface AllOrdersResponse {
   success: boolean;
   message: string;
   data: Order[];
+}
+
+export interface RiderResponse {
+  success: boolean,
+  message: string
 }

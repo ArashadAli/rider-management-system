@@ -1,72 +1,50 @@
-import {
-  Component,
-  OnInit,
-  OnDestroy
-} from '@angular/core';
 
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-import { OrdersService } from '../../core/services/orders.service';
-import { Order } from '../../core/models/order-response.model';
-
-import { LoaderService } from 'src/app/core/services/loader.service';
-
 import { Subject } from 'rxjs';
-import {
-  takeUntil,
-  finalize
-} from 'rxjs/operators';
+import { finalize, takeUntil } from 'rxjs/operators';
 
-interface Rider {
-  id: number;
-  name: string;
-}
+import { OrdersService } from 'src/app/core/services/orders.service';
+import { RidersService } from 'src/app/core/services/riders.service';
+import { CustomToastService } from 'src/app/core/services/toast.service';
+
+import { Order } from 'src/app/core/models/order-response.model';
+import { AvailableRider } from 'src/app/core/models/rider-response.model';
+import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
+import { OrderDrawerComponent } from './orders-drawer/order-drawer.component';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    BreadcrumbComponent,
+    OrderDrawerComponent
   ],
-  templateUrl: './orders.component.html',
-  styleUrls: ['./orders.component.css']
+  templateUrl: './orders.component.html'
 })
 export class OrdersComponent implements OnInit, OnDestroy {
-
   private destroy$ = new Subject<void>();
 
   showCreateOrder = false;
+  loadingRiders = false;
+  assigningOrderId: string | null = null;
+  updatingStatusOrderId: string | null = null;
 
   currentPage = 1;
-
   pageSize = 10;
-
   totalOrders = 0;
-
   totalPages = 0;
-
   hasNext = false;
-
   hasPrevious = false;
 
   orders: Order[] = [];
+  availableRiders: AvailableRider[] = [];
 
-  availableRiders: Rider[] = [
-  {
-    "id": 1,
-    "name": "Ahmed"
-  },
-  {
-    "id": 2,
-    "name": "Mohammed"
-  },
-  {
-    "id": 3,
-    "name": "Ali"
-  }
-];
+  busyRiders: AvailableRider[] = [];
+  loadingBusyRiders = false;
 
   filters = {
     search: '',
@@ -76,66 +54,145 @@ export class OrdersComponent implements OnInit, OnDestroy {
     sort: 'newest'
   };
 
-  newOrder = {
-    order_item: '',
-    customer_name: '',
-    customer_mobile: '',
-    pickup_address: '',
-    delivery_address: '',
-    amount: 0
-  };
+  loadingOrders = false;
+  hasLoadedAvailableRiders = false;
+  hasLoadedBusyRiders = false;
 
   constructor(
     private ordersService: OrdersService,
-    private loaderService: LoaderService
-  ) {}
+    private ridersService: RidersService,
+    private toastService: CustomToastService
+  ) { }
 
   ngOnInit(): void {
     this.loadOrders();
-
-    // TODO: Call the rider API here to fetch all available/free riders
-    // this.loadAvailableRiders();
   }
 
   loadOrders(): void {
-
-    this.loaderService.show();
-
-    this.ordersService
-      .getOrders(this.currentPage, this.pageSize)
+    this.loadingOrders = true;
+    this.ordersService.getOrders(this.currentPage, this.pageSize, this.filters)
       .pipe(
         takeUntil(this.destroy$),
-        finalize(() => {
-          this.loaderService.hide();
-        })
+        finalize(() => this.loadingOrders = false)
       )
       .subscribe({
         next: (response) => {
-
           if (response.success) {
-
             this.orders = response.data.orders;
-
             this.currentPage = response.data.current_page;
             this.pageSize = response.data.page_size;
             this.totalOrders = response.data.total_orders;
             this.totalPages = response.data.total_pages;
             this.hasNext = response.data.has_next;
             this.hasPrevious = response.data.has_previous;
-
+          } else {
+            this.toastService.error( response.message || 'Failed to load orders.');
           }
         },
-
         error: (error) => {
-          console.error('Error loading orders:', error);
+          this.toastService.error(error?.error?.message || 'Failed to load orders.');
         }
       });
   }
 
-  ngOnDestroy(): void {
+  loadAvailableRiders(): void {
+    if (this.loadingRiders || this.hasLoadedAvailableRiders) {
+      return;
+    }
+    this.loadingRiders = true;
+    this.ridersService.getAvailableRiders()
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.loadingRiders = false
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.availableRiders = response.data;
+            this.hasLoadedAvailableRiders = true
+          } else {
+            this.toastService.error(response.message || 'Failed to load available riders.');
+          }
+        },
+        error: (error) => {
+          this.toastService.error(error?.error?.message || 'Failed to load available riders.');
+        }
+      });
+  }
 
-    this.destroy$.next();
-    this.destroy$.complete();
+  assignRider(order: Order, riderId: string | null): void {
+    if (!riderId || this.assigningOrderId) {
+      return;
+    }
+
+    if (order.rider_id) {
+      this.toastService.warning('This order already has an assigned rider.');
+      this.loadOrders();
+      return;
+    }
+
+    this.assigningOrderId = order.order_id;
+    // this.loaderService.show();
+
+    this.ordersService.assignOrder(order.order_id, riderId)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.assigningOrderId = null;
+          // this.loaderService.hide();
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (!response.success) {
+            this.toastService.error(response.message || 'Failed to assign rider.');
+            this.loadOrders();
+            return;
+          }
+
+          this.toastService.success(response.message || 'Rider assigned successfully.');
+
+          this.loadOrders();
+          this.loadAvailableRiders();
+        },
+        error: (error) => {
+          this.toastService.error(error?.error?.message || 'Failed to assign rider.');
+          this.loadOrders();
+        }
+      });
+  }
+
+  updateOrderStatus(order: Order, status: string): void {
+    if ( !status || status === order.status || this.updatingStatusOrderId ) {
+      return;
+    }
+    this.updatingStatusOrderId = order.order_id;
+    // this.loaderService.show();
+    this.ordersService.updateOrderStatus(order.order_id, status)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.updatingStatusOrderId = null;
+          // this.loaderService.hide();
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (!response.success) {
+            this.toastService.error(response.message || 'Failed to update order status.');
+            this.loadOrders();
+            return;
+          }
+          this.toastService.success(response.message || 'Order status updated successfully.');
+          this.loadOrders();
+        },
+        error: (error) => {
+          this.toastService.error( error?.error?.message || 'Failed to update order status.');
+          this.loadOrders();
+        }
+      });
   }
 
   openCreateOrder(): void {
@@ -146,105 +203,59 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.showCreateOrder = false;
   }
 
-  createOrder(): void {
-
-    if (
-      !this.newOrder.order_item.trim() ||
-      !this.newOrder.customer_name.trim() ||
-      !this.newOrder.customer_mobile.trim() ||
-      !this.newOrder.pickup_address.trim() ||
-      !this.newOrder.delivery_address.trim() ||
-      this.newOrder.amount <= 0
-    ) {
-      alert('Please fill all required fields.');
-      return;
-    }
-
-    const mobileRegex = /^[0-9]{10}$/;
-
-    if (!mobileRegex.test(this.newOrder.customer_mobile.trim())) {
-      alert('Please enter a valid 10-digit mobile number.');
-      return;
-    }
-
-    const orderPayload = {
-      order_item: this.newOrder.order_item,
-      customer_name: this.newOrder.customer_name,
-      customer_mobile: this.newOrder.customer_mobile,
-      pickup_address: this.newOrder.pickup_address,
-      delivery_address: this.newOrder.delivery_address,
-      amount: this.newOrder.amount
-    };
-
-    this.ordersService.createOrder(orderPayload).subscribe({
-      next: (response) => {
-
-        console.log('Order created successfully:', response);
-
-        this.closeCreateOrder();
-
-        this.resetOrderForm();
-
-        this.currentPage = 1;
-
-        this.loadOrders();
-      },
-
-      error: (error) => {
-        console.error('Error creating order:', error);
-      }
-    });
-  }
-
-  resetOrderForm(): void {
-
-    this.newOrder = {
-      order_item: '',
-      customer_name: '',
-      customer_mobile: '',
-      pickup_address: '',
-      delivery_address: '',
-      amount: 0
-    };
-  }
-
-  assignRider(order: Order, riderId: number | null): void {
-
-    if (!riderId) {
-      return;
-    }
-
-    console.log(
-      'Assign rider:',
-      riderId,
-      'to order:',
-      order.order_id
-    );
-
-    // TODO: Call assign-rider API here when the rider assignment API is created
+  onOrderCreated(): void {
+    this.currentPage = 1;
+    this.loadOrders();
   }
 
   formatDate(date: string | null): string {
-
     if (!date) {
       return '-';
     }
 
-    const formattedDate = new Date(date);
-
-    return formattedDate.toLocaleDateString('en-GB', {
+    return new Date(date).toLocaleDateString('en-GB', {
       day: '2-digit',
       month: 'short',
       year: 'numeric'
     });
   }
 
+  getStatusClass(status: string): string {
+    const classes: Record<string, string> = {
+      pending: 'bg-amber-50 text-amber-700',
+      'rider assigned': 'bg-indigo-50 text-indigo-700',
+      assigned: 'bg-indigo-50 text-indigo-700',
+      accepted: 'bg-blue-50 text-blue-700',
+      picked_up: 'bg-purple-50 text-purple-700',
+      on_the_way: 'bg-emerald-50 text-emerald-700',
+      delivered: 'bg-green-50 text-green-700',
+      cancelled: 'bg-red-50 text-red-700'
+    };
+
+    return classes[status] || 'bg-gray-100 text-gray-700';
+  }
+
+  formatStatus(status: string): string {
+    const labels: Record<string, string> = {
+      pending: 'Pending',
+      assigned: 'Rider Assigned',
+      accepted: 'Accepted',
+      picked_up: 'Picked Up',
+      on_the_way: 'On The Way',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled'
+    };
+
+    return labels[status] ||
+      status.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+
   applyFilters(): void {
-    console.log('Filters:', this.filters);
+    this.currentPage = 1;
+    this.loadOrders();
   }
 
   clearFilters(): void {
-
     this.filters = {
       search: '',
       status: '',
@@ -254,19 +265,15 @@ export class OrdersComponent implements OnInit, OnDestroy {
     };
 
     this.currentPage = 1;
-
     this.loadOrders();
   }
 
   changePageSize(): void {
-
     this.currentPage = 1;
-
     this.loadOrders();
   }
 
   previousPage(): void {
-
     if (this.hasPrevious) {
       this.currentPage--;
       this.loadOrders();
@@ -274,64 +281,45 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   nextPage(): void {
-
     if (this.hasNext) {
       this.currentPage++;
       this.loadOrders();
     }
   }
 
-  getStatusClass(status: string): string {
-
-    switch (status) {
-
-      case 'pending':
-        return 'pending';
-
-      case 'accepted':
-        return 'accepted';
-
-      case 'picked_up':
-        return 'picked-up';
-
-      case 'on_the_way':
-        return 'on-the-way';
-
-      case 'delivered':
-        return 'delivered';
-
-      case 'cancelled':
-        return 'cancelled';
-
-      default:
-        return '';
-    }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  formatStatus(status: string): string {
 
-    switch (status) {
-
-      case 'pending':
-        return 'Pending';
-
-      case 'accepted':
-        return 'Accepted';
-
-      case 'picked_up':
-        return 'Picked Up';
-
-      case 'on_the_way':
-        return 'On The Way';
-
-      case 'delivered':
-        return 'Delivered';
-
-      case 'cancelled':
-        return 'Cancelled';
-
-      default:
-        return status;
+  loadBusyRiders(): void {
+    if (this.loadingBusyRiders || this.hasLoadedBusyRiders) {
+      return;
     }
+
+    this.loadingBusyRiders = true;
+
+    this.ridersService.getBusyRiders()
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.loadingBusyRiders = false;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.busyRiders = response.data;
+            this.hasLoadedBusyRiders = true
+          } else {
+            this.toastService.error(response.message || 'Failed to load busy riders.');
+          }
+        },
+        error: (error) => {
+          this.toastService.error(error?.error?.message || 'Failed to load busy riders.');
+        }
+      });
   }
+
 }

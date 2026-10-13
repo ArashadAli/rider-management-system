@@ -1,461 +1,219 @@
-<div class="orders-page">
-
-  <div class="orders-header">
-
+<div class="min-h-full bg-[#f6f8fb] p-4 text-[#163758] md:p-7">
+  <app-breadcrumb></app-breadcrumb>
+  <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
     <div>
-      <h2>Orders</h2>
-      <p>Manage and create delivery orders</p>
+      <h2 class="text-2xl font-bold">Orders</h2>
+      <p class="mt-1 text-sm text-gray-500">
+        Manage orders, assign riders and update delivery status.
+      </p>
     </div>
-
-    <button type="button" class="create-order-btn" (click)="openCreateOrder()">
-      <span class="plus-icon">+</span>
+    <button type="button" (click)="openCreateOrder()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#DC1D47] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#c9183f]">
+      <span class="text-lg">+</span>
       Create Order
     </button>
-
   </div>
-
-
-  <div class="filter-card">
-
-    <div class="filter-header">
-
+  <section class="mb-5 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div class="mb-4 flex items-center justify-between">
       <div>
-        <h3>Orders</h3>
-        <span>Search and filter orders</span>
+        <h3 class="font-semibold">Filters</h3>
+        <p class="mt-1 text-xs text-gray-500">Find and organize orders.</p>
       </div>
-
-      <button type="button" class="clear-btn" (click)="clearFilters()">
-        Clear Filters
+      <button type="button" (click)="clearFilters()" class="text-sm font-semibold text-[#DC1D47] hover:underline">
+        Clear filters
       </button>
-
     </div>
-
-
-    <div class="filters">
-
-      <div class="filter-group search-group">
-
-        <label>Search</label>
-
-        <div class="search-box">
-
-          <span class="search-icon">⌕</span>
-
-          <input type="text" placeholder="Search by order ID, customer..." [(ngModel)]="filters.search"
-            (input)="applyFilters()" />
-
-        </div>
-
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold text-gray-600">
+          Search
+        </label>
+        <input [(ngModel)]="filters.search" (keyup.enter)="applyFilters()" placeholder="Order ID or customer or mobile"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100" />
       </div>
-
-
-      <div class="filter-group">
-
-        <label>Status</label>
-
-        <select [(ngModel)]="filters.status" (change)="applyFilters()">
-          <option value="">All Status</option>
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold text-gray-600">
+          Status
+        </label>
+        <select [(ngModel)]="filters.status" (change)="applyFilters()"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]">
+          <option value="">All Statuses</option>
           <option value="pending">Pending</option>
+          <option value="assigned">Rider Assigned</option>
           <option value="accepted">Accepted</option>
           <option value="picked_up">Picked Up</option>
           <option value="on_the_way">On The Way</option>
           <option value="delivered">Delivered</option>
           <option value="cancelled">Cancelled</option>
         </select>
-
       </div>
-
-
-      <div class="filter-group">
-
-        <label>Rider</label>
-
-        <select [(ngModel)]="filters.rider" (change)="applyFilters()">
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold text-gray-600">
+          Rider
+        </label>
+        <select [(ngModel)]="filters.rider" (focus)="loadBusyRiders()" (change)="applyFilters()" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]">
           <option value="">All Riders</option>
-
-          <option *ngFor="let rider of availableRiders" [value]="rider.id">
+          <option *ngFor="let rider of busyRiders" [value]="rider.id">
             {{ rider.name }}
           </option>
         </select>
-
       </div>
-
-
-      <div class="filter-group">
-
-        <label>Order Date</label>
-
-        <input type="date" [(ngModel)]="filters.date" (change)="applyFilters()" />
-
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold text-gray-600">
+          Date
+        </label>
+        <input type="date" [(ngModel)]="filters.date" (change)="applyFilters()" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]" />
       </div>
-
-
-      <div class="filter-group">
-
-        <label>Sort By</label>
-
-        <select [(ngModel)]="filters.sort" (change)="applyFilters()">
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold text-gray-600">
+          Sort
+        </label>
+        <select [(ngModel)]="filters.sort" (change)="applyFilters()"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]">
           <option value="newest">Newest First</option>
           <option value="oldest">Oldest First</option>
-          <option value="customer">Customer Name</option>
-          <option value="amount-high">Amount: High to Low</option>
-          <option value="amount-low">Amount: Low to High</option>
         </select>
-
       </div>
-
     </div>
-
-  </div>
-
-
-  <div class="table-card">
-
-    <div class="table-header">
-
+  </section>
+  <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div class="flex flex-col justify-between gap-3 border-b border-gray-100 px-5 py-4 sm:flex-row sm:items-center">
       <div>
-        <h3>Order List</h3>
-        <span>{{ orders.length }} orders found</span>
+        <h3 class="font-semibold">Order List</h3>
+        <p class="mt-1 text-xs text-gray-500">
+          {{ totalOrders }} total orders
+        </p>
       </div>
-
-      <select class="page-size" [(ngModel)]="pageSize" (change)="changePageSize()">
-        <option [ngValue]="10">10 / page</option>
-        <option [ngValue]="25">25 / page</option>
-        <option [ngValue]="50">50 / page</option>
+      <select [(ngModel)]="pageSize" (change)="changePageSize()"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#DC1D47]">
+        <option [ngValue]="5">5 per page</option>
+        <option [ngValue]="10">10 per page</option>
+        <option [ngValue]="25">25 per page</option>
+        <option [ngValue]="50">50 per page</option>
       </select>
-
     </div>
-
-
-    <div class="table-wrapper">
-
-      <table>
-
-        <thead>
-
-          <tr>
-            <th>Order ID</th>
-            <th>Customer</th>
-            <th>Pickup</th>
-            <th>Delivery</th>
-            <th>Amount</th>
-            <th>Rider</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th>Assign Rider</th>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[1100px] text-left">
+        <thead class="bg-gray-50">
+          <tr class="border-b border-gray-200 text-[11px] uppercase tracking-wide text-gray-500">
+            <th class="px-5 py-4 font-semibold">Order ID</th>
+            <th class="px-5 py-4 font-semibold">Customer</th>
+            <th class="px-5 py-4 font-semibold">Item / Amount</th>
+            <th class="px-5 py-4 font-semibold">Pickup</th>
+            <th class="px-5 py-4 font-semibold">Delivery</th>
+            <th class="px-5 py-4 font-semibold">Rider</th>
+            <th class="px-5 py-4 font-semibold">Status</th>
+            <th class="px-5 py-4 font-semibold">Created</th>
           </tr>
-
         </thead>
-
-
         <tbody>
-
-          <tr *ngFor="let order of orders">
-
-            <td>
-              <span class="order-id">
-                {{ order.order_id }}
-              </span>
-            </td>
-
-
-            <td>
-
-              <div class="customer-info">
-
-                <strong>
-                  {{ order.customer_name }}
-                </strong>
-
-                <small>
-                  {{ order.customer_mobile }}
-                </small>
-
-              </div>
-
-            </td>
-
-
-            <td>
-
-              <span class="location-text">
-                {{ order.pickup_address }}
-              </span>
-
-            </td>
-
-
-            <td>
-
-              <span class="location-text">
-                {{ order.delivery_address }}
-              </span>
-
-            </td>
-
-
-            <td>
-              <strong>
-                AED {{ order.amount }}
-              </strong>
-            </td>
-
-
-            <td>
-
-              <span *ngIf="order.rider_id">
-                Rider {{ order.rider_id }}
-              </span>
-
-              <span class="unassigned" *ngIf="!order.rider_id">
-                Unassigned
-              </span>
-
-            </td>
-
-
-            <td>
-
-              <span class="status" [ngClass]="getStatusClass(order.status)">
-                {{ formatStatus(order.status) }}
-              </span>
-
-            </td>
-
-
-            <td>
-              {{ formatDate(order.created_at) }}
-            </td>
-
-
-            <td>
-
-              <select class="rider-select" [ngModel]="order.rider_id" (ngModelChange)="assignRider(order, $event)">
-
-                <option [ngValue]="null">
-                  {{ order.rider_id ? 'Rider ' + order.rider_id : 'Assign Rider' }}
-                </option>
-
-                <option *ngFor="let rider of availableRiders" [ngValue]="rider.id">
-                  {{ rider.name }}
-                </option>
-
-              </select>
-
-            </td>
-
-          </tr>
-
-
-          <tr *ngIf="orders.length === 0">
-
-            <td colspan="9">
-
-              <div class="empty-state">
-
-                <div class="empty-icon">
-                  📦
+          <tr *ngIf="loadingOrders">
+            <td colspan="8" class="px-5 py-12">
+              <div class="flex flex-col items-center justify-center gap-3">
+                <div class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#DC1D47]">
                 </div>
-
-                <h3>No Orders Found</h3>
-
-                <p>
-                  No orders match the selected filters.
-                </p>
-
+                <p class="text-sm text-gray-500">Loading orders...</p>
               </div>
-
             </td>
-
           </tr>
+          <ng-container *ngIf="!loadingOrders">
+            <tr *ngFor="let order of orders" class="border-b border-gray-100 transition hover:bg-gray-50/70">
+              <td class="px-5 py-4">
+                <span class="font-semibold">{{ order.order_id }}</span>
+              </td>
 
+              <td class="px-5 py-4">
+                <div class="flex flex-col gap-1">
+                  <span class="font-medium">{{ order.customer_name }}</span>
+                  <span class="text-xs text-gray-500">
+                    {{ order.customer_mobile }}
+                  </span>
+                </div>
+              </td>
+
+              <td class="px-5 py-4">
+                <div class="flex flex-col gap-1">
+                  <span>{{ order.order_item }}</span>
+                  <span class="font-semibold text-[#163758]">
+                    {{ order.amount | currency:'INR':'symbol':'1.2-2' }}
+                  </span>
+                </div>
+              </td>
+
+              <td class="px-5 py-4">
+                <span class="block max-w-40 truncate" [title]="order.pickup_address">
+                  {{ order.pickup_address }}
+                </span>
+              </td>
+
+              <td class="px-5 py-4">
+                <span class="block max-w-40 truncate" [title]="order.delivery_address">
+                  {{ order.delivery_address }}
+                </span>
+              </td>
+
+              <td class="px-5 py-4">
+                <ng-container *ngIf="order.rider_id; else assignRiderControl">
+                  <span class="font-medium">
+                    {{ order.rider_name || 'Assigned rider' }}
+                  </span>
+                </ng-container>
+
+                <ng-template #assignRiderControl>
+                  <select [ngModel]="null" (focus)="loadAvailableRiders()" (ngModelChange)="assignRider(order, $event)"
+                    [disabled]="assigningOrderId === order.order_id"
+                    class="w-40 rounded-lg border border-gray-300 bg-white px-2.5 py-2 text-xs outline-none focus:border-[#DC1D47] disabled:opacity-50">
+                    <option [ngValue]="null">
+                      {{ loadingRiders ? 'Loading riders...' : 'Assign Rider' }}
+                    </option>
+                    <option *ngFor="let rider of availableRiders" [ngValue]="rider.id">
+                      {{ rider.name }}
+                    </option>
+                  </select>
+                </ng-template>
+              </td>
+              <td class="px-5 py-4">
+                <select [ngModel]="order.status" (ngModelChange)="updateOrderStatus(order, $event)"
+                  [disabled]="updatingStatusOrderId === order.order_id"
+                  class="max-w-40 rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs font-semibold outline-none focus:border-[#DC1D47] disabled:opacity-50"
+                  [ngClass]="getStatusClass(order.status)">
+                  <option value="pending">Pending</option>
+                  <option value="assigned">Assigned</option>
+                  <option value="accepted">Accepted</option>
+                  <option value="picked_up">Picked Up</option>
+                  <option value="on_the_way">On The Way</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </td>
+              <td class="whitespace-nowrap px-5 py-4 text-xs text-gray-500">
+                {{ formatDate(order.created_at) }}
+              </td>
+            </tr>
+            <tr *ngIf="orders.length === 0">
+              <td colspan="8" class="px-5 py-16 text-center">
+                <h3 class="font-semibold text-[#163758]">No orders found</h3>
+                <p class="mt-1 text-sm text-gray-500">Create an order to get started.</p>
+              </td>
+            </tr>
+          </ng-container>
         </tbody>
-
       </table>
-
     </div>
-
-
-    <div class="pagination">
-
-      <span>
-        Showing {{ orders.length }} of {{ totalOrders }} orders
-      </span>
-
-      <div class="pagination-buttons">
-
-        <button type="button" [disabled]="!hasPrevious" (click)="previousPage()">
+    <div class="flex flex-col justify-between gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center">
+      <p class="text-xs text-gray-500">
+        Page {{ currentPage }} of {{ totalPages || 1 }}
+      </p>
+      <div class="flex gap-2">
+        <button type="button" (click)="previousPage()" [disabled]="!hasPrevious" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
           Previous
         </button>
-
-        <button type="button" class="active-page">
-          {{ currentPage }} / {{ totalPages }}
-        </button>
-
-        <button type="button" [disabled]="!hasNext" (click)="nextPage()">
+        <button type="button" (click)="nextPage()" [disabled]="!hasNext"
+          class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
           Next
         </button>
-
       </div>
-
     </div>
-
-  </div>
-
+  </section>
 </div>
 
-
-<div class="modal-overlay" *ngIf="showCreateOrder" (click)="closeCreateOrder()">
-
-  <div class="order-modal" (click)="$event.stopPropagation()">
-
-    <div class="modal-header">
-
-      <div>
-        <h2>Create New Order</h2>
-        <p>Enter the order details</p>
-      </div>
-
-      <button type="button" class="close-btn" (click)="closeCreateOrder()">
-        ×
-      </button>
-
-    </div>
-
-
-    <form class="order-form" (ngSubmit)="createOrder()">
-
-      <div class="form-section">
-
-        <div class="section-title">
-
-
-          <div>
-            <h3>Order Details</h3>
-            <p>Basic order information</p>
-          </div>
-
-        </div>
-
-
-        <div class="form-grid">
-
-          <div class="form-group">
-
-            <label>Order Item</label>
-
-            <input type="text" [(ngModel)]="newOrder.order_item" name="order_item" placeholder="Enter order item"
-              required />
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label>Amount</label>
-
-            <input type="number" [(ngModel)]="newOrder.amount" min="1" name="amount" placeholder="Enter order amount"
-              required />
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="form-section">
-
-        <div class="section-title">
-
-
-          <div>
-            <h3>Customer Details</h3>
-            <p>Enter customer information</p>
-          </div>
-
-        </div>
-
-
-        <div class="form-grid">
-
-          <div class="form-group">
-
-            <label>Customer Name</label>
-
-            <input type="text" [(ngModel)]="newOrder.customer_name" name="customer_name"
-              placeholder="Enter customer name" required />
-
-          </div>
-
-
-          <div class="form-group">
-
-            <label>Customer Mobile</label>
-
-            <input type="tel" [(ngModel)]="newOrder.customer_mobile" name="customer_mobile"
-              placeholder="Enter mobile number" maxlength="10" pattern="[0-9]{10}" required />
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="form-section">
-
-        <div class="section-title">
-
-          <div>
-            <h3>Pickup & Delivery</h3>
-            <p>Enter pickup and delivery addresses</p>
-          </div>
-
-        </div>
-
-
-        <div class="form-grid">
-
-          <div class="form-group full-width">
-
-            <label>Pickup Address</label>
-
-            <textarea [(ngModel)]="newOrder.pickup_address" name="pickup_address" rows="3"
-              placeholder="Enter pickup address" required></textarea>
-
-          </div>
-
-
-          <div class="form-group full-width">
-
-            <label>Delivery Address</label>
-
-            <textarea [(ngModel)]="newOrder.delivery_address" name="delivery_address" rows="3"
-              placeholder="Enter delivery address" required></textarea>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <div class="form-actions">
-
-        <button type="button" class="cancel-btn" (click)="closeCreateOrder()">
-          Cancel
-        </button>
-
-
-        <button type="submit" class="submit-order-btn">
-          Create Order
-        </button>
-
-      </div>
-
-    </form>
-
-  </div>
-
-</div>
+<app-order-drawer *ngIf="showCreateOrder" (close)="closeCreateOrder()" (saved)="onOrderCreated()"></app-order-drawer>

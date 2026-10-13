@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { ApiService } from './api.service';
-import { OrderResponse, AllOrdersResponse } from '../models/order-response.model';
+import { OrderResponse, AllOrdersResponse, RiderResponse } from '../models/order-response.model';
+import { AvailableRiderResponse, AssignRiderResponse } from '../models/rider-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +19,30 @@ export class OrdersService {
     );
   }
 
-  getOrders(page: number, limit: number): Observable<OrderResponse> {
+  getOrders(
+    page: number, 
+    limit: number,
+    filters: {
+      search: string,
+      status: string,
+      rider: string,
+      date: string,
+      sort: string
+    }
+  ): Observable<OrderResponse> {
+
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      search: filters.search || '',
+      status: filters.status || '',
+      rider: filters.rider || '',
+      date: filters.date || '',
+      sort: filters.sort || 'newest'
+    })
+
     return this.apiService.get<OrderResponse>(
-      `/orders/pagination?page=${page}&limit=${limit}`
+      `/orders/pagination?${params.toString()}`
     );
   }
 
@@ -28,6 +50,20 @@ export class OrdersService {
     return this.apiService.get<AllOrdersResponse>(
       `/orders/allOrders`
     );
+  }
+
+  assignOrder(order_id: string, rider_id: string): Observable<AssignRiderResponse> {
+    return this.apiService.post<AssignRiderResponse>(
+      `/orders/assign-rider/${order_id}`,
+      {rider_id}
+    )
+  }
+
+  updateOrderStatus(order_id: string, status: string): Observable<RiderResponse> {
+    return this.apiService.post<RiderResponse>(
+      `/orders/update-order-status/${order_id}`,
+      {status}
+    )
   }
 
 }

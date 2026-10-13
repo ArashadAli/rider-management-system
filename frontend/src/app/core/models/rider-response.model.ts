@@ -49,3 +49,35 @@ export interface UpdateRiderStatusResponse {
     success: boolean;
     message: string;
 }
+
+export interface AvailableRider {
+    id: string,
+    name: string,
+    email: string,
+    mobile: string,
+    status: string,
+    availability: string
+}
+
+
+export interface AvailableRiderResponse {
+    success: boolean,
+    message: string,
+    data: AvailableRider[]
+}
+
+
+export interface AssignRiderResponse {
+  success: boolean;
+  message: string;
+  data: {
+    id: string;
+    name: string;
+    email: string;
+    mobile: string;
+    status: string;
+    availability: string;
+  };
+}
+
+
