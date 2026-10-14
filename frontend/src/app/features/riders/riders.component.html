@@ -321,10 +321,10 @@
             </div>
         </div>
         <div class="mt-7 flex justify-end gap-3">
-            <button type="button" (click)="cancelDelete()" [disabled]="deletingRider" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+            <button (click)="cancelDelete()" [disabled]="deletingRider" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
                 Cancel
             </button>
-            <button type="button" (click)="confirmDeleteRider()" [disabled]="deletingRider" class="rounded-lg bg-[#DC1D47] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#c7193f] disabled:cursor-not-allowed disabled:opacity-60">
+            <button (click)="confirmDeleteRider()" [disabled]="deletingRider" class="rounded-lg bg-[#DC1D47] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#c7193f] disabled:cursor-not-allowed disabled:opacity-60">
                 {{ deletingRider ? 'Deleting...' : 'Confirm Delete' }}
             </button>
         </div>

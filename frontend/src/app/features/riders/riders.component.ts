@@ -58,7 +58,6 @@ export class RidersComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-
     this.filterForm = this.fb.group({
       search: [''],
       status: [''],
@@ -93,15 +92,10 @@ export class RidersComponent implements OnInit, OnDestroy {
     this.filterForm.valueChanges
       .pipe(
         debounceTime(300),
-        distinctUntilChanged(
-          (previous, current) =>
-            JSON.stringify(previous) === JSON.stringify(current)
-        ),
+        distinctUntilChanged((previous, current) => JSON.stringify(previous) === JSON.stringify(current)),
         switchMap(filters => {
-
           this.currentPage = 1;
           this.loading = true;
-
           return this.ridersService
             .getPaginatedRiders(
               this.currentPage,
@@ -118,7 +112,6 @@ export class RidersComponent implements OnInit, OnDestroy {
               }),
               finalize(() => {
                 this.loading = false;
-                // this.loaderService.hide();
               })
 
             );
@@ -126,11 +119,9 @@ export class RidersComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe(response => {
-
         if (!response) {
           return;
         }
-
         if (response.success) {
           this.riders = response.data.riders;
           this.currentPage = response.pagination.page;
@@ -138,7 +129,6 @@ export class RidersComponent implements OnInit, OnDestroy {
           this.totalRiders =  response.pagination.total;
           this.totalPages = response.pagination.pages;
         }
-
       });
   }
 
@@ -146,7 +136,6 @@ export class RidersComponent implements OnInit, OnDestroy {
 
     const filters = this.filterForm?.value || {};
     this.loading = true;
-    // this.loaderService.show();
     this.ridersService
       .getPaginatedRiders(
         this.currentPage,
@@ -161,9 +150,7 @@ export class RidersComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
         finalize(() => {
           this.loading = false;
-          // this.loaderService.hide();
         }),
-
         catchError(error => {
           return of(null);
         })
@@ -172,8 +159,6 @@ export class RidersComponent implements OnInit, OnDestroy {
         if (!response?.success) {
           return;
         }
-
-        // this.toastService.success(response.message)
         this.riders = response.data.riders;
         this.currentPage = response.pagination.page;
         this.pageSize = response.pagination.limit;
@@ -225,9 +210,7 @@ export class RidersComponent implements OnInit, OnDestroy {
   }
 
   toggleStatus(rider: Rider): void {
-
     this.loading = true;
-    // this.loaderService.show();
     this.ridersService.updateRiderStatus(rider.id).subscribe({
       next: (response) => {
         if (response.success) {
@@ -236,9 +219,7 @@ export class RidersComponent implements OnInit, OnDestroy {
         }
       },
       error: (error) => {
-        console.error('Failed to update rider status:', error);
         this.loading = false;
-        // this.loaderService.hide();
       }
     })
   }
@@ -267,19 +248,15 @@ export class RidersComponent implements OnInit, OnDestroy {
   }
 
   viewRider(rider: Rider): void {
-    // this.router.navigate(['/riders', rider.id]);
     this.openViewDrawer(rider);
   }
 
   confirmDeleteRider(): void {
     const rider = this.selectedRiderToDelete;
-
     if (!rider || this.deletingRider) {
       return;
     }
-
     this.deletingRider = true;
-
     this.ridersService.deleteRiderById(rider.id)
       .pipe(
         takeUntil(this.destroy$),
@@ -290,29 +267,20 @@ export class RidersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response?.success) {
-            this.toastService.success(
-              response.message || 'Rider deleted successfully.',
-              'Success'
-            );
-
+            this.toastService.success( response.message || 'Rider deleted successfully.','Success' );
             this.showDeleteConfirmation = false;
             this.selectedRiderToDelete = null;
-            
             if (this.riders.length === 1 && this.currentPage > 1) {
               this.currentPage--;
             }
-
             this.getPaginatedRiders();
-          } else {
-            this.toastService.error(
-              response?.message || 'Unable to delete rider.',
-              'Error'
-            );
+          } 
+          else {
+            this.toastService.error( response?.message || 'Unable to delete rider.','Error' );
           }
         },
         error: (error) => {
           console.error('Failed to delete rider:', error);
-
         }
       });
   }
@@ -349,7 +317,6 @@ export class RidersComponent implements OnInit, OnDestroy {
     this.showDeleteConfirmation = false;
     this.selectedRiderToDelete = null;
   }
-
 
   @HostListener('document:click')
   onDocumentClick(): void {

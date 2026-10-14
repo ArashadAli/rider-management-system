@@ -1,11 +1,10 @@
-import { Component,EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import {Subject,of} from 'rxjs';
-import {catchError,finalize,takeUntil} from 'rxjs/operators';
-import {RidersService} from 'src/app/core/services/riders.service';
-import {CustomToastService} from 'src/app/core/services/toast.service';
-import {LoaderService} from 'src/app/core/services/loader.service';
+import { Subject, of } from 'rxjs';
+import { catchError, finalize, takeUntil } from 'rxjs/operators';
+import { RidersService } from 'src/app/core/services/riders.service';
+import { CustomToastService } from 'src/app/core/services/toast.service';
 
 
 @Component({
@@ -35,13 +34,12 @@ export class RiderFormComponent
   constructor(
     private fb: FormBuilder,
     private ridersService: RidersService,
-    private toastService: CustomToastService,
-    private loaderService: LoaderService
+    private toastService: CustomToastService
   ) { }
 
   ngOnInit(): void {
     this.initializeForm();
-    if ( this.mode === 'view' || this.mode === 'edit') {
+    if (this.mode === 'view' || this.mode === 'edit') {
       if (this.riderId) {
         this.getRider(this.riderId);
       }
@@ -53,60 +51,29 @@ export class RiderFormComponent
 
   initializeForm(): void {
     this.riderForm = this.fb.group({
-      name: [
-        '',
-        [
-          Validators.required,
-          Validators.minLength(2)
-        ]
-      ],
-      email: [
-        '',
-        [
-          Validators.required,
-          Validators.email
-        ]
-      ],
-      mobile: [
-        '',
-        [
-          Validators.required,
-          Validators.pattern(/^[0-9]{10}$/)
-        ]
-      ],
-      vehicle_type: [
-        '',
-        Validators.required
-      ],
-      vehicle_number: [
-        '',
-        Validators.required
-      ],
-      status: [
-        'active',
-        Validators.required
-      ],
-      availability: [
-        'available',
-        Validators.required
-      ]
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      mobile: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      vehicle_type: ['', Validators.required],
+      vehicle_number: ['', Validators.required],
+      status: ['active', Validators.required],
+      availability: ['available', Validators.required],
+      profile_image: [null]
     });
   }
 
   getRider(id: string): void {
     this.loading = true;
-    // this.loaderService.show();
     this.ridersService
       .getRiderById(id)
       .pipe(
         takeUntil(this.destroy$),
         catchError(error => {
-          this.toastService.error( error?.error?.message || 'Failed to fetch rider' );
+          this.toastService.error(error?.error?.message || 'Failed to fetch rider');
           return of(null);
         }),
         finalize(() => {
           this.loading = false;
-          // this.loaderService.hide();
         })
       )
       .subscribe(response => {
@@ -132,15 +99,14 @@ export class RiderFormComponent
 
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if ( !input.files || input.files.length === 0 ) {
+    if (!input.files || input.files.length === 0) {
       return;
     }
     const file = input.files[0];
     this.selectedImage = file;
     const reader = new FileReader();
     reader.onload = () => {
-      this.imagePreview =
-        reader.result as string;
+      this.imagePreview = reader.result as string;
     };
     reader.readAsDataURL(file);
   }
@@ -161,7 +127,7 @@ export class RiderFormComponent
       return '';
     }
     if (control.hasError('required')) {
-      return 'This field is required';
+      return `${controlName} field is required`;
     }
     if (control.hasError('email')) {
       return 'Enter a valid email';
@@ -197,7 +163,7 @@ export class RiderFormComponent
     }
 
     if (this.mode === 'edit') {
-      this.createRider();
+      this.updateRider();
     }
   }
 
@@ -205,14 +171,12 @@ export class RiderFormComponent
 
     const formData = this.createFormData();
     this.loading = true;
-    // this.loaderService.show();
     this.ridersService
       .createRider(formData)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
           this.loading = false;
-          // this.loaderService.hide();
         })
       )
       .subscribe({
@@ -224,7 +188,7 @@ export class RiderFormComponent
           }
         },
         error: error => {
-          this.toastService.error( error?.error?.message || 'Failed to create rider');
+          this.toastService.error(error?.error?.message || 'Failed to create rider');
         }
       });
   }
@@ -235,67 +199,57 @@ export class RiderFormComponent
     }
     const formData = this.createFormData();
     this.loading = true;
-    // this.loaderService.show();
     this.ridersService.updateRiderById(this.riderId, formData)
       .pipe(takeUntil(this.destroy$),
         finalize(() => {
           this.loading = false;
-          // this.loaderService.hide();
-        })
-      )
-      .subscribe({
-        next: response => {
-          if (response.success) {
-            this.toastService.success( response.message );
-            this.saved.emit();
-            this.close.emit();
+        })).subscribe({
+          next: response => {
+            if (response.success) {
+              this.toastService.success(response.message);
+              this.saved.emit();
+              this.close.emit();
+            }
+          },
+          error: error => {
+            this.toastService.error(error?.error?.message || 'Failed to update rider');
           }
-        },
-        error: error => {
-          this.toastService.error(error?.error?.message || 'Failed to update rider');
-        }
-      });
+        });
   }
 
   createFormData(): FormData {
     const formData = new FormData();
     const value = this.riderForm.getRawValue();
-    formData.append('name',value.name);
-    formData.append('email',value.email);
-    formData.append('mobile',value.mobile);
-    formData.append('vehicle_type',value.vehicle_type);
-    formData.append('vehicle_number',value.vehicle_number);
-    formData.append('status',value.status);
-    formData.append('availability',value.availability);
+    formData.append('name', value.name);
+    formData.append('email', value.email);
+    formData.append('mobile', value.mobile);
+    formData.append('vehicle_type', value.vehicle_type);
+    formData.append('vehicle_number', value.vehicle_number);
+    formData.append('status', value.status);
+    formData.append('availability', value.availability);
     if (this.selectedImage) {
-      formData.append('profile_image',this.selectedImage);
+      formData.append('profile_image', this.selectedImage);
     }
     return formData;
   }
 
   get drawerTitle(): string {
-
     if (this.mode === 'create') {
       return 'Create Rider';
     }
-
     if (this.mode === 'edit') {
       return 'Edit Rider';
     }
-
     return 'Rider Profile';
   }
 
   get drawerSubtitle(): string {
-
     if (this.mode === 'create') {
       return 'Add a new rider';
     }
-
     if (this.mode === 'edit') {
       return 'Update rider information';
     }
-
     return 'View rider details';
 
   }

@@ -22,6 +22,13 @@ def create_Rider(user_email):
 
         profile_image = request.files.get("profile_image")
 
+
+        # print("name : ", name)
+        # print("email : ", email)
+        # print("mobile : ", mobile)
+
+        print("create request : ", request.form.to_dict())
+
         if not name or not email or not mobile:
             return jsonify({
                 "success": False,

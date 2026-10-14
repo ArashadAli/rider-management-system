@@ -4,11 +4,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
-
 import { OrdersService } from 'src/app/core/services/orders.service';
 import { RidersService } from 'src/app/core/services/riders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
-
 import { Order } from 'src/app/core/models/order-response.model';
 import { AvailableRider } from 'src/app/core/models/rider-response.model';
 import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
@@ -32,20 +30,16 @@ export class OrdersComponent implements OnInit, OnDestroy {
   loadingRiders = false;
   assigningOrderId: string | null = null;
   updatingStatusOrderId: string | null = null;
-
   currentPage = 1;
   pageSize = 10;
   totalOrders = 0;
   totalPages = 0;
   hasNext = false;
   hasPrevious = false;
-
   orders: Order[] = [];
   availableRiders: AvailableRider[] = [];
-
   busyRiders: AvailableRider[] = [];
   loadingBusyRiders = false;
-
   filters = {
     search: '',
     status: '',
@@ -53,7 +47,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
     date: '',
     sort: 'newest'
   };
-
   loadingOrders = false;
   hasLoadedAvailableRiders = false;
   hasLoadedBusyRiders = false;
@@ -85,7 +78,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
             this.totalPages = response.data.total_pages;
             this.hasNext = response.data.has_next;
             this.hasPrevious = response.data.has_previous;
-          } else {
+          } 
+          else {
             this.toastService.error( response.message || 'Failed to load orders.');
           }
         },
@@ -112,7 +106,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
           if (response.success) {
             this.availableRiders = response.data;
             this.hasLoadedAvailableRiders = true
-          } else {
+          } 
+          else {
             this.toastService.error(response.message || 'Failed to load available riders.');
           }
         },
@@ -126,22 +121,17 @@ export class OrdersComponent implements OnInit, OnDestroy {
     if (!riderId || this.assigningOrderId) {
       return;
     }
-
     if (order.rider_id) {
       this.toastService.warning('This order already has an assigned rider.');
       this.loadOrders();
       return;
     }
-
     this.assigningOrderId = order.order_id;
-    // this.loaderService.show();
-
     this.ordersService.assignOrder(order.order_id, riderId)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
           this.assigningOrderId = null;
-          // this.loaderService.hide();
         })
       )
       .subscribe({
@@ -151,9 +141,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
             this.loadOrders();
             return;
           }
-
           this.toastService.success(response.message || 'Rider assigned successfully.');
-
           this.loadOrders();
           this.loadAvailableRiders();
         },
@@ -169,13 +157,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
       return;
     }
     this.updatingStatusOrderId = order.order_id;
-    // this.loaderService.show();
     this.ordersService.updateOrderStatus(order.order_id, status)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
           this.updatingStatusOrderId = null;
-          // this.loaderService.hide();
         })
       )
       .subscribe({
@@ -212,7 +198,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
     if (!date) {
       return '-';
     }
-
     return new Date(date).toLocaleDateString('en-GB', {
       day: '2-digit',
       month: 'short',
@@ -231,7 +216,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
       delivered: 'bg-green-50 text-green-700',
       cancelled: 'bg-red-50 text-red-700'
     };
-
     return classes[status] || 'bg-gray-100 text-gray-700';
   }
 
@@ -245,9 +229,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
       delivered: 'Delivered',
       cancelled: 'Cancelled'
     };
-
-    return labels[status] ||
-      status.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+    return labels[status] || status.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
   }
 
   applyFilters(): void {
@@ -263,7 +245,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
       date: '',
       sort: 'newest'
     };
-
     this.currentPage = 1;
     this.loadOrders();
   }
@@ -292,14 +273,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-
   loadBusyRiders(): void {
     if (this.loadingBusyRiders || this.hasLoadedBusyRiders) {
       return;
     }
-
     this.loadingBusyRiders = true;
-
     this.ridersService.getBusyRiders()
       .pipe(
         takeUntil(this.destroy$),
@@ -312,7 +290,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
           if (response.success) {
             this.busyRiders = response.data;
             this.hasLoadedBusyRiders = true
-          } else {
+          } 
+          else {
             this.toastService.error(response.message || 'Failed to load busy riders.');
           }
         },
@@ -321,5 +300,4 @@ export class OrdersComponent implements OnInit, OnDestroy {
         }
       });
   }
-
 }

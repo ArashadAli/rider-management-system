@@ -79,7 +79,7 @@ export class RidersService {
 
   updateRiderById(riderId: string, updateDetails: FormData): Observable<UpdateRiderStatusResponse> {
     return this.apiService.put<UpdateRiderStatusResponse>(
-      `rider-update/${riderId}`,
+      `/riders/rider-update/${riderId}`,
       updateDetails
     )
   }
