@@ -1,12 +1,6 @@
 import { Component } from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  Validators
-} from '@angular/forms';
+import {AbstractControl,FormBuilder,FormGroup,Validators} from '@angular/forms';
 import { Router } from '@angular/router';
-
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
@@ -17,7 +11,6 @@ import { AuthService } from '../../../core/services/auth.service';
 export class RegisterComponent {
 
   registerForm: FormGroup;
-
   isLoading = false;
   successMessage = '';
   errorMessage = '';
@@ -33,26 +26,9 @@ export class RegisterComponent {
       {
         name: ['', [Validators.required]],
         email: ['', [Validators.required, Validators.email]],
-        mobile: [
-          '',
-          [
-            Validators.required,
-            Validators.pattern(/^[0-9]{10}$/)
-          ]
-        ],
-        password: [
-          '',
-          [
-            Validators.required,
-            Validators.minLength(8)
-          ]
-        ],
-        confirm_password: [
-          '',
-          [
-            Validators.required
-          ]
-        ]
+        mobile: ['',[ Validators.required,Validators.pattern(/^[0-9]{10}$/)]],
+        password: ['',[Validators.required,Validators.minLength(8)]],
+        confirm_password: ['',[Validators.required]]
       },
       {
         validators: this.passwordMatchValidator
@@ -68,50 +44,32 @@ export class RegisterComponent {
       control.get('confirm_password')?.setErrors({
         passwordMismatch: true
       });
-
       return { passwordMismatch: true };
     }
-
     return null;
   }
 
   onSubmit(): void {
-
     this.successMessage = '';
     this.errorMessage = '';
-
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
     }
-
     this.isLoading = true;
-
     const userData = this.registerForm.value;
-
     this.authService.register(userData).subscribe({
       next: (response) => {
-
         this.isLoading = false;
-
         if (response.success) {
           this.successMessage = response.message;
-
           this.registerForm.reset();
-
           this.router.navigate(["/login"])
         }
       },
-
       error: (error) => {
-
         this.isLoading = false;
-
-        // console.log("error while registering the user : ", error)
-
-        this.errorMessage =
-          error?.error?.message ||
-          'Something went wrong. Please try again.';
+        this.errorMessage = error?.error?.message || 'Something went wrong. Please try again.';
       }
     });
   }

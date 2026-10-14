@@ -1,9 +1,9 @@
 
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { finalize, takeUntil } from 'rxjs/operators';
+import { debounceTime, finalize, takeUntil, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { OrdersService } from 'src/app/core/services/orders.service';
 import { RidersService } from 'src/app/core/services/riders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
@@ -23,14 +23,14 @@ import { OrderDrawerComponent } from './orders-drawer/order-drawer.component';
   ],
   templateUrl: './orders.component.html'
 })
-export class OrdersComponent implements OnInit, OnDestroy {
+export class OrdersComponent implements OnDestroy {
   private destroy$ = new Subject<void>();
 
   showCreateOrder = false;
   loadingRiders = false;
   assigningOrderId: string | null = null;
   updatingStatusOrderId: string | null = null;
-  currentPage = 1;
+  currentPage : number = 1;
   pageSize = 10;
   totalOrders = 0;
   totalPages = 0;
@@ -55,11 +55,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
     private ordersService: OrdersService,
     private ridersService: RidersService,
     private toastService: CustomToastService
-  ) { }
+  ) { 
 
-  ngOnInit(): void {
     this.loadOrders();
   }
+
 
   loadOrders(): void {
     this.loadingOrders = true;

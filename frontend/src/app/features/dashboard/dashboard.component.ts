@@ -1,17 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
 import { LoaderService } from 'src/app/core/services/loader.service';
 import { DashboardService } from 'src/app/core/services/dashboard.service';
-
 import { Subject } from 'rxjs';
 import { takeUntil, finalize, retry } from 'rxjs/operators';
-
-import {
-  DashboardData,
-  DashboardOrder,
-  DashboardRider
-} from 'src/app/core/models/dashboard-response.model';
+import { DashboardData, DashboardOrder, DashboardRider } from 'src/app/core/models/dashboard-response.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -22,14 +15,10 @@ import {
 export class DashboardComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
-
   dashboard: DashboardData | null = null;
-
   recentOrders: DashboardOrder[] = [];
   recentRiders: DashboardRider[] = [];
-
   isLoading = false;
-
   constructor(
     private loaderService: LoaderService,
     private dashboardService: DashboardService
@@ -62,10 +51,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error(
-            'Dashboard fetching error:',
-            error
-          );
         }
       });
   }
@@ -90,15 +75,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   getRiderStatusClass(status: string): string {
-    return status?.toLowerCase() === 'active'
-      ? 'bg-green-50 text-green-700'
-      : 'bg-red-50 text-red-700';
+    return status?.toLowerCase() === 'active' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700';
   }
 
   getAvailabilityClass(availability: string): string {
-    return availability?.toLowerCase() === 'available'
-      ? 'bg-green-50 text-green-700'
-      : 'bg-gray-100 text-gray-700';
+    return availability?.toLowerCase() === 'available' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-700';
   }
 
   formatDate(date: string | null): string {

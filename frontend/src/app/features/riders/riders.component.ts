@@ -2,12 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { RidersService } from 'src/app/core/services/riders.service';
-import { LoaderService } from 'src/app/core/services/loader.service';
 import { Rider } from 'src/app/core/models/rider-response.model';
 import { Subject, of } from 'rxjs';
 import { takeUntil, finalize, debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
-import { ActivatedRoute, Router } from '@angular/router';
 import { CustomToastService } from 'src/app/core/services/toast.service';
 import { RiderFormComponent } from './rider-form/rider-form.component';
 
@@ -31,7 +29,6 @@ export class RidersComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   riders: Rider[] = [];
-
   loading = false;
   currentPage = 1;
   pageSize = 5;
@@ -50,10 +47,7 @@ export class RidersComponent implements OnInit, OnDestroy {
 
   constructor(
     private ridersService: RidersService,
-    private loaderService: LoaderService,
     private fb: FormBuilder,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
     private toastService: CustomToastService
   ) { }
 
@@ -68,23 +62,6 @@ export class RidersComponent implements OnInit, OnDestroy {
 
     this.getPaginatedRiders();
     this.setupFilterListeners();
-    this.activatedRoute.paramMap
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(params => {
-
-        const riderId = params.get('id');
-
-        if (riderId) {
-          this.drawerMode = 'view';
-          this.selectedRiderId = riderId;
-          this.drawerOpen = true;
-        } 
-        else {
-          this.drawerOpen = false;
-          this.selectedRiderId = null;
-        }
-
-      });
   }
 
   setupFilterListeners(): void {
