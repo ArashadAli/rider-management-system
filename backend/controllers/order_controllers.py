@@ -196,12 +196,8 @@ def getOrderForPagination(user_email):
             query = query.filter(
                 or_(
                     Order.order_id.ilike(search_term),
-                    Order.order_item.ilike(search_term),
                     Order.customer_name.ilike(search_term),
-                    Order.customer_mobile.ilike(search_term),
-                    Order.pickup_address.ilike(search_term),
-                    Order.delivery_address.ilike(search_term),
-                    Rider.name.ilike(search_term)
+                    Order.customer_mobile.ilike(search_term)
                 )
             )
 
@@ -413,5 +409,48 @@ def update_Order_Status(order_id):
         return jsonify({
             "success": False,
             "message": "Server error",
+            "error": str(e)
+        }), 500
+
+
+def get_Single_Order(order_id):
+    try:
+        order = Order.query.filter_by(order_id = order_id).first()
+        if not order:
+            return jsonify({
+                "success": False,
+                "message": "Order not found"
+            }), 404
+
+        rider_name = None
+
+        if order.rider_id is not None:
+            rider = Rider.query.filter_by(id = order.rider_id).first()
+
+            if rider:
+                rider_name = rider.name
+
+        return jsonify({
+            "success": True,
+            "message": "Successfully fetched",
+            "data": {
+                "order_item": order.order_item,
+                "order_id": order.order_id,
+                "amount": float(order.amount) if order.amount is not None else None,
+                "created_at": (order.created_at.isoformat() if order.created_at else None),
+                "customer_mobile": order.customer_mobile,
+                "customer_name": order.customer_name,
+                "delivery_address": order.delivery_address,
+                "pickup_address": order.pickup_address,
+                "status": order.status,
+                "rider_id": order.rider_id,
+                "rider_name": rider_name
+            }
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "Order not fetched",
             "error": str(e)
         }), 500

@@ -7,7 +7,8 @@
         Manage orders, assign riders and update delivery status.
       </p>
     </div>
-    <button type="button" (click)="openCreateOrder()" class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#DC1D47] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#c9183f]">
+    <button type="button" (click)="openCreateOrder()"
+      class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#DC1D47] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#c9183f]">
       <span class="text-lg">+</span>
       Create Order
     </button>
@@ -50,7 +51,8 @@
         <label class="mb-1.5 block text-xs font-semibold text-gray-600">
           Rider
         </label>
-        <select [(ngModel)]="filters.rider" (focus)="loadBusyRiders()" (change)="applyFilters()" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]">
+        <select [(ngModel)]="filters.rider" (focus)="loadBusyRiders()" (change)="applyFilters()"
+          class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]">
           <option value="">All Riders</option>
           <option *ngFor="let rider of busyRiders" [value]="rider.id">
             {{ rider.name }}
@@ -61,7 +63,8 @@
         <label class="mb-1.5 block text-xs font-semibold text-gray-600">
           Date
         </label>
-        <input type="date" [(ngModel)]="filters.date" (change)="applyFilters()" class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]" />
+        <input type="date" [(ngModel)]="filters.date" (change)="applyFilters()"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]" />
       </div>
       <div>
         <label class="mb-1.5 block text-xs font-semibold text-gray-600">
@@ -102,12 +105,13 @@
             <th class="px-5 py-4 font-semibold">Delivery</th>
             <th class="px-5 py-4 font-semibold">Rider</th>
             <th class="px-5 py-4 font-semibold">Status</th>
+            <th class="px-5 py-4 font-semibold">Action</th>
             <th class="px-5 py-4 font-semibold">Created</th>
           </tr>
         </thead>
         <tbody>
           <tr *ngIf="loadingOrders">
-            <td colspan="8" class="px-5 py-12">
+            <td colspan="9" class="px-5 py-12">
               <div class="flex flex-col items-center justify-center gap-3">
                 <div class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#DC1D47]">
                 </div>
@@ -185,6 +189,11 @@
                   <option value="cancelled">Cancelled</option>
                 </select>
               </td>
+              <td class="px-5 py-4">
+                <button class="inline-flex items-center gap-1.5 rounded-lg border border-[#DC1D47]/20 bg-[#DC1D47]/5 px-3 py-1.5 text-sm font-semibold text-[#DC1D47] transition-all duration-200 hover:border-[#DC1D47] hover:bg-[#DC1D47] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#DC1D47]/30"
+                  (click)="openOrderViewDrawer(order.order_id)"
+                >view</button>
+              </td>
               <td class="whitespace-nowrap px-5 py-4 text-xs text-gray-500">
                 {{ formatDate(order.created_at) }}
               </td>
@@ -204,7 +213,8 @@
         Page {{ currentPage }} of {{ totalPages || 1 }}
       </p>
       <div class="flex gap-2">
-        <button type="button" (click)="previousPage()" [disabled]="!hasPrevious" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+        <button type="button" (click)="previousPage()" [disabled]="!hasPrevious"
+          class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
           Previous
         </button>
         <button type="button" (click)="nextPage()" [disabled]="!hasNext"
@@ -216,4 +226,4 @@
   </section>
 </div>
 
-<app-order-drawer *ngIf="showCreateOrder" (close)="closeCreateOrder()" (saved)="onOrderCreated()"></app-order-drawer>
+<app-order-drawer *ngIf="showCreateOrder" (close)="closeCreateOrder()" (saved)="onOrderCreated()" [mode]="drawerMode" [orderId]="order_id"></app-order-drawer>

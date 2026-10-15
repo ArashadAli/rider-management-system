@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { ApiService } from './api.service';
-import { OrderResponse, AllOrdersResponse, RiderResponse } from '../models/order-response.model';
+import { OrderResponse, AllOrdersResponse, RiderResponse, SingleOrderResponse } from '../models/order-response.model';
 import { AvailableRiderResponse, AssignRiderResponse } from '../models/rider-response.model';
 
 @Injectable({
@@ -63,6 +63,12 @@ export class OrdersService {
     return this.apiService.post<RiderResponse>(
       `/orders/update-order-status/${order_id}`,
       {status}
+    )
+  }
+
+  getSingleOrder(order_id : string): Observable<SingleOrderResponse> {
+    return this.apiService.get<SingleOrderResponse>(
+      `/orders/single-order/${order_id}`
     )
   }
 

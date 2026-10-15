@@ -1,9 +1,9 @@
 
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject } from 'rxjs';
-import { debounceTime, finalize, takeUntil, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
+import { EMPTY, Subject } from 'rxjs';
+import {  catchError, debounceTime, finalize, switchMap, takeUntil } from 'rxjs/operators';
 import { OrdersService } from 'src/app/core/services/orders.service';
 import { RidersService } from 'src/app/core/services/riders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
@@ -23,10 +23,14 @@ import { OrderDrawerComponent } from './orders-drawer/order-drawer.component';
   ],
   templateUrl: './orders.component.html'
 })
-export class OrdersComponent implements OnDestroy {
+export class OrdersComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private loadOrders$ = new Subject<void>();
 
   showCreateOrder = false;
+  order_id: string | null = null
+  drawerMode : 'create' | 'view' = 'create'
+
   loadingRiders = false;
   assigningOrderId: string | null = null;
   updatingStatusOrderId: string | null = null;
@@ -56,17 +60,28 @@ export class OrdersComponent implements OnDestroy {
     private ridersService: RidersService,
     private toastService: CustomToastService
   ) { 
-
-    this.loadOrders();
+    
   }
 
-
-  loadOrders(): void {
-    this.loadingOrders = true;
-    this.ordersService.getOrders(this.currentPage, this.pageSize, this.filters)
+  ngOnInit(): void {
+    this.loadOrders$
       .pipe(
-        takeUntil(this.destroy$),
-        finalize(() => this.loadingOrders = false)
+        debounceTime(600),
+        switchMap(() => {
+          this.loadingOrders = true;
+          return this.ordersService
+            .getOrders(this.currentPage, this.pageSize, this.filters)
+            .pipe(
+              catchError((error) => {
+                console.log("Failed to load orders: ", error)
+                return EMPTY;
+              }),
+              finalize(() => {
+                this.loadingOrders = false;
+              })
+            )
+        }),
+        takeUntil(this.destroy$)
       )
       .subscribe({
         next: (response) => {
@@ -84,9 +99,15 @@ export class OrdersComponent implements OnDestroy {
           }
         },
         error: (error) => {
-          this.toastService.error(error?.error?.message || 'Failed to load orders.');
+        this.toastService.error(error?.error?.message || 'Failed to load orders.');
         }
-      });
+      })
+
+      this.loadOrders();
+  }
+
+  loadOrders(): void {
+    this.loadOrders$.next();
   }
 
   loadAvailableRiders(): void {
@@ -182,11 +203,14 @@ export class OrdersComponent implements OnDestroy {
   }
 
   openCreateOrder(): void {
+    this.drawerMode = 'create',
+    this.order_id = null
     this.showCreateOrder = true;
   }
 
   closeCreateOrder(): void {
     this.showCreateOrder = false;
+    this.order_id = null
   }
 
   onOrderCreated(): void {
@@ -299,5 +323,11 @@ export class OrdersComponent implements OnDestroy {
           this.toastService.error(error?.error?.message || 'Failed to load busy riders.');
         }
       });
+  }
+
+  openOrderViewDrawer(order_id: string): void{
+    this.drawerMode = 'view';
+    this.order_id = order_id;
+    this.showCreateOrder = true
   }
 }

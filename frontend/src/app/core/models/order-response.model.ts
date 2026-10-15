@@ -37,3 +37,9 @@ export interface RiderResponse {
   success: boolean,
   message: string
 }
+
+export interface SingleOrderResponse {
+  success: boolean,
+  message: string,
+  data: Order
+}

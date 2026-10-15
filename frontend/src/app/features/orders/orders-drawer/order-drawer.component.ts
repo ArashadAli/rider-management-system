@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, Input, SimpleChange, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs/operators';
+import { catchError, finalize } from 'rxjs/operators';
 import { OrdersService } from 'src/app/core/services/orders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
+import { EMPTY } from 'rxjs';
 
 @Component({
     selector: 'app-order-drawer',
@@ -12,10 +13,16 @@ import { CustomToastService } from 'src/app/core/services/toast.service';
     templateUrl: './order-drawer.component.html'
 })
 export class OrderDrawerComponent {
+
+    @Input() mode: 'create' | 'view' = 'create';
+    @Input() orderId: string | null = null
+
     @Output() close = new EventEmitter<void>();
     @Output() saved = new EventEmitter<void>();
 
     submitting = false;
+    loadingOrder = false;
+    orderDetails: any = null;
     newOrder = {
         order_item: '',
         customer_name: '',
@@ -30,6 +37,62 @@ export class OrderDrawerComponent {
         private toastService: CustomToastService
     ) { }
 
+    ngOnChanges(changes: SimpleChanges): void {
+        if(changes['mode'] || changes['orderId']) {
+            if(this.mode === 'view' && this.orderId) {
+                this.loadSingleOrder(this.orderId);
+            }
+            else if(this.mode === 'create') {
+                this.resetForm();
+                this.orderDetails = null
+            }
+        }
+    }
+
+    loadSingleOrder(orderId: string): void {
+        this.loadingOrder = true;
+        this.orderDetails = null;
+
+        this.ordersService.getSingleOrder(orderId)
+        .pipe(
+            catchError((error) => {
+                this.toastService.error(error.message || 'Failed to load order details')
+                return EMPTY;
+            })
+        )
+        .subscribe({
+            next:(response) => {
+                if(!response.success) {
+                    this.toastService.error(response.message);
+                    return;
+                }
+                const order = response.data;
+                this.orderDetails = order;
+                this.newOrder = {
+                    order_item: order.order_item || '',
+                    customer_name: order.customer_name || '',
+                    customer_mobile: order.customer_mobile || '',
+                    pickup_address: order.pickup_address || '',
+                    delivery_address: order.delivery_address || '',
+                    amount: Number(order.amount) || 0
+                }
+
+                this.loadingOrder = false
+            }
+        })
+    }
+
+    resetForm(): void {
+        this.newOrder = {
+            order_item: '',
+            customer_mobile: '',
+            customer_name: '',
+            pickup_address: '',
+            delivery_address: '',
+            amount: 0
+        }
+    }
+
     closeDrawer(): void {
         if (!this.submitting) {
             this.close.emit();
@@ -37,6 +100,9 @@ export class OrderDrawerComponent {
     }
 
     createOrder(): void {
+
+        if(this.mode !== 'create' || this.submitting) return
+
         const payload = {
             order_item: this.newOrder.order_item.trim(),
             customer_name: this.newOrder.customer_name.trim(),
@@ -70,14 +136,7 @@ export class OrderDrawerComponent {
                     }
 
                     this.toastService.success( response.message || 'Order created successfully.' );
-                    this.newOrder = {
-                        order_item: '',
-                        customer_name: '',
-                        customer_mobile: '',
-                        pickup_address: '',
-                        delivery_address: '',
-                        amount: 0
-                    };
+                    this.resetForm();
                     this.close.emit();
                     this.saved.emit();
                 },
