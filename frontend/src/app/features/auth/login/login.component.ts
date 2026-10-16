@@ -56,12 +56,14 @@ export class LoginComponent {
         });
           if(response.success) {
             this.toastService.success(response.message)
+            this.authService.setUser(response.user)
             this.router.navigate(['/dashboard'])
           }
       },
 
       error: (error) => {
         this.isLoading = false;
+        this.authService.setUser(null)
         this.errorMessage = error?.error?.message || 'Invalid email or password.';
       }
     });

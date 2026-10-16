@@ -31,12 +31,14 @@ export class SidebarComponent {
       next: (response) => {
         if (response.success) {
           localStorage.removeItem('csrf_token');
+          this.authService.clearUser()
           this.router.navigate(['/login']);
         }
       },
       error: (error) => {
         console.error('Logout failed', error);
         localStorage.removeItem('csrf_token');
+        this.authService.clearUser()
         this.router.navigate(['/login']);
       }
     });

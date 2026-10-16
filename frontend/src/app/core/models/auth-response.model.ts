@@ -5,6 +5,11 @@ export interface User {
   mobile: string;
 }
 
+export interface CommonResponse {
+  success: boolean,
+  message: string
+}
+
 export interface RegisterResponse {
   success: boolean;
   message: string;

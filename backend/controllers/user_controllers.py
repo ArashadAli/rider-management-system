@@ -1,6 +1,7 @@
-from flask import jsonify
+from flask import jsonify, request
 from sqlalchemy import func
 from models.user_model import User
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from config.connectDB import db
 from models.order_model import Order
@@ -202,3 +203,105 @@ def user_profile(user_email):
             "mobile": user.mobile
         }
     }), 200
+
+def update_user_profile(user_email):
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "Required request body is missing"
+            }), 422
+
+        user_name = data.get("name")
+        user_mobile = data.get("mobile")
+
+        existUserWithMobile = User.query.filter_by(mobile = user_mobile).first()
+        if existUserWithMobile:
+            return jsonify({
+                "success": False,
+                "message": "User already exist with this mobile number"
+            }), 409
+
+        user = User.query.filter_by(email = user_email).first()
+
+        print("user name : ", user.name)
+
+        if user_name:
+            user.name = user_name
+
+        if user_mobile:
+            user.mobile = user_mobile
+
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Profile updated successfully",
+            "user": {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "mobile": user.mobile
+            }
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "message": "Server error",
+            "error": str(e)
+        }), 500
+
+
+def change_user_password(user_email):
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                "success": False,
+                "message": "Request data is missing"
+            }), 422
+
+        user = User.query.filter_by(email = user_email).first()
+
+        current_password = data.get("currentPassword")
+        new_password = data.get("newPassword")
+
+        if not current_password and new_password:
+            return jsonify({
+                "success": False,
+                "message": "current password and new password both fields are required"
+            })
+
+        if not check_password_hash(user.password, current_password):
+            return jsonify({
+                "success": False,
+                "message": "Current password and login password mismatch"
+            }), 400
+
+        if len(new_password) < 8:
+            return jsonify({
+                "success": False,
+                "message": "Length should be min of 8 characters"
+            }), 400
+
+        new_hashed_password = generate_password_hash(new_password)
+
+        user.password = new_hashed_password
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Password updated"
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "message": "Server error",
+            "error": str(e)
+        }), 500
+    
