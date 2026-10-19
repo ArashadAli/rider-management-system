@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, Input, SimpleChange, SimpleChanges } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, EventEmitter, Output, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, finalize } from 'rxjs/operators';
 import { OrdersService } from 'src/app/core/services/orders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
@@ -9,10 +9,10 @@ import { EMPTY } from 'rxjs';
 @Component({
     selector: 'app-order-drawer',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, ReactiveFormsModule],
     templateUrl: './order-drawer.component.html'
 })
-export class OrderDrawerComponent {
+export class OrderDrawerComponent implements OnChanges {
 
     @Input() mode: 'create' | 'view' = 'create';
     @Input() orderId: string | null = null
@@ -20,33 +20,44 @@ export class OrderDrawerComponent {
     @Output() close = new EventEmitter<void>();
     @Output() saved = new EventEmitter<void>();
 
+    orderForm: FormGroup
+
     submitting = false;
     loadingOrder = false;
     orderDetails: any = null;
-    newOrder = {
-        order_item: '',
-        customer_name: '',
-        customer_mobile: '',
-        pickup_address: '',
-        delivery_address: '',
-        amount: 0
-    };
+    showConfirmation = false;
 
     constructor(
         private ordersService: OrdersService,
-        private toastService: CustomToastService
-    ) { }
+        private toastService: CustomToastService,
+        private fb: FormBuilder
+    ) {
+        this.orderForm = this.fb.group({
+            order_item: ['', Validators.required],
+            customer_name: ['', Validators.required],
+            customer_mobile: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+            pickup_address: ['', Validators.required],
+            delivery_address: ['', Validators.required],
+            amount: [null, [Validators.required, Validators.min(0.01)]]
+        })
+    }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if(changes['mode'] || changes['orderId']) {
-            if(this.mode === 'view' && this.orderId) {
+        if (changes['mode'] || changes['orderId']) {
+            if (this.mode === 'view' && this.orderId) {
+                this.showConfirmation = false
                 this.loadSingleOrder(this.orderId);
             }
-            else if(this.mode === 'create') {
+            else if (this.mode === 'create') {
                 this.resetForm();
                 this.orderDetails = null
+                this.showConfirmation = false
             }
         }
+    }
+
+    get f() {
+        return this.orderForm.controls;
     }
 
     loadSingleOrder(orderId: string): void {
@@ -54,74 +65,109 @@ export class OrderDrawerComponent {
         this.orderDetails = null;
 
         this.ordersService.getSingleOrder(orderId)
-        .pipe(
-            catchError((error) => {
-                this.toastService.error(error.message || 'Failed to load order details')
-                return EMPTY;
-            })
-        )
-        .subscribe({
-            next:(response) => {
-                if(!response.success) {
-                    this.toastService.error(response.message);
-                    return;
-                }
-                const order = response.data;
-                this.orderDetails = order;
-                this.newOrder = {
-                    order_item: order.order_item || '',
-                    customer_name: order.customer_name || '',
-                    customer_mobile: order.customer_mobile || '',
-                    pickup_address: order.pickup_address || '',
-                    delivery_address: order.delivery_address || '',
-                    amount: Number(order.amount) || 0
-                }
+            .pipe(
+                catchError((error) => {
+                    this.toastService.error(error.message || 'Failed to load order details')
+                    return EMPTY;
+                }),
+                finalize(() => {
+                    this.loadingOrder = false;
+                })
+            )
+            .subscribe({
+                next: (response) => {
+                    if (!response.success) {
+                        this.toastService.error(response.message);
+                        return;
+                    }
+                    const order = response.data;
+                    this.orderDetails = order;
+                    this.orderForm.patchValue({
+                        order_item: order.order_item || '',
+                        customer_name: order.customer_name || '',
+                        customer_mobile: order.customer_mobile || '',
+                        pickup_address: order.pickup_address || '',
+                        delivery_address: order.delivery_address || '',
+                        amount: Number(order.amount) || null
+                    })
 
-                this.loadingOrder = false
-            }
-        })
+                    this.orderForm.markAsPristine();
+                    this.orderForm.markAsUntouched();
+
+                    this.loadingOrder = false
+                }
+            })
     }
 
     resetForm(): void {
-        this.newOrder = {
+        this.orderForm.reset({
             order_item: '',
-            customer_mobile: '',
             customer_name: '',
+            customer_mobile: '',
             pickup_address: '',
             delivery_address: '',
-            amount: 0
-        }
+            amount: null
+        })
+
+        this.orderForm.markAsPristine();
+        this.orderForm.markAsUntouched();
     }
 
     closeDrawer(): void {
         if (!this.submitting) {
+            this.showConfirmation = false;
             this.close.emit();
         }
     }
 
-    createOrder(): void {
-
+    requestCreateConfirmation(): void {
         if(this.mode !== 'create' || this.submitting) return
+        
+        if(this.orderForm.invalid) {
+            this.orderForm.markAllAsTouched();
+            return;
+        }
+
+        const values = this.orderForm.getRawValue();
+        const textFields = [
+            'order_item',
+            'customer_name',
+            'customer_mobile',
+            'pickup_address',
+            'delivery_address'
+        ]
+
+        const hasBlankField = textFields.some(field => !String(values[field] ?? '').trim())
+        if(hasBlankField) {
+            textFields.forEach(field => {
+                const control = this.orderForm.get(field);
+                if(control && !String(control.value ?? '').trim()) {
+                    control.setErrors({...control.errors, required: true})
+                    control.markAsTouched();
+                }
+            })
+            return
+        }
+        this.showConfirmation = true;
+    }
+
+    confirmCreateOrder(): void {
+
+        if (this.mode !== 'create' || this.submitting || !this.showConfirmation || this.orderForm.invalid) return
+
+        const values = this.orderForm.getRawValue();
 
         const payload = {
-            order_item: this.newOrder.order_item.trim(),
-            customer_name: this.newOrder.customer_name.trim(),
-            customer_mobile: this.newOrder.customer_mobile.trim(),
-            pickup_address: this.newOrder.pickup_address.trim(),
-            delivery_address: this.newOrder.delivery_address.trim(),
-            amount: this.newOrder.amount
+            order_item: values.order_item.trim(),
+            customer_name: values.customer_name.trim(),
+            customer_mobile: values.customer_mobile.trim(),
+            pickup_address: values.pickup_address.trim(),
+            delivery_address: values.delivery_address.trim(),
+            amount: Number(values.amount)
         };
-        if ( !payload.order_item || !payload.customer_name || !payload.customer_mobile || !payload.pickup_address || !payload.delivery_address || payload.amount <= 0 ) {
-            this.toastService.warning('Please fill all required fields.');
-            return;
-        }
+        this.showConfirmation = false;
+        this.submitting = true
 
-        if (!/^[0-9]{10}$/.test(payload.customer_mobile)) {
-            this.toastService.warning('Enter a valid 10-digit mobile number.');
-            return;
-        }
-
-        this.submitting = true;
         this.ordersService.createOrder(payload)
             .pipe(
                 finalize(() => {
@@ -131,18 +177,24 @@ export class OrderDrawerComponent {
             .subscribe({
                 next: (response) => {
                     if (!response.success) {
-                        this.toastService.error( response.message || 'Failed to create order.' );
+                        this.toastService.error(response.message || 'Failed to create order.');
                         return;
                     }
 
-                    this.toastService.success( response.message || 'Order created successfully.' );
+                    this.toastService.success(response.message || 'Order created successfully.');
                     this.resetForm();
                     this.close.emit();
                     this.saved.emit();
                 },
                 error: (error) => {
-                    this.toastService.error( error?.error?.message || 'Failed to create order.' );
+                    this.toastService.error(error?.error?.message || 'Failed to create order.');
                 }
             });
+    }
+
+    cancelConfirmation(): void {
+        if(!this.submitting) {
+            this.showConfirmation = false;
+        }
     }
 }

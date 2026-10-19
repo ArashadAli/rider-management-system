@@ -16,7 +16,8 @@
                 <span class="text-2xl">&times;</span>
             </button>
         </div>
-        <form class="flex min-h-0 flex-1 flex-col" (ngSubmit)="createOrder()">
+        <form [formGroup]="orderForm" class="flex min-h-0 flex-1 flex-col" (ngSubmit)="requestCreateConfirmation()"
+            novalidate>
             <div class="relative min-h-0 flex-1 overflow-hidden">
                 <div *ngIf="loadingOrder"
                     class="absolute inset-0 z-20 flex items-center justify-center bg-white/85 backdrop-blur-[1px]"
@@ -37,22 +38,36 @@
                         </h3>
                         <div class="space-y-4">
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                                <label for="order_item" class="mb-1.5 block text-sm font-medium text-gray-700">
                                     Order Item *
                                 </label>
-                                <input type="text" name="order_item" [(ngModel)]="newOrder.order_item"
-                                    [readonly]="mode === 'view'" required
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
-                                    placeholder="Enter item name" />
+                                <input id="order_item" type="text" formControlName="order_item"
+                                    [readonly]="mode === 'view'" placeholder="Enter item name"
+                                    class="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
+                                    [class.border-red-500]="f['order_item'].touched && f['order_item'].invalid"
+                                    [class.border-gray-300]="!f['order_item'].touched || f['order_item'].valid" />
+                                <p *ngIf="f['order_item'].touched && f['order_item'].hasError('required')"
+                                    class="mt-1 text-xs text-red-600">
+                                    Order item is required.
+                                </p>
                             </div>
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                                <label for="amount" class="mb-1.5 block text-sm font-medium text-gray-700">
                                     Amount *
                                 </label>
-                                <input type="number" name="amount" [(ngModel)]="newOrder.amount" min="0.01" step="0.01"
-                                    [readonly]="mode === 'view'" required
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
-                                    placeholder="Enter amount" />
+                                <input id="amount" type="number" formControlName="amount" min="0.01" step="0.01"
+                                    [readonly]="mode === 'view'" placeholder="Enter amount"
+                                    class="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
+                                    [class.border-red-500]="f['amount'].touched && f['amount'].invalid"
+                                    [class.border-gray-300]="!f['amount'].touched || f['amount'].valid" />
+                                <p *ngIf="f['amount'].touched && f['amount'].hasError('required')"
+                                    class="mt-1 text-xs text-red-600">
+                                    Amount is required.
+                                </p>
+                                <p *ngIf="f['amount'].touched && f['amount'].hasError('min')"
+                                    class="mt-1 text-xs text-red-600">
+                                    Amount must be greater than zero.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -62,22 +77,33 @@
                         </h3>
                         <div class="space-y-4">
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                                <label for="customer_name" class="mb-1.5 block text-sm font-medium text-gray-700">
                                     Customer Name *
                                 </label>
-                                <input type="text" name="customer_name" [(ngModel)]="newOrder.customer_name"
-                                    [readonly]="mode === 'view'" required
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
-                                    placeholder="Enter customer name" />
+                                <input id="customer_name" type="text" formControlName="customer_name"
+                                    [readonly]="mode === 'view'" placeholder="Enter customer name"
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100" />
+                                <p *ngIf="f['customer_name'].touched && f['customer_name'].hasError('required')"
+                                    class="mt-1 text-xs text-red-600">
+                                    Customer name is required.
+                                </p>
                             </div>
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                                <label for="customer_mobile" class="mb-1.5 block text-sm font-medium text-gray-700">
                                     Mobile Number *
                                 </label>
-                                <input type="tel" name="customer_mobile" [(ngModel)]="newOrder.customer_mobile"
-                                    [readonly]="mode === 'view'" maxlength="10" required
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
-                                    placeholder="10-digit mobile number" />
+                                <input id="customer_mobile" type="tel" inputmode="numeric" maxlength="10"
+                                    formControlName="customer_mobile" [readonly]="mode === 'view'"
+                                    placeholder="10-digit mobile number"
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100" />
+                                <p *ngIf="f['customer_mobile'].touched && f['customer_mobile'].hasError('required')"
+                                    class="mt-1 text-xs text-red-600">
+                                    Mobile number is required.
+                                </p>
+                                <p *ngIf="f['customer_mobile'].touched && f['customer_mobile'].hasError('pattern')"
+                                    class="mt-1 text-xs text-red-600">
+                                    Enter a valid 10-digit mobile number.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -87,22 +113,30 @@
                         </h3>
                         <div class="space-y-4">
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                                <label for="pickup_address" class="mb-1.5 block text-sm font-medium text-gray-700">
                                     Pickup Address *
                                 </label>
-                                <textarea name="pickup_address" [(ngModel)]="newOrder.pickup_address" rows="3" required
-                                    [readonly]="mode === 'view'"
-                                    class="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
-                                    placeholder="Enter pickup address"></textarea>
+                                <textarea id="pickup_address" formControlName="pickup_address" rows="3"
+                                    [readonly]="mode === 'view'" placeholder="Enter pickup address"
+                                    class="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100">
+                                </textarea>
+                                <p *ngIf="f['pickup_address'].touched && f['pickup_address'].hasError('required')"
+                                    class="mt-1 text-xs text-red-600">
+                                    Pickup address is required.
+                                </p>
                             </div>
                             <div>
-                                <label class="mb-1.5 block text-sm font-medium text-gray-700">
+                                <label for="delivery_address" class="mb-1.5 block text-sm font-medium text-gray-700">
                                     Delivery Address *
                                 </label>
-                                <textarea name="delivery_address" [(ngModel)]="newOrder.delivery_address" rows="3"
-                                    [readonly]="mode === 'view'" required
-                                    class="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
-                                    placeholder="Enter delivery address"></textarea>
+                                <textarea id="delivery_address" formControlName="delivery_address" rows="3"
+                                    [readonly]="mode === 'view'" placeholder="Enter delivery address"
+                                    class="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100">
+                                </textarea>
+                                <p *ngIf="f['delivery_address'].touched && f['delivery_address'].hasError('required')"
+                                    class="mt-1 text-xs text-red-600">
+                                    Delivery address is required.
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -159,7 +193,7 @@
             <div class="flex shrink-0 justify-end gap-3 border-t border-gray-200 bg-white px-6 py-4">
                 <button type="button" [disabled]="submitting" (click)="closeDrawer()"
                     class="rounded-lg border border-gray-30 px-4 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
-                    {{mode === 'create' ? 'Cancle' : 'Close'}}
+                    {{mode === 'create' ? 'Cancel' : 'Close'}}
                 </button>
                 <button type="submit" [disabled]="submitting" *ngIf="mode === 'create'"
                     class="rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#c9183f] disabled:cursor-not-allowed disabled:opacity-50">
@@ -167,5 +201,32 @@
                 </button>
             </div>
         </form>
+        <div *ngIf="showConfirmation" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 p-4" (click)="cancelConfirmation()">
+            <div role="alertdialog" aria-modal="true" aria-labelledby="confirmation-title" aria-describedby="confirmation-description" class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl"
+                (click)="$event.stopPropagation()">
+                <div class="flex items-start gap-4">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-50">
+                        <span class="text-2xl text-[#DC1D47]">?</span>
+                    </div>
+                    <div class="flex-1">
+                        <h3 id="confirmation-title" class="text-lg font-bold text-[#163758]">
+                            Confirm Order Creation
+                        </h3>
+                        <p id="confirmation-description" class="mt-2 text-sm leading-6 text-gray-600">
+                            Are you sure you want to create this order?
+                            Please verify the order and customer details before proceeding.
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-7 flex justify-end gap-3">
+                    <button type="button" (click)="cancelConfirmation()" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50">
+                        No, Go Back
+                    </button>
+                    <button type="button" [disabled]="submitting" (click)="confirmCreateOrder()" class="rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transitionhover:bg-[#c9183f] disabled:cursor-not-allowed disabled:opacity-50">
+                        {{ submitting ? 'Creating...' : 'Yes, Create Order' }}
+                    </button>
+                </div>
+            </div>
+        </div>
     </aside>
 </div>
