@@ -163,6 +163,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
             return;
           }
           this.toastService.success(response.message || 'Rider assigned successfully.');
+          this.refreshRiderLists();
           this.loadOrders();
           this.loadAvailableRiders();
         },
@@ -329,5 +330,12 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.drawerMode = 'view';
     this.order_id = order_id;
     this.showCreateOrder = true
+  }
+
+  refreshRiderLists(): void {
+    this.availableRiders = [];
+    this.busyRiders = [];
+    this.hasLoadedAvailableRiders = false;
+    this.hasLoadedBusyRiders = false;
   }
 }
