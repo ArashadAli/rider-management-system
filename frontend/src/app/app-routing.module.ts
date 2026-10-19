@@ -1,6 +1,5 @@
 import { Component, NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
 import { RegisterComponent } from './features/auth/register/register.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
@@ -8,7 +7,6 @@ import { PageNotFoundComponent } from './not-found/not-found.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { LayoutComponent } from './layout/layout.component';
 import { ProfileComponent } from './features/profile/profile.component';
-import { SettingsComponent } from './features/settings/settings.component';
 
 const routes: Routes = [
   {
@@ -35,7 +33,7 @@ const routes: Routes = [
         children: [
           {
             path: '',
-            data: { breadcrumb: 'Orders'},
+            data: { breadcrumb: 'Orders' },
             loadComponent: () => import('./features/orders/orders.component').then(m => m.OrdersComponent)
           }
         ],
@@ -64,15 +62,15 @@ const routes: Routes = [
       },
       {
         path: 'profile',
-        loadComponent: () =>
-          import('./features/profile/profile.component')
-            .then(m => m.ProfileComponent)
-      },
-      {
-        path: 'settings',
-        loadComponent: () =>
-          import('./features/settings/settings.component')
-            .then(m => m.SettingsComponent)
+        children: [
+          {
+            path: '',
+            data: { breadcrumb: 'User Profile' },
+            loadComponent: () =>
+              import('./features/profile/profile.component')
+                .then(m => m.ProfileComponent)
+          }
+        ]
       }
     ],
   },

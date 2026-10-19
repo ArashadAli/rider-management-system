@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from config.connectDB import db
 from models.order_model import Order
 from models.rider_model import Rider
+from utils.email_mobile_validate import validate_mobile
 
 def user_dashboard(user_email):
     total_orders = db.session.query(func.count(Order.id)).scalar() or 0
@@ -215,17 +216,15 @@ def update_user_profile(user_email):
 
         user_name = data.get("name")
         user_mobile = data.get("mobile")
-
-        existUserWithMobile = User.query.filter_by(mobile = user_mobile).first()
-        if existUserWithMobile:
-            return jsonify({
-                "success": False,
-                "message": "User already exist with this mobile number"
-            }), 409
-
         user = User.query.filter_by(email = user_email).first()
 
-        print("user name : ", user.name)
+        # print("user name : ", user.name)
+
+        if not validate_mobile(user_mobile):
+            return jsonify({
+                "success": False,
+                "message": "Invalide mobile number format"
+            }), 400
 
         if user_name:
             user.name = user_name

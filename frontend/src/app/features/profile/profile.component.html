@@ -1,1 +1,221 @@
-<p>profile works!</p>
+<div class="min-h-full px-4 py-6 md:px-7">
+    <app-breadcrumb></app-breadcrumb>
+    <div class="mb-7 mt-6">
+        <h1 class="text-2xl font-bold tracking-tight text-[#163758] md:text-3xl">
+            User Profile
+        </h1>
+        <p class="mt-2 text-sm text-slate-500 md:text-base">
+            Manage your personal information and account security.
+        </p>
+    </div>
+    <div class="grid grid-cols-1 items-stretch gap-5 xl:grid-cols-2">
+        <section class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+            <div class="flex min-w-0 items-center gap-4 pb-6">
+                <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[#FDE8ED] text-3xl font-bold text-[#DC1D47]">
+                    {{ user?.name?.charAt(0)?.toUpperCase() || 'U' }}
+                </div>
+                <div class="min-w-0">
+                    <h2 class="break-words text-xl font-bold text-[#163758] md:text-2xl">
+                        {{ user?.name || 'User' }}
+                    </h2>
+                    <p class="mt-1 break-all text-sm text-slate-500">
+                        {{ user?.email || '' }}
+                    </p>
+                    <span class="mt-2 inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-[#163758]">
+                        Account Profile
+                    </span>
+                </div>
+            </div>
+            <div class="mb-6 border-t border-slate-200"></div>
+            <div class="mb-6 flex items-center gap-3">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#FDE8ED] text-[#DC1D47]">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="8" r="4"></circle>
+                        <path d="M5 21v-2a7 7 0 0 1 14 0v2"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-[#163758]">
+                        Profile Information
+                    </h3>
+                    <p class="mt-1 text-sm text-slate-500">
+                        Update your name and mobile number.
+                    </p>
+                </div>
+            </div>
+            <form #profileNgForm="ngForm" (ngSubmit)="updateProfile()">
+                <div class="mb-5">
+                    <label for="profileName" class="mb-2 block text-sm font-semibold text-[#163758]">
+                        Name <span class="text-[#DC1D47]">*</span>
+                    </label>
+                    <div class="flex min-w-0 items-center gap-3 rounded-lg border border-slate-300 px-3 focus-within:border-[#163758] focus-within:ring-2 focus-within:ring-[#163758]/10">
+                        <svg class="h-5 w-5 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="8" r="4"></circle>
+                            <path d="M5 21v-2a7 7 0 0 1 14 0v2"></path>
+                        </svg>
+                        <input id="profileName" type="text" name="name" [(ngModel)]="profileForm.name" #nameInput="ngModel" required maxlength="100" autocomplete="name" placeholder="Enter your name"
+                            class="w-full min-w-0 border-0 bg-transparent py-3 text-sm text-[#163758] outline-none focus:ring-0" />
+                    </div>
+                    <p *ngIf="nameInput.invalid && nameInput.touched" class="mt-1 text-xs text-[#DC1D47]">
+                        Please enter your name.
+                    </p>
+                </div>
+                <div class="mb-5">
+                    <label for="profileMobile" class="mb-2 block text-sm font-semibold text-[#163758]">
+                        Mobile Number <span class="text-[#DC1D47]">*</span>
+                    </label>
+                    <div class="flex min-w-0 items-center gap-3 rounded-lg border border-slate-300 px-3 focus-within:border-[#163758] focus-within:ring-2 focus-within:ring-[#163758]/10">
+                        <svg class="h-5 w-5 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.19 18a19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.91-8.67A2 2 0 0 1 3.26 1.15h3a2 2 0 0 1 2 1.72c.12.96.36 1.9.7 2.79a2 2 0 0 1-.45 2.11L7.24 9.04a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.89.34 1.83.58 2.79.7a2 2 0 0 1 1.72 1.9z">
+                            </path>
+                        </svg>
+                        <input id="profileMobile" type="tel" name="mobile" [(ngModel)]="profileForm.mobile" #mobileInput="ngModel" required maxlength="10" autocomplete="tel" placeholder="Enter mobile number"
+                            class="w-full min-w-0 border-0 bg-transparent py-3 text-sm text-[#163758] outline-none focus:ring-0" />
+                    </div>
+                    <p *ngIf="mobileInput.invalid && mobileInput.touched" class="mt-1 text-xs text-[#DC1D47]">
+                        Please enter your mobile number.
+                    </p>
+                </div>
+                <div class="mt-7 flex justify-end">
+                    <button type="submit" [disabled]="loadingProfile || profileNgForm.invalid" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#DC1D47] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#C8173E] disabled:cursor-not-allowed disabled:opacity-60">
+                        <svg *ngIf="!loadingProfile" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <path d="M17 21v-8H7v8"></path>
+                            <path d="M7 3v5h8"></path>
+                        </svg>
+                        <span *ngIf="loadingProfile" class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white">
+                        </span>
+                        {{ loadingProfile ? 'Updating...' : 'Update Profile' }}
+                    </button>
+                </div>
+            </form>
+        </section>
+        <section class="min-w-0 rounded-xl border border-slate-200 bg-white p-5 shadow-sm md:p-7">
+            <div class="mb-6 flex items-center gap-3">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[#163758]">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-[#163758]">
+                        Change Password
+                    </h3>
+                    <p class="mt-1 text-sm text-slate-500">
+                        Update your password to keep your account secure.
+                    </p>
+                </div>
+            </div>
+            <form #passwordNgForm="ngForm" (ngSubmit)="changePassword()">
+                <div class="mb-5">
+                    <label for="currentPassword" class="mb-2 block text-sm font-semibold text-[#163758]">
+                        Current Password <span class="text-[#DC1D47]">*</span>
+                    </label>
+                    <div class="flex min-w-0 items-center gap-3 rounded-lg border border-slate-300 px-3 focus-within:border-[#163758] focus-within:ring-2 focus-within:ring-[#163758]/10">
+                        <svg class="h-5 w-5 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input id="currentPassword" [type]="showCurrentPassword ? 'text' : 'password'" name="currentPassword" [(ngModel)]="passwordForm.currentPassword" required autocomplete="current-password" placeholder="Enter current password" class="w-full min-w-0 border-0 bg-transparent py-3 text-sm text-[#163758] outline-none focus:ring-0" />
+                        <button type="button" (click)="showCurrentPassword = !showCurrentPassword" [attr.aria-label]="showCurrentPassword ? 'Hide current password' : 'Show current password'" class="shrink-0 rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-[#163758]">
+                            <svg *ngIf="!showCurrentPassword" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg *ngIf="showCurrentPassword" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 3l18 18"></path>
+                                <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path>
+                                <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-4 4.7"></path>
+                                <path d="M6.6 6.6C3.6 8.4 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-5">
+                    <label for="newPassword" class="mb-2 block text-sm font-semibold text-[#163758]">
+                        New Password <span class="text-[#DC1D47]">*</span>
+                    </label>
+                    <div class="flex min-w-0 items-center gap-3 rounded-lg border border-slate-300 px-3 focus-within:border-[#163758] focus-within:ring-2 focus-within:ring-[#163758]/10">
+                        <svg class="h-5 w-5 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input id="newPassword" [type]="showNewPassword ? 'text' : 'password'" name="newPassword" [(ngModel)]="passwordForm.newPassword" #newPasswordInput="ngModel" required autocomplete="new-password" placeholder="Enter new password"
+                            class="w-full min-w-0 border-0 bg-transparent py-3 text-sm text-[#163758] outline-none focus:ring-0" />
+                        <button type="button" (click)="showNewPassword = !showNewPassword" [attr.aria-label]="showNewPassword ? 'Hide new password' : 'Show new password'"
+                            class="shrink-0 rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-[#163758]">
+                            <svg *ngIf="!showNewPassword" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg *ngIf="showNewPassword" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 3l18 18"></path>
+                                <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path>
+                                <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-4 4.7"></path>
+                                <path d="M6.6 6.6C3.6 8.4 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p *ngIf="newPasswordInput.touched && passwordForm.newPassword && passwordForm.currentPassword === passwordForm.newPassword" class="mt-1 text-xs text-[#DC1D47]">
+                        New password must differ from current password.
+                    </p>
+                </div>
+                <div class="mb-5">
+                    <label for="confirmPassword" class="mb-2 block text-sm font-semibold text-[#163758]">
+                        Confirm New Password <span class="text-[#DC1D47]">*</span>
+                    </label>
+                    <div class="flex min-w-0 items-center gap-3 rounded-lg border border-slate-300 px-3 focus-within:border-[#163758] focus-within:ring-2 focus-within:ring-[#163758]/10">
+                        <svg class="h-5 w-5 shrink-0 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input id="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'"  name="confirmPassword" [(ngModel)]="passwordForm.confirmPassword" #confirmPasswordInput="ngModel" required autocomplete="new-password" placeholder="Confirm new password"
+                            class="w-full min-w-0 border-0 bg-transparent py-3 text-sm text-[#163758] outline-none focus:ring-0" />
+                        <button type="button" (click)="showConfirmPassword = !showConfirmPassword" [attr.aria-label]="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
+                            class="shrink-0 rounded-md p-1.5 text-slate-500 hover:bg-slate-100 hover:text-[#163758]">
+                            <svg *ngIf="!showConfirmPassword" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg *ngIf="showConfirmPassword" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 3l18 18"></path>
+                                <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path>
+                                <path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-4 4.7"></path>
+                                <path d="M6.6 6.6C3.6 8.4 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p *ngIf="confirmPasswordInput.touched && passwordForm.confirmPassword && passwordForm.newPassword !== passwordForm.confirmPassword" class="mt-1 text-xs text-[#DC1D47]">
+                        New password and confirm password do not match.
+                    </p>
+                    <p *ngIf="passwordForm.confirmPassword && passwordForm.newPassword === passwordForm.confirmPassword" class="mt-1 text-xs text-green-700">
+                        Passwords match.
+                    </p>
+                </div>
+                <div class="flex items-start gap-2 rounded-lg bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+                    <svg class="mt-0.5 h-4 w-4 shrink-0 text-[#163758]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    <span>
+                        Your new password must differ from your current password, and confirmation must match.
+                    </span>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" [disabled]="loadingPassword || passwordNgForm.invalid" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#163758] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#102A43] disabled:cursor-not-allowed disabled:opacity-60">
+                        <svg *ngIf="!loadingPassword" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <span *ngIf="loadingPassword" class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white">
+                        </span>
+                        {{ loadingPassword ? 'Changing...' : 'Change Password' }}
+                    </button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
