@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from models.rider_model import Rider
+from models.order_model import Order
 from config.connectDB import db
 from utils.email_mobile_validate import validate_email, validate_mobile
 from utils.image_validator import validate_profile_image
@@ -526,7 +527,8 @@ def update_Rider(user_email, rider_id):
 
             allowed_availability = [
                 "available",
-                "unavailable"
+                "unavailable",
+                "busy"
             ]
 
             if availability not in allowed_availability:
@@ -629,8 +631,13 @@ def getAll_Available_riders(user_email):
 
 
 def get_Busy_Rider():
+
     try:
-        riders = Rider.query.filter(Rider.status == "active", Rider.availability == "busy").all()
+        assigned_rider_ids = db.session.query(Order.rider_id).filter(Order.rider_id.isnot(None)).distinct().all()
+
+        rider_ids = [rider_id[0] for rider_id in assigned_rider_ids]
+
+        riders = Rider.query.filter(Rider.status == "active", Rider.id.in_(rider_ids)).all()
 
         return jsonify({
             "success": True,

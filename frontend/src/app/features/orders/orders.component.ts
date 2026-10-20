@@ -178,6 +178,15 @@ export class OrdersComponent implements OnInit, OnDestroy {
     if ( !status || status === order.status || this.updatingStatusOrderId ) {
       return;
     }
+
+    if(status === 'cancelled') {
+      const confirm = window.confirm(`Are you sure you want to cancle order ${order.order_id}`)
+
+      if(!confirm) {
+        this.loadOrders();
+        return;
+      }
+    }
     this.updatingStatusOrderId = order.order_id;
     this.ordersService.updateOrderStatus(order.order_id, status)
       .pipe(
@@ -226,7 +235,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
     return new Date(date).toLocaleDateString('en-GB', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
     });
   }
 
@@ -242,19 +254,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
       cancelled: 'bg-red-50 text-red-700'
     };
     return classes[status] || 'bg-gray-100 text-gray-700';
-  }
-
-  formatStatus(status: string): string {
-    const labels: Record<string, string> = {
-      pending: 'Pending',
-      assigned: 'Rider Assigned',
-      accepted: 'Accepted',
-      picked_up: 'Picked Up',
-      on_the_way: 'On The Way',
-      delivered: 'Delivered',
-      cancelled: 'Cancelled'
-    };
-    return labels[status] || status.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
   }
 
   applyFilters(): void {

@@ -397,6 +397,12 @@ def update_Order_Status(order_id):
 
         order.status = status
 
+        if status.lower() in ["delivered", "cancelled"]:
+            rider = Rider.query.filter_by(id = order.rider_id).first()
+
+            if rider:
+                rider.availability = "available"
+
         db.session.commit()
 
         return jsonify({
