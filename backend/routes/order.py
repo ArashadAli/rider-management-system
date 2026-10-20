@@ -1,6 +1,6 @@
 from flask import Blueprint
 from middleware.auth_middleware import token_required
-from controllers.order_controllers import create_Order, allOrders, getOrderForPagination, assign_Rider, update_Order_Status, get_Single_Order
+from controllers.order_controllers import create_Order, allOrders, getOrderForPagination, assign_Rider, update_Order_Status, get_Single_Order, delete_Order
 
 order_bp = Blueprint("api/orders", __name__)
 
@@ -41,3 +41,8 @@ def update_order_status(user_email, order_id):
 @token_required
 def get_single_order(user_email, order_id):
     return get_Single_Order(order_id)
+
+@order_bp.route("/delete-order/<string:order_id>", methods=["DELETE"])
+@token_required
+def delete_order(user_email, order_id):
+    return delete_Order(order_id)

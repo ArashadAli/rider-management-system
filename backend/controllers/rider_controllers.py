@@ -585,6 +585,14 @@ def delete_Rider(rider_id):
                 "message": "Rider not found"
             }), 404
 
+        linked_order = Order.query.filter_by(rider_id = rider_id).first()
+
+        if linked_order:
+            return jsonify({
+                "success": False,
+                "message": "This rider is linked with orders"
+            }), 409
+
         db.session.delete(rider)
 
         db.session.commit()
@@ -596,6 +604,8 @@ def delete_Rider(rider_id):
 
     except Exception as e:
         db.session.rollback()
+
+        print("Deletion error : ", str(e))
         return jsonify({
             "success": False,
             "message": "Server error"

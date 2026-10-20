@@ -460,3 +460,35 @@ def get_Single_Order(order_id):
             "message": "Order not fetched",
             "error": str(e)
         }), 500
+
+
+def delete_Order(order_id):
+    try:
+        order = Order.query.filter_by(order_id = order_id).first()
+
+        if not order:
+            return jsonify({
+                "success": False,
+                "message": "Order not found"
+            }), 404
+
+        if order.rider_id:
+            rider = Rider.query.get(order.rider_id)
+            if rider:
+                rider.availability = "available"
+
+        db.session.delete(order)
+        db.session.commit()
+        return jsonify({
+            "success": True,
+            "message": "Order deleted successfully"
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({
+            "success": False,
+            "message": "Server error",
+            "error": str(e)
+        }), 500
+

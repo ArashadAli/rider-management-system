@@ -30,6 +30,9 @@ export class OrdersComponent implements OnInit, OnDestroy {
   showCreateOrder = false;
   order_id: string | null = null
   drawerMode : 'create' | 'view' = 'create'
+  deleteConfirmationOpen = false;
+  deletingOrderId: string | null = null
+  orderToDelete: {order_id: string} | null = null
 
   loadingRiders = false;
   assigningOrderId: string | null = null;
@@ -337,4 +340,44 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.hasLoadedAvailableRiders = false;
     this.hasLoadedBusyRiders = false;
   }
+
+  confirmDeleteOrder(order: {order_id: string}): void {
+    this.orderToDelete = order;
+    this.deleteConfirmationOpen = true;
+  }
+
+  closeDeleteConfirmation(): void {
+    if(this.deletingOrderId) return
+
+    this.deleteConfirmationOpen = false
+    this.orderToDelete = null;
+  }
+
+  deleteSelectedOrder(): void {
+    if(!this.orderToDelete || this.deletingOrderId) {
+      return
+    }
+    const orderId = this.orderToDelete.order_id;
+    this.deletingOrderId = orderId;
+    this.ordersService.deleteOrder(orderId)
+    .pipe(
+      finalize(() => {
+        this.deletingOrderId = null
+        this.closeDeleteConfirmation()
+      })
+    )
+    .subscribe({
+      next: (response) => {
+        if(response.success) {
+          this.toastService.success(response.message)
+          this.closeDeleteConfirmation();
+          this.applyFilters();
+        }
+      },
+      error: (error) => {
+        this.toastService.error(error?.error?.message || 'Failed to delete order')
+      }
+    })
+  }
+  
 }

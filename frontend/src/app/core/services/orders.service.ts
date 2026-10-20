@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { OrderResponse, AllOrdersResponse, RiderResponse, SingleOrderResponse } from '../models/order-response.model';
 import { AvailableRiderResponse, AssignRiderResponse } from '../models/rider-response.model';
+import { CommonResponse } from '../models/auth-response.model';
 
 @Injectable({
   providedIn: 'root'
@@ -69,6 +70,12 @@ export class OrdersService {
   getSingleOrder(order_id : string): Observable<SingleOrderResponse> {
     return this.apiService.get<SingleOrderResponse>(
       `/orders/single-order/${order_id}`
+    )
+  }
+
+  deleteOrder(order_id: string): Observable<CommonResponse> {
+    return this.apiService.delete<CommonResponse>(
+      `/orders/delete-order/${order_id}`
     )
   }
 
