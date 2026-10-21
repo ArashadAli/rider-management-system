@@ -12,8 +12,9 @@
             </p>
         </div>
         <button type="button" (click)="openCreateDrawer()"
-            class="rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c7193f] sm:w-auto">
-            + Create Rider
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#c7193f] focus:outline-none focus:ring-2 focus:ring-[#DC1D47]/50 focus:ring-offset-2 sm:w-auto">
+            <i-lucide name="circle-plus" [size]="18" [strokeWidth]="2"></i-lucide>
+            <span>Create Rider</span>
         </button>
     </div>
     <form [formGroup]="filterForm">
@@ -117,7 +118,7 @@
     </form>
     <div class="overflow-hidden rounded-xl bg-white shadow-sm">
         <div class="overflow-x-auto">
-            <table class="min-w-[1000px] w-full">
+            <table class="min-w-[1200px] w-full">
                 <thead class="bg-[#163758]">
                     <tr>
                         <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
@@ -131,6 +132,9 @@
                         </th>
                         <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
                             Mobile
+                        </th>
+                        <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
+                            Vehicle Type
                         </th>
                         <th class="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wide text-white">
                             Status
@@ -166,6 +170,24 @@
                             <td class="px-5 py-4 text-sm text-gray-600">
                                 {{ rider.mobile }}
                             </td>
+                            <td *ngIf="rider.vehicle_type" class="px-5 py-4">
+                                <div
+                                    class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-[#163758] transition-colors duration-200 hover:border-[#163758] hover:bg-blue-50">
+                                    <i-lucide *ngIf="rider.vehicle_type === 'bike'" name="bike"
+                                        class="h-5 w-5"></i-lucide>
+                                    <i-lucide *ngIf="rider.vehicle_type === 'car'" name="car"
+                                        class="h-5 w-5"></i-lucide>
+                                    <i-lucide *ngIf="rider.vehicle_type === 'van'" name="van"
+                                        class="h-5 w-5"></i-lucide>
+                                    <i-lucide *ngIf="rider.vehicle_type === 'scooter'" name="scooter"
+                                        class="h-5 w-5"></i-lucide>
+                                </div>
+                            </td>
+                            <td *ngIf="!rider.vehicle_type" class="px-5 py-4">
+                                <div class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-gray-400 transition-colors duration-200 hover:border-[#163758] hover:bg-blue-50 hover:text-[#163758]">
+                                    <i-lucide name="ban" class="h-5 w-5"></i-lucide>
+                                </div>
+                            </td>
                             <td class="px-5 py-4">
                                 <span *ngIf="rider.status === 'active'"
                                     class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
@@ -189,24 +211,25 @@
                             <td class="px-5 py-4 text-center">
                                 <div class="relative inline-block text-left">
                                     <!-- Three-dot button -->
-                                    <button type="button" (click)=" $event.stopPropagation(); toggleActionMenu(rider.id)"
+                                    <button type="button"
+                                        (click)=" $event.stopPropagation(); toggleActionMenu(rider.id)"
                                         [attr.aria-expanded]="openActionMenuId === rider.id" aria-label="Rider actions"
-                                        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-[#163758]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                                            <circle cx="12" cy="5" r="1.8"></circle>
-                                            <circle cx="12" cy="12" r="1.8"></circle>
-                                            <circle cx="12" cy="19" r="1.8"></circle>
-                                        </svg>
+                                        class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 hover:text-[#163758]">
+                                        <i-lucide name="ellipsis-vertical" [size]="22"></i-lucide>
                                     </button>
                                     <!-- Dropdown menu -->
-                                    <div *ngIf="openActionMenuId === rider.id" class="absolute right-0 top-full z-50 mt-2 w-40 rounded-lg border border-gray-200 bg-white py-1 text-left shadow-lg">
-                                        <button type="button" (click)="onViewRider(rider)" class="block w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                    <div *ngIf="openActionMenuId === rider.id"
+                                        class="absolute right-0 top-full z-50 mt-2 w-40 rounded-lg border border-gray-200 bg-white py-1 text-left shadow-lg">
+                                        <button type="button" (click)="onViewRider(rider)"
+                                            class="block w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
                                             View
                                         </button>
-                                        <button type="button" (click)="onEditRider(rider)" class="block w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+                                        <button type="button" (click)="onEditRider(rider)"
+                                            class="block w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
                                             Edit
                                         </button>
-                                        <button type="button" (click)="openDeleteConfirmation(rider)" class="block w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                                        <button type="button" (click)="openDeleteConfirmation(rider)"
+                                            class="block w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
                                             Delete
                                         </button>
                                     </div>
@@ -272,16 +295,11 @@
             <div class="flex items-center gap-2">
                 <button type="button" (click)="previousPage()" [disabled]="currentPage === 1"
                     class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
-                    Previous
-                </button>
-                <button *ngFor="let page of [].constructor(totalPages); let i = index" type="button"
-                    (click)="goToPage(i + 1)" [ngClass]=" currentPage === i + 1 ? 'bg-[#163758] text-white' : 'text-gray-600 hover:bg-gray-100'
-                    " class="rounded-lg px-3 py-2 text-sm font-medium">
-                    {{ i + 1 }}
+                    <i-lucide name="circle-arrow-left" [size]="22"></i-lucide>
                 </button>
                 <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages"
                     class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
-                    Next
+                    <i-lucide name="circle-arrow-right" [size]="22"></i-lucide>
                 </button>
             </div>
         </div>
@@ -298,11 +316,14 @@
     </aside>
 </div>
 
-<div *ngIf="showDeleteConfirmation" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="cancelDelete()">
-    <div role="dialog" aria-modal="true" aria-labelledby="delete-modal-title" class="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl" (click)="$event.stopPropagation()">
+<div *ngIf="showDeleteConfirmation" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4"
+    (click)="cancelDelete()">
+    <div role="dialog" aria-modal="true" aria-labelledby="delete-modal-title"
+        class="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl" (click)="$event.stopPropagation()">
         <div class="flex items-start gap-4">
             <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
-                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="23" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path d="M3 6h18"></path>
                     <path d="M8 6V4h8v2"></path>
                     <path d="m19 6-1 14H6L5 6"></path>
@@ -324,10 +345,12 @@
             </div>
         </div>
         <div class="mt-7 flex justify-end gap-3">
-            <button (click)="cancelDelete()" [disabled]="deletingRider" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+            <button (click)="cancelDelete()" [disabled]="deletingRider"
+                class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
                 Cancel
             </button>
-            <button (click)="confirmDeleteRider()" [disabled]="deletingRider" class="rounded-lg bg-[#DC1D47] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#c7193f] disabled:cursor-not-allowed disabled:opacity-60">
+            <button (click)="confirmDeleteRider()" [disabled]="deletingRider"
+                class="rounded-lg bg-[#DC1D47] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#c7193f] disabled:cursor-not-allowed disabled:opacity-60">
                 {{ deletingRider ? 'Deleting...' : 'Confirm Delete' }}
             </button>
         </div>

@@ -5,11 +5,12 @@ import { catchError, finalize } from 'rxjs/operators';
 import { OrdersService } from 'src/app/core/services/orders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
 import { EMPTY } from 'rxjs';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
     selector: 'app-order-drawer',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
     templateUrl: './order-drawer.component.html'
 })
 export class OrderDrawerComponent implements OnChanges {

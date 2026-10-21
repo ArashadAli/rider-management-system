@@ -8,6 +8,7 @@ import { takeUntil, finalize, debounceTime, distinctUntilChanged, switchMap, cat
 import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
 import { CustomToastService } from 'src/app/core/services/toast.service';
 import { RiderFormComponent } from './rider-form/rider-form.component';
+import { LucideAngularModule } from 'lucide-angular';
 
 
 @Component({
@@ -18,7 +19,8 @@ import { RiderFormComponent } from './rider-form/rider-form.component';
     FormsModule,
     ReactiveFormsModule,
     BreadcrumbComponent,
-    RiderFormComponent
+    RiderFormComponent,
+    LucideAngularModule
   ],
   templateUrl: './riders.component.html',
   styleUrls: ['./riders.component.css']
@@ -170,13 +172,6 @@ export class RidersComponent implements OnInit, OnDestroy {
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.getPaginatedRiders();
-    }
-  }
-
-  goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
       this.getPaginatedRiders();
     }
   }

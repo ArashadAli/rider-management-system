@@ -9,7 +9,7 @@
     </div>
     <button type="button" (click)="openCreateOrder()"
       class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#DC1D47] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#c9183f]">
-      <span class="text-lg">+</span>
+      <i-lucide name="circle-plus" [size]="18"></i-lucide>
       Create Order
     </button>
   </div>
@@ -210,14 +210,7 @@
                     [attr.aria-label]="'Delete order ' + order.order_id" title="Delete order"
                     class="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 p-2 text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50">
 
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M3 6h18"></path>
-                      <path d="M8 6V4h8v2"></path>
-                      <path d="m19 6-1 14H6L5 6"></path>
-                      <path d="M10 11v5"></path>
-                      <path d="M14 11v5"></path>
-                    </svg>
+                    <i-lucide name="trash-2" [size]="16"></i-lucide>
                   </button>
 
                 </div>
@@ -243,11 +236,11 @@
       <div class="flex gap-2">
         <button type="button" (click)="previousPage()" [disabled]="!hasPrevious"
           class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
-          Previous
+          <i-lucide name="circle-arrow-left" [size]="18"></i-lucide>
         </button>
         <button type="button" (click)="nextPage()" [disabled]="!hasNext"
           class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
-          Next
+          <i-lucide name="circle-arrow-right" [size]="18"></i-lucide>
         </button>
       </div>
     </div>
@@ -257,13 +250,9 @@
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" (click)="closeDeleteConfirmation()">
     <div role="dialog" aria-modal="true" aria-labelledby="delete-order-title"
       class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" (click)="$event.stopPropagation()">
-      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 6h18"></path>
-          <path d="M8 6V4h8v2"></path>
-          <path d="m19 6-1 14H6L5 6"></path>
-        </svg>
+      <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+        <i-lucide name="trash-2" [size]="22" [strokeWidth]="2" class="text-red-600">
+        </i-lucide>
       </div>
       <h3 id="delete-order-title" class="text-lg font-bold text-[#163758]">
         Delete Order?
@@ -282,7 +271,8 @@
         </button>
         <button type="button" (click)="deleteSelectedOrder()" [disabled]="!!deletingOrderId"
           class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50">
-          <span *ngIf="deletingOrderId" class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+          <span *ngIf="deletingOrderId"
+            class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
           {{ deletingOrderId ? 'Deleting...' : 'Delete Order' }}
         </button>
       </div>

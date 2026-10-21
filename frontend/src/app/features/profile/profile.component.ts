@@ -6,13 +6,12 @@ import { takeUntil } from 'rxjs/operators';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
 import { CustomToastService } from 'src/app/core/services/toast.service';
-
 import { User } from 'src/app/core/models/auth-response.model';
-
+import { LucideAngularModule } from 'lucide-angular';
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, BreadcrumbComponent],
+  imports: [CommonModule, FormsModule, BreadcrumbComponent, LucideAngularModule],
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css']
 })

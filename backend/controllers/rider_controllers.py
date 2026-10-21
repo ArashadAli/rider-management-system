@@ -23,12 +23,7 @@ def create_Rider(user_email):
 
         profile_image = request.files.get("profile_image")
 
-
-        # print("name : ", name)
-        # print("email : ", email)
-        # print("mobile : ", mobile)
-
-        print("create request : ", request.form.to_dict())
+        # print("create request : ", request.form.to_dict())
 
         if not name or not email or not mobile:
             return jsonify({
@@ -273,7 +268,8 @@ def paginate_Riders(user_email):
                 "email": rider.email,
                 "mobile": rider.mobile,
                 "status": rider.status,
-                "availability": rider.availability
+                "availability": rider.availability,
+                "vehicle_type": rider.vehicle_type
             })
 
         return jsonify({

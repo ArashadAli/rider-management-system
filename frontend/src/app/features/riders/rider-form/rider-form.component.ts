@@ -5,14 +5,15 @@ import { Subject, of } from 'rxjs';
 import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { RidersService } from 'src/app/core/services/riders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
-
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-rider-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    LucideAngularModule
   ],
   templateUrl: './rider-form.component.html',
   styleUrls: ['./rider-form.component.css']

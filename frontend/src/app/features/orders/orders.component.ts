@@ -11,6 +11,7 @@ import { Order } from 'src/app/core/models/order-response.model';
 import { AvailableRider } from 'src/app/core/models/rider-response.model';
 import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
 import { OrderDrawerComponent } from './orders-drawer/order-drawer.component';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-orders',
@@ -19,7 +20,8 @@ import { OrderDrawerComponent } from './orders-drawer/order-drawer.component';
     CommonModule,
     FormsModule,
     BreadcrumbComponent,
-    OrderDrawerComponent
+    OrderDrawerComponent,
+    LucideAngularModule
   ],
   templateUrl: './orders.component.html'
 })

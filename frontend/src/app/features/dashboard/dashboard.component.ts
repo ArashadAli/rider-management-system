@@ -5,11 +5,12 @@ import { DashboardService } from 'src/app/core/services/dashboard.service';
 import { Subject } from 'rxjs';
 import { takeUntil, finalize, retry } from 'rxjs/operators';
 import { DashboardData, DashboardOrder, DashboardRider } from 'src/app/core/models/dashboard-response.model';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit, OnDestroy {

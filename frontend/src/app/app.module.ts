@@ -15,6 +15,23 @@ import { GlobalLoaderComponent } from './shared/components/global-loader/global-
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
+import { LucideAngularModule, LayoutDashboard, ShoppingCartIcon, Truck, UserRoundCog, LogOut, CirclePlus, Trash2, CircleArrowRight, CircleArrowLeft, Package, Motorbike,
+  RotateCw,
+  PackageCheck,
+  CircleX,
+  EllipsisVertical,
+  User,
+  Phone,
+  Save,
+  Lock,
+  Eye,
+  EyeClosed,
+  Bike,
+  Scooter,
+  Car,
+  Van,
+  Ban
+} from 'lucide-angular';
 
 
 @NgModule({
@@ -41,6 +58,34 @@ import { ToastrModule } from 'ngx-toastr';
       progressBar: true,
       closeButton: true,
       preventDuplicates: true
+    }),
+    LucideAngularModule.pick({
+      LayoutDashboard,
+      ShoppingCartIcon,
+      Truck,
+      UserRoundCog,
+      LogOut,
+      CirclePlus,
+      Trash2,
+      CircleArrowLeft,
+      CircleArrowRight,
+      Package,
+      Motorbike,
+      RotateCw,
+      PackageCheck,
+      CircleX,
+      EllipsisVertical,
+      User,
+      Phone,
+      Save,
+      Lock,
+      Eye,
+      EyeClosed,
+      Bike,
+      Scooter,
+      Car,
+      Van,
+      Ban
     })
   ],
 
