@@ -176,6 +176,20 @@ export class RidersComponent implements OnInit, OnDestroy {
     }
   }
 
+  firstPage(): void {
+    if(this.currentPage > 1) {
+      this.currentPage = 1;
+      this.getPaginatedRiders()
+    }
+  }
+
+  lastPage(): void {
+    if(this.currentPage < this.totalPages) {
+      this.currentPage = this.totalPages;
+      this.getPaginatedRiders()
+    }
+  }
+
   onPageSizeChange(): void {
     this.currentPage = 1;
     this.getPaginatedRiders();

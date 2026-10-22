@@ -1,4 +1,4 @@
-<div class="min-h-full p-4 md:p-6">
+<div class="min-h-full p-4 md:p-0">
     <div class="mb-3">
         <app-breadcrumb></app-breadcrumb>
     </div>
@@ -171,8 +171,7 @@
                                 {{ rider.mobile }}
                             </td>
                             <td *ngIf="rider.vehicle_type" class="px-5 py-4">
-                                <div
-                                    class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-[#163758] transition-colors duration-200 hover:border-[#163758] hover:bg-blue-50">
+                                <div class="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-[#163758] transition-colors duration-200 hover:border-[#163758] hover:bg-blue-50">
                                     <i-lucide *ngIf="rider.vehicle_type === 'bike'" name="bike"
                                         class="h-5 w-5"></i-lucide>
                                     <i-lucide *ngIf="rider.vehicle_type === 'car'" name="car"
@@ -293,6 +292,10 @@
                 </span>
             </p>
             <div class="flex items-center gap-2">
+                <button type="button" (click)="firstPage()" [disabled]="currentPage === 1"
+                    class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+                    first
+                </button>
                 <button type="button" (click)="previousPage()" [disabled]="currentPage === 1"
                     class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
                     <i-lucide name="circle-arrow-left" [size]="22"></i-lucide>
@@ -300,6 +303,10 @@
                 <button type="button" (click)="nextPage()" [disabled]="currentPage === totalPages"
                     class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
                     <i-lucide name="circle-arrow-right" [size]="22"></i-lucide>
+                </button>
+                <button type="button" (click)="lastPage()" [disabled]="currentPage === totalPages"
+                    class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+                    last
                 </button>
             </div>
         </div>

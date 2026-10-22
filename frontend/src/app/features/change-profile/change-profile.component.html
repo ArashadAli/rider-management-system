@@ -1,0 +1,54 @@
+<div class="space-y-6">
+    <app-breadcrumb></app-breadcrumb>
+    <div>
+        <h1 class="text-2xl font-bold text-[#163758]">
+            Change Profile
+        </h1>
+        <p class="mt-1 text-sm text-gray-500">
+            Update your personal information.
+        </p>
+    </div>
+    <div class="mx-auto w-full max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div class="flex items-center gap-4 border-b border-gray-100 bg-gray-50/70 p-5 sm:p-6">
+            <div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-[#DC1D47] text-xl font-semibold text-white">
+                {{ profileForm.name.charAt(0).toUpperCase() || 'U' }}
+            </div>
+            <div class="min-w-0">
+                <h2 class="truncate text-lg font-semibold text-[#163758]">
+                    {{ profileForm.name || 'Your Profile' }}
+                </h2>
+                <p class="text-sm text-gray-500">
+                    Administrator
+                </p>
+            </div>
+        </div>
+        <form #profileNgForm="ngForm" (ngSubmit)="updateProfile()" class="space-y-5 p-5 sm:p-7">
+            <div>
+                <label for="profileName" class="mb-2 block text-sm font-medium text-[#163758]">
+                    Full Name
+                </label>
+                <input id="profileName" type="text" name="name" [(ngModel)]="profileForm.name" required maxlength="100" autocomplete="name" placeholder="Enter your full name" class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-[#163758] focus:ring-2focus:ring-[#163758]/10" />
+            </div>
+            <div>
+                <label for="profileMobile" class="mb-2 block text-sm font-medium text-[#163758]">
+                    Mobile Number
+                </label>
+                <input id="profileMobile" type="tel" name="mobile" [(ngModel)]="profileForm.mobile" required autocomplete="tel" placeholder="Enter your mobile number" class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10" />
+            </div>
+            <div class="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
+                <button type="button" (click)="profileForm.name = user?.name || ''; profileForm.mobile = user?.mobile || ''" [disabled]="loadingProfile" class="rounded-xl border border-gray-300 px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:opacity-50">
+                    Reset
+                </button>
+                <button type="submit" [disabled]="loadingProfile || !profileNgForm.valid" class="inline-flex items-center justify-center gap-2
+                 rounded-xl bg-[#DC1D47] px-5 py-3
+                 text-sm font-semibold text-white transition
+                 hover:bg-[#bd173b] disabled:cursor-not-allowed
+                 disabled:opacity-60">
+                    <i-lucide *ngIf="loadingProfile" name="loader-circle" class="h-4 w-4 animate-spin">
+                    </i-lucide>
+                    {{ loadingProfile ? 'Saving...' : 'Save Changes' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

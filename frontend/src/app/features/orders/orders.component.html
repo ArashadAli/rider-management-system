@@ -1,4 +1,4 @@
-<div class="min-h-full bg-[#f6f8fb] p-4 text-[#163758] md:p-7">
+<div class="min-h-full bg-[#f6f8fb] p-4 text-[#163758] md:p-0 sm:p-0">
   <app-breadcrumb></app-breadcrumb>
   <div class="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
     <div>
@@ -86,13 +86,6 @@
           {{ totalOrders }} total orders
         </p>
       </div>
-      <select [(ngModel)]="pageSize" (change)="changePageSize()"
-        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#DC1D47]">
-        <option [ngValue]="5">5 per page</option>
-        <option [ngValue]="10">10 per page</option>
-        <option [ngValue]="25">25 per page</option>
-        <option [ngValue]="50">50 per page</option>
-      </select>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full min-w-[1100px] text-left">
@@ -230,17 +223,41 @@
       </table>
     </div>
     <div class="flex flex-col justify-between gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center">
+      <select [(ngModel)]="pageSize" (change)="changePageSize()"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#DC1D47]">
+        <option [ngValue]="5">5 per page</option>
+        <option [ngValue]="10">10 per page</option>
+        <option [ngValue]="25">25 per page</option>
+        <option [ngValue]="50">50 per page</option>
+      </select>
       <p class="text-xs text-gray-500">
         Page {{ currentPage }} of {{ totalPages || 1 }}
       </p>
-      <div class="flex gap-2">
-        <button type="button" (click)="previousPage()" [disabled]="!hasPrevious"
-          class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
-          <i-lucide name="circle-arrow-left" [size]="18"></i-lucide>
+      <div class="flex items-center justify-center gap-2">
+        <button type="button" (click)="firstPage()" [disabled]="currentPage === 1 || loadingOrders" class="rounded-lg border border-gray-200 px-3 py-2
+           text-sm font-medium text-[#163758]
+           transition hover:bg-gray-100
+           disabled:cursor-not-allowed disabled:opacity-40">
+          First
         </button>
-        <button type="button" (click)="nextPage()" [disabled]="!hasNext"
-          class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
-          <i-lucide name="circle-arrow-right" [size]="18"></i-lucide>
+        <button type="button" (click)="previousPage()" [disabled]="!hasPrevious || loadingOrders" class="rounded-lg border border-gray-200 px-3 py-2
+           text-sm font-medium text-[#163758]
+           transition hover:bg-gray-100
+           disabled:cursor-not-allowed disabled:opacity-40">
+          <i-lucide name="circle-arrow-left"></i-lucide>
+        </button>
+        <button type="button" (click)="nextPage()" [disabled]="!hasNext || loadingOrders" class="rounded-lg border border-gray-200 px-3 py-2
+           text-sm font-medium text-[#163758]
+           transition hover:bg-gray-100
+           disabled:cursor-not-allowed disabled:opacity-40">
+          <i-lucide name="circle-arrow-right"></i-lucide>
+        </button>
+        <button type="button" (click)="lastPage()"
+          [disabled]="currentPage >= totalPages || totalPages === 0 || loadingOrders" class="rounded-lg border border-gray-200 px-3 py-2
+           text-sm font-medium text-[#163758]
+           transition hover:bg-gray-100
+           disabled:cursor-not-allowed disabled:opacity-40">
+          Last
         </button>
       </div>
     </div>

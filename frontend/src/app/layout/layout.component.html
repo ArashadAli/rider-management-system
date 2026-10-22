@@ -1,24 +1,17 @@
 <div class="min-h-screen bg-[#f5f7fa]">
-
   <app-header
     (menuToggle)="toggleSidebar()">
   </app-header>
-
   <app-sidebar
     [sidebarOpen]="sidebarOpen"
+    [sidebarExpanded]="sidebarExpanded"
     (closeSidebar)="closeSidebar()">
   </app-sidebar>
-
-  <main class="min-h-screen pt-[70px] md:ml-[240px]">
-
+  <main class="min-h-screen pt-[80px] transition-[margin] duration-300 ease-in-out"
+    [ngClass]="sidebarExpanded ? 'lg:ml-[240px]' : 'lg:ml-[64px]'">
     <div class="p-4 md:p-6 lg:p-7">
-
       <app-global-loader></app-global-loader>
-
       <router-outlet></router-outlet>
-
     </div>
-
   </main>
-
 </div>

@@ -18,13 +18,14 @@ import { LucideAngularModule } from 'lucide-angular';
 export class SidebarComponent {
 
   @Input() sidebarOpen = false;
+  @Input() sidebarExpanded = false;
 
   @Output() closeSidebar = new EventEmitter<void>();
 
   constructor(private authService: AuthService, private router: Router) { }
 
   closeOnMobile(): void {
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth < 1024) {
       this.closeSidebar.emit();
     }
   }

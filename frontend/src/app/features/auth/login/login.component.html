@@ -1,52 +1,48 @@
-<div class="login-container">
-  <div class="login-card">
-    <div class="login-header">
-      <h2>Welcome Back</h2>
-      <p>Login to your account</p>
+
+<div class="flex min-h-screen items-center justify-center bg-gray-100 p-5">
+  <div class="w-full max-w-[420px] rounded-xl bg-white p-6 shadow-lg sm:p-8">
+    <div class="mb-7 text-center">
+      <h2 class="text-2xl font-bold text-[#163758]">Welcome Back</h2>
+      <p class="mt-1 text-sm text-gray-500">Login to your account</p>
     </div>
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="email">
-          Email
-        </label>
-        <input id="email" type="email" formControlName="email" placeholder="Enter your email" />
-        <small class="error" *ngIf="email?.touched && email?.hasError('required')">
-          Email is required
-        </small>
-        <small class="error" *ngIf="email?.touched && email?.hasError('email')">
-          Please enter a valid email
-        </small>
-      </div>
-      <div class="form-group">
-        <label for="password">
-          Password
-        </label>
-        <div class="password-wrapper">
-          <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter your password" />
-          <button type="button" class="password-toggle" (click)="togglePassword()">
-            {{ showPassword ? 'Hide' : 'Show' }}
-          </button>
+      <fieldset [disabled]="isLoading" class="min-w-0 space-y-5 disabled:cursor-not-allowed">
+        <div>
+          <label for="email" class="mb-1.5 block text-sm font-medium text-[#163758]">Email</label>
+          <input id="email" type="email" formControlName="email" placeholder="Enter your email"
+            class="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500" />
+          <small *ngIf="email?.touched && email?.hasError('required')" class="mt-1 block text-xs text-[#dc1d47]">Email is required</small>
+          <small *ngIf="email?.touched && email?.hasError('email')" class="mt-1 block text-xs text-[#dc1d47]">Please enter a valid email</small>
         </div>
-        <small class="error" *ngIf="password?.touched && password?.hasError('required')">
-          Password is required
-        </small>
-      </div>
-      <div class="remember-me">
-          <input type="checkbox" formControlName="rememberMe" />
+        <div>
+          <label for="password" class="mb-1.5 block text-sm font-medium text-[#163758]">Password</label>
+          <div class="relative">
+            <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter your password"
+              class="w-full rounded-lg border border-gray-300 px-3 py-3 pr-12 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500" />
+            <button type="button" (click)="togglePassword()" [disabled]="isLoading" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+              class="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded p-1 text-[#163758] hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50">
+              <i-lucide [name]="showPassword ? 'eye-closed' : 'eye'" [size]="20"></i-lucide>
+            </button>
+          </div>
+          <small *ngIf="password?.touched && password?.hasError('required')" class="mt-1 block text-xs text-[#dc1d47]">Password is required</small>
+        </div>
+        <label class="flex w-fit items-center gap-2 text-sm text-gray-600" [class.cursor-not-allowed]="isLoading" [class.cursor-pointer]="!isLoading">
+          <input type="checkbox" formControlName="rememberMe" class="h-4 w-4 accent-[#163758] disabled:cursor-not-allowed" />
           <span>Remember Me</span>
-      </div>
-      <div class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </div>
-      <button type="submit" [disabled]="isLoading">
-        {{ isLoading ? 'Logging in...' : 'Login' }}
-      </button>
+        </label>
+        <div *ngIf="errorMessage" role="alert" class="rounded-lg bg-rose-50 p-3 text-sm text-[#dc1d47]">
+          {{ errorMessage }}
+        </div>
+        <button type="submit" [disabled]="isLoading"
+          class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#dc1d47] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#bd183b] disabled:cursor-not-allowed disabled:opacity-60">
+          <i-lucide *ngIf="isLoading" name="loader-circle" [size]="18" class="animate-spin"></i-lucide>
+          {{ isLoading ? 'Logging in...' : 'Login' }}
+        </button>
+      </fieldset>
     </form>
-    <div class="register-link">
-      <span>Don't have an account?</span>
-      <a routerLink="/register">
-        Register
-      </a>
+    <div class="mt-6 text-center text-sm">
+      <span class="text-gray-500">Don't have an account?</span>
+      <a routerLink="/register" [class.pointer-events-none]="isLoading" [class.opacity-50]="isLoading" class="ml-1 font-medium text-[#163758] hover:underline">Register</a>
     </div>
   </div>
 </div>

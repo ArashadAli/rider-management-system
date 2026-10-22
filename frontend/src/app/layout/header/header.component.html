@@ -1,44 +1,59 @@
-<header
-  class="fixed top-0 left-0 right-0 z-50 h-[70px] bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-7">
 
-  <div class="flex items-center gap-3">
-
+<header class="fixed top-0 left-0 right-0 z-50 h-[80px] bg-white border-b border-gray-200 flex items-center justify-between px-3 md:px-4">
+  <div class="flex items-centre gap-6 min-w-0">
     <button
       type="button"
       (click)="toggleSidebar()"
-      class="md:hidden text-2xl font-semibold text-[#163758]">
-      ☰
+      class="flex-shrink-0 flex items-center justify-center w-9 h-9 rounded-lg text-[#163758] hover:bg-gray-100 transition-colors" aria-label="Toggle sidebar">
+      <i-lucide name="menu" class="w-6 h-6"></i-lucide>
     </button>
-
-    <h2 class="text-xl md:text-2xl font-bold text-[#163758]">
-      Jeebly
-    </h2>
+    <img src="/assets/Jeebly logo.png" alt="Jeebly Logo" class="block w-[120px] sm:w-[135px] md:w-[150px] h-auto max-h-[55px] object-contain object-left flex-shrink-0 m-0 p-0" />
 
   </div>
-
-  <div class="flex items-center gap-3 md:gap-5">
-
-    <div class="flex items-center gap-2.5">
-
-      <div *ngIf="user$ | async as user"
-        class="w-10 h-10 rounded-full bg-[#DC1D47] text-white flex items-center justify-center text-lg font-semibold">
-        {{ user.name.charAt(0).toUpperCase() }}
+  <div class="flex items-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0">
+    <ng-container *ngIf="user$ | async as user">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#DC1D47] text-white flex items-center justify-center text-base sm:text-lg font-semibold flex-shrink-0">
+          {{ user.name.charAt(0).toUpperCase() || 'U' }}
+        </div>
+        <div class="hidden sm:flex flex-col gap-0.5 min-w-0">
+          <span class="text-sm font-semibold text-[#163758] truncate max-w-[180px]">
+            {{ user.name }}
+          </span>
+          <span class="text-xs text-gray-500">
+            Administrator
+          </span>
+        </div>
       </div>
-
-      <div class="hidden md:flex flex-col gap-0.5" *ngIf="user$ | async as user">
-
-        <span class="text-sm font-semibold text-[#163758]">
-          {{ user.name }}
-        </span>
-
-        <span class="text-xs text-gray-500">
-          Administrator
-        </span>
-
+    </ng-container>
+    <div class="relative">
+      <button
+        type="button"
+        (click)="toggleDropdown()"
+        class="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-lg text-[#163758] hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-[#163758]/20"
+        [attr.aria-expanded]="isDropdownOpen"
+        aria-label="User menu">
+        <i-lucide name="ellipsis-vertical" class="w-5 h-5 sm:w-6 sm:h-6">
+        </i-lucide>
+      </button>
+      <div *ngIf="isDropdownOpen"
+        class="absolute right-0 top-full mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white border border-gray-200 rounded-xl shadow-xl py-2 z-[60]">
+        <button type="button" (click)="onMenuAction('profile')"
+          class="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#163758] hover:bg-gray-50 transition-colors">
+          <i-lucide name="user" class="w-5 h-5 flex-shrink-0"></i-lucide>
+          <span>Change Profile</span>
+        </button>
+        <button type="button" (click)="onMenuAction('password')"
+          class="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#163758] hover:bg-gray-50 transition-colors">
+          <i-lucide name="lock" class="w-5 h-5 flex-shrink-0"></i-lucide>
+          <span>Change Password</span>
+        </button>
+        <div class="border-t border-gray-200 my-1.5"></div>
+        <button type="button" (click)="onMenuAction('logout')" class="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#DC1D47] hover:bg-red-50 transition-colors">
+          <i-lucide name="log-out" class="w-5 h-5 flex-shrink-0"></i-lucide>
+          <span>Logout</span>
+        </button>
       </div>
-
     </div>
-
   </div>
-
 </header>

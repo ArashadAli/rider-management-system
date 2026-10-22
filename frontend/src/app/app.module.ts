@@ -30,7 +30,10 @@ import { LucideAngularModule, LayoutDashboard, ShoppingCartIcon, Truck, UserRoun
   Scooter,
   Car,
   Van,
-  Ban
+  Ban,
+  Menu,
+  ShieldCheck,
+  LoaderCircle
 } from 'lucide-angular';
 
 
@@ -85,7 +88,10 @@ import { LucideAngularModule, LayoutDashboard, ShoppingCartIcon, Truck, UserRoun
       Scooter,
       Car,
       Van,
-      Ban
+      Ban,
+      Menu,
+      ShieldCheck,
+      LoaderCircle
     })
   ],
 

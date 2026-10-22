@@ -7,6 +7,8 @@ import { PageNotFoundComponent } from './not-found/not-found.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { LayoutComponent } from './layout/layout.component';
 import { ProfileComponent } from './features/profile/profile.component';
+import { ChangePasswordComponent } from './features/change-password/change-password.component';
+import { ChangeProfileComponent } from './features/change-profile/change-profile.component';
 
 const routes: Routes = [
   {
@@ -71,7 +73,32 @@ const routes: Routes = [
                 .then(m => m.ProfileComponent)
           }
         ]
+      },
+      {
+        path: 'settings/profile',
+        children: [
+          {
+            path:'',
+            data: { breadcrumb: 'profile-settings'},
+            loadComponent: () => 
+              import('./features/change-profile/change-profile.component')
+                .then(m => m.ChangeProfileComponent)
+          }
+        ]
+      },
+      {
+        path: 'settings/change-password',
+        children: [
+          {
+            path:'',
+            data: { breadcrumb: 'password-settings'},
+            loadComponent: () => 
+              import('./features/change-password/change-password.component')
+                .then(m => m.ChangePasswordComponent)
+          }
+        ]
       }
+
     ],
   },
   {

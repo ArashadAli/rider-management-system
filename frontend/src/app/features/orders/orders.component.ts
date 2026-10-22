@@ -302,6 +302,20 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  firstPage(): void {
+    if(this.currentPage > 1) {
+      this.currentPage = 1;
+      this.loadOrders();
+    }
+  }
+
+  lastPage(): void {
+    if(this.currentPage < this.totalPages) {
+      this.currentPage = this.totalPages;
+      this.loadOrders();
+    }
+  }
+
   loadBusyRiders(): void {
     if (this.loadingBusyRiders || this.hasLoadedBusyRiders) {
       return;

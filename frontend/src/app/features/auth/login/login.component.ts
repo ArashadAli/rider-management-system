@@ -33,20 +33,20 @@ export class LoginComponent {
   onSubmit(): void {
     this.successMessage = '';
     this.errorMessage = '';
+    if(this.isLoading) return
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
     }
-
     this.isLoading = true;
+    this.loginForm.disable();
     const credentials = {
       email: this.loginForm.value.email,
       password: this.loginForm.value.password
     };
 
     this.authService.login(credentials).subscribe({
-      next: (response) => { 
-        this.isLoading = false;  
+      next: (response) => {   
         this.authService.getCsrfToken().subscribe({
           next: (tokenResponse) => {
             if (tokenResponse.success) {
@@ -58,11 +58,16 @@ export class LoginComponent {
             this.toastService.success(response.message)
             this.authService.setUser(response.user)
             this.router.navigate(['/dashboard'])
+          } else {
+            this.isLoading = false;
+            this.loginForm.enable();
+            this.errorMessage = response.message || 'Login failed. Please try again';
           }
       },
 
       error: (error) => {
         this.isLoading = false;
+        this.loginForm.enable()
         this.authService.setUser(null)
         this.errorMessage = error?.error?.message || 'Invalid email or password.';
       }
