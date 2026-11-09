@@ -6,6 +6,7 @@ import { catchError, finalize, takeUntil } from 'rxjs/operators';
 import { RidersService } from 'src/app/core/services/riders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
 import { LucideAngularModule } from 'lucide-angular';
+import { ImageUploadComponent } from 'src/app/shared/components/image-upload/image-upload.component';
 
 @Component({
   selector: 'app-rider-form',
@@ -13,7 +14,8 @@ import { LucideAngularModule } from 'lucide-angular';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    LucideAngularModule
+    LucideAngularModule,
+    ImageUploadComponent
   ],
   templateUrl: './rider-form.component.html',
   styleUrls: ['./rider-form.component.css']
@@ -28,7 +30,6 @@ export class RiderFormComponent
   riderForm!: FormGroup;
   loading = false;
   selectedImage: File | null = null;
-  imagePreview: string | null = null;
   existingImageUrl: string | null = null;
   private destroy$ = new Subject<void>();
 
@@ -58,8 +59,7 @@ export class RiderFormComponent
       vehicle_type: ['', Validators.required],
       vehicle_number: ['', Validators.required],
       status: ['active', Validators.required],
-      availability: ['available', Validators.required],
-      profile_image: [null]
+      availability: ['available', Validators.required]
     });
   }
 
@@ -98,23 +98,8 @@ export class RiderFormComponent
       });
   }
 
-  onImageSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) {
-      return;
-    }
-    const file = input.files[0];
+  onImageSelected(file: File | null): void {
     this.selectedImage = file;
-    const reader = new FileReader();
-    reader.onload = () => {
-      this.imagePreview = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  removeImage(): void {
-    this.selectedImage = null;
-    this.imagePreview = null;
   }
 
   isInvalid(controlName: string): boolean {
@@ -187,9 +172,6 @@ export class RiderFormComponent
             this.saved.emit();
             this.close.emit();
           }
-        },
-        error: error => {
-          this.toastService.error(error?.error?.message || 'Failed to create rider');
         }
       });
   }
@@ -211,9 +193,6 @@ export class RiderFormComponent
               this.saved.emit();
               this.close.emit();
             }
-          },
-          error: error => {
-            this.toastService.error(error?.error?.message || 'Failed to update rider');
           }
         });
   }

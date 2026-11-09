@@ -29,28 +29,9 @@
                     <label class="mb-2 block text-sm font-medium text-gray-700">
                         Profile Image
                     </label>
-                    <div
-                        class="flex flex-col items-center gap-4 rounded-xl border border-dashed border-gray-300 p-5 sm:flex-row">
-                        <div
-                            class="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-100">
-                            <img *ngIf="imagePreview" [src]="imagePreview" alt="Preview"
-                                class="h-full w-full object-cover" />
-
-                            <img *ngIf="!imagePreview && existingImageUrl" [src]="existingImageUrl" alt="Rider"
-                                class="h-full w-full object-cover" />
-                            <span *ngIf="!imagePreview && !existingImageUrl" class="text-2xl font-bold text-gray-400">
-                                {{ riderForm.get('name')?.value?.charAt(0) || '?' }}
-                            </span>
-                        </div>
-                        <div *ngIf="mode !== 'view'" class="w-full">
-                            <input type="file" accept="image/jpeg,image/png" (change)="onImageSelected($event)"
-                                formControlName="profile_image"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-[#163758] file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-[#102b45]" />
-                            <p class="mt-2 text-xs text-gray-400">
-                                JPG, PNG or JPEG
-                            </p>
-                        </div>
-                    </div>
+                    <app-image-upload [previewUrl]="existingImageUrl" [disabled]="mode === 'view' || loading"
+                        [maxSizeMB]="5" (fileSelected)="onImageSelected($event)">
+                    </app-image-upload>
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700">

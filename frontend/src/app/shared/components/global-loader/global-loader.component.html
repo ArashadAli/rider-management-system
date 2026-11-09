@@ -1,5 +1,12 @@
-<div class="loader-overlay" *ngIf="loading$ | async">
+<div
+  *ngIf="loading$ | async"
+  class="absolute inset-0 z-[1000] flex h-full w-full items-center justify-center bg-white/85">
 
-  <div class="spinner"></div>
+  <i-lucide
+    name="loader-circle"
+    [size]="45"
+    [strokeWidth]="3"
+    class="animate-spin text-[#163758]">
+  </i-lucide>
 
 </div>

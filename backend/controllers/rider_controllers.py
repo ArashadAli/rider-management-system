@@ -1,102 +1,40 @@
 from flask import request, jsonify
+from sqlalchemy import or_
 from models.rider_model import Rider
 from models.order_model import Order
 from config.connectDB import db
-from utils.email_mobile_validate import validate_email, validate_mobile
 from utils.image_validator import validate_profile_image
-
 import cloudinary.uploader
+from schemas.base import get_validated_data, get_validated_query
 
-
-def create_Rider(user_email):
-
+def create_Rider(user_email, validated_data=None):
     try:
+        data = validated_data or get_validated_data()
+        if not data:
+            data = request.form.to_dict() if request.form else {}
 
-        name = request.form.get("name")
-        email = request.form.get("email")
-        mobile = request.form.get("mobile")
-        vehicle_type = request.form.get("vehicle_type")
-        vehicle_number = request.form.get("vehicle_number")
+        name = data.get("name")
+        email = data.get("email")
+        mobile = data.get("mobile")
+        vehicle_type = data.get("vehicle_type")
+        vehicle_number = data.get("vehicle_number")
+        status = data.get("status") or "active"
+        availability = data.get("availability") or "available"
 
-        status = request.form.get("status") or "active"
-        availability = request.form.get("availability") or "available"
+        # Consolidated single uniqueness check for email and mobile
+        conflict = Rider.query.filter(or_(Rider.email == email, Rider.mobile == mobile)).first()
+        if conflict:
+            msg = "Rider with this email already exists" if conflict.email == email else "Rider with this mobile number already exists"
+            return jsonify({
+                "success": False,
+                "message": msg
+            }), 409
 
         profile_image = request.files.get("profile_image")
-
-        # print("create request : ", request.form.to_dict())
-
-        if not name or not email or not mobile:
-            return jsonify({
-                "success": False,
-                "message": "Name, email and mobile are required"
-            }), 400
-
-        if not vehicle_type:
-            return jsonify({
-                "success": False,
-                "message": "Vehicle type is required"
-            }), 400
-
-        if not vehicle_number:
-            return jsonify({
-                "success": False,
-                "message": "Vehicle number is required"
-            }), 400
-
-        if not validate_email(email):
-            return jsonify({
-                "success": False,
-                "message": "Invalid email format"
-            }), 400
-
-        if not validate_mobile(mobile):
-            return jsonify({
-                "success": False,
-                "message": "Invalid mobile format"
-            }), 400
-
-        allowed_status = ["active", "inactive"]
-
-        if status not in allowed_status:
-            return jsonify({
-                "success": False,
-                "message": "Invalid status"
-            }), 400
-
-        allowed_availability = ["available", "unavailable"]
-
-        if availability not in allowed_availability:
-            return jsonify({
-                "success": False,
-                "message": "Invalid availability"
-            }), 400
-
-        existing_email = Rider.query.filter_by(
-            email=email
-        ).first()
-
-        if existing_email:
-            return jsonify({
-                "success": False,
-                "message": "Rider with this email already exists"
-            }), 409
-
-        existing_mobile = Rider.query.filter_by(
-            mobile=mobile
-        ).first()
-
-        if existing_mobile:
-            return jsonify({
-                "success": False,
-                "message": "Rider with this mobile number already exists"
-            }), 409
-
         profile_image_url = None
 
         if profile_image:
-
             is_valid, error_message = validate_profile_image(profile_image)
-
             if not is_valid:
                 return jsonify({
                     "success": False,
@@ -109,7 +47,6 @@ def create_Rider(user_email):
                 resource_type="image",
                 allowed_formats=["jpg", "jpeg", "png"]
             )
-
             profile_image_url = result.get("secure_url")
 
         rider = Rider(
@@ -124,11 +61,7 @@ def create_Rider(user_email):
         )
 
         db.session.add(rider)
-
         db.session.commit()
-
-
-        print("New rider created:", rider.id)
 
         return jsonify({
             "success": True,
@@ -144,80 +77,74 @@ def create_Rider(user_email):
                     "status": rider.status,
                     "availability": rider.availability,
                     "profile_image_url": rider.profile_image_url,
-                    "created_at": rider.created_at.isoformat(),
-                    "updated_at": rider.updated_at.isoformat()
+                    "created_at": rider.created_at.isoformat() if rider.created_at else None,
+                    "updated_at": rider.updated_at.isoformat() if rider.updated_at else None
                 }
             }
         }), 201
 
     except Exception as e:
-
         db.session.rollback()
-
         return jsonify({
             "success": False,
             "message": "Failed to create rider",
             "error": str(e)
         }), 500
 
+
 def allRiders(user_email):
+    try:
+        riders = Rider.query.with_entities(
+            Rider.id, Rider.name, Rider.email, Rider.mobile,
+            Rider.vehicle_type, Rider.vehicle_number, Rider.status, Rider.availability
+        ).all()
+
+        rider_list = [
+            {
+                "id": str(r.id),
+                "name": r.name,
+                "email": r.email,
+                "mobile": r.mobile,
+                "vehicle_type": r.vehicle_type,
+                "vehicle_number": r.vehicle_number,
+                "status": r.status,
+                "availability": r.availability
+            }
+            for r in riders
+        ]
+
+        return jsonify({
+            "success": True,
+            "message": "Riders retrieved successfully",
+            "data": rider_list
+        }), 200
+
+    except Exception as e:
         return jsonify({
             "success": False,
-            "message": "Failed to retrieve riders"
+            "message": "Failed to retrieve riders",
+            "error": str(e)
         }), 500
 
 
-def paginate_Riders(user_email):
+def paginate_Riders(user_email, validated_query=None):
     try:
+        query_params = validated_query or get_validated_query() or {}
 
-        page = request.args.get("page", 1, type=int)
-        limit = request.args.get("limit", 5, type=int)
-
-        if page < 1:
-            page = 1
-
-        if limit < 1:
-            limit = 5
-
-        if limit > 100:
-            limit = 100
-
-        search = request.args.get(
-            "search",
-            "",
-            type=str
-        ).strip()
-
-        status = request.args.get(
-            "status",
-            "",
-            type=str
-        ).strip()
-
-        availability = request.args.get(
-            "availability",
-            "",
-            type=str
-        ).strip()
-
-        sort_by = request.args.get(
-            "sort_by",
-            "created_at",
-            type=str
-        ).strip()
-
-        sort_order = request.args.get(
-            "sort_order",
-            "desc",
-            type=str
-        ).strip().lower()
+        page = max(int(query_params.get("page", 1)), 1)
+        limit = min(max(int(query_params.get("limit", 5)), 1), 100)
+        search = query_params.get("search", "")
+        status = query_params.get("status", "")
+        availability = query_params.get("availability", "")
+        sort_by = query_params.get("sort_by", "created_at")
+        sort_order = query_params.get("sort_order", "desc")
 
         query = Rider.query
 
         if search:
             search_value = f"%{search}%"
             query = query.filter(
-                db.or_(
+                or_(
                     Rider.name.ilike(search_value),
                     Rider.email.ilike(search_value),
                     Rider.mobile.ilike(search_value)
@@ -225,14 +152,10 @@ def paginate_Riders(user_email):
             )
 
         if status:
-            query = query.filter(
-                Rider.status == status
-            )
+            query = query.filter(Rider.status == status)
 
         if availability:
-            query = query.filter(
-                Rider.availability == availability
-            )
+            query = query.filter(Rider.availability == availability)
 
         sort_columns = {
             "name": Rider.name,
@@ -243,26 +166,17 @@ def paginate_Riders(user_email):
             "created_at": Rider.created_at
         }
 
-        sort_column = sort_columns.get(
-            sort_by,
-            Rider.created_at
-        )
+        sort_column = sort_columns.get(sort_by, Rider.created_at)
 
-        if sort_order == "asc":
+        if sort_order.lower() == "asc":
             query = query.order_by(sort_column.asc())
         else:
             query = query.order_by(sort_column.desc())
 
-        pagination = query.paginate(
-            page=page,
-            per_page=limit,
-            error_out=False
-        )
+        pagination = query.paginate(page=page, per_page=limit, error_out=False)
 
-        rider_list = []
-
-        for rider in pagination.items:
-            rider_list.append({
+        rider_list = [
+            {
                 "id": str(rider.id),
                 "name": rider.name,
                 "email": rider.email,
@@ -270,10 +184,11 @@ def paginate_Riders(user_email):
                 "status": rider.status,
                 "availability": rider.availability,
                 "vehicle_type": rider.vehicle_type
-            })
+            }
+            for rider in pagination.items
+        ]
 
         return jsonify({
-
             "success": True,
             "message": "Riders retrieved successfully",
             "data": {
@@ -285,14 +200,10 @@ def paginate_Riders(user_email):
                 "total": pagination.total,
                 "pages": pagination.pages
             }
-
         }), 200
 
-
     except Exception as e:
-
         return jsonify({
-
             "success": False,
             "message": "Failed to retrieve riders",
             "error": str(e)
@@ -301,33 +212,26 @@ def paginate_Riders(user_email):
 
 def update_Rider_Status(user_email, rider_id):
     try:
-        rider = Rider.query.get(rider_id)
-
+        rider = Rider.query.filter_by(id=rider_id).first()
         if not rider:
             return jsonify({
                 "success": False,
                 "message": "Rider not found"
             }), 404
 
-        # print("current_rider", rider)
-
         # Toggle status
         if rider.status == "active":
-             rider.status = "inactive"
-             rider.availability = "unavailable"
-
+            rider.status = "inactive"
+            rider.availability = "unavailable"
         else:
-             rider.status ="active"
-             rider.availability = "available"
-             
+            rider.status = "active"
+            rider.availability = "available"
 
         db.session.commit()
 
-        # print("updated_rider", rider)
-
         return jsonify({
             "success": True,
-            "message": "Rider status updated",
+            "message": "Rider status updated"
         }), 200
 
     except Exception as e:
@@ -339,19 +243,17 @@ def update_Rider_Status(user_email, rider_id):
         }), 500
 
 
-# get Active riders based on status
-
-def get_Active_Riders(user_email):
+def get_Active_Riders(user_email, validated_data=None):
     try:
+        data = validated_data or get_validated_data()
+        if not data:
+            data = request.get_json(silent=True) or {}
 
-        data = request.get_json()
         status = data.get("status")
         active_riders = Rider.query.filter_by(status=status).all()
 
-        rider_list = []
-
-        for rider in active_riders:
-            rider_data = {
+        rider_list = [
+            {
                 "id": str(rider.id),
                 "name": rider.name,
                 "email": rider.email,
@@ -359,8 +261,8 @@ def get_Active_Riders(user_email):
                 "status": rider.status,
                 "availability": rider.availability
             }
-
-            rider_list.append(rider_data)
+            for rider in active_riders
+        ]
 
         return jsonify({
             "success": True,
@@ -380,33 +282,30 @@ def get_Active_Riders(user_email):
 
 def get_Rider(user_email, rider_id):
     try:
-        rider = Rider.query.get(rider_id)
-
+        rider = Rider.query.filter_by(id=rider_id).first()
         if not rider:
             return jsonify({
                 "success": False,
                 "message": "Rider not found"
             }), 404
 
-        rider_data = {
-            "id": str(rider.id),
-            "name": rider.name,
-            "email": rider.email,
-            "mobile": rider.mobile,
-            "vehicle_type": rider.vehicle_type,
-            "vehicle_number": rider.vehicle_number,
-            "status": rider.status,
-            "availability": rider.availability,
-            "profile_image_url": rider.profile_image_url,
-            "created_at": rider.created_at.isoformat(),
-            "updated_at": rider.updated_at.isoformat()
-        }
-
         return jsonify({
             "success": True,
             "message": "Rider retrieved successfully",
             "data": {
-                "rider": rider_data
+                "rider": {
+                    "id": str(rider.id),
+                    "name": rider.name,
+                    "email": rider.email,
+                    "mobile": rider.mobile,
+                    "vehicle_type": rider.vehicle_type,
+                    "vehicle_number": rider.vehicle_number,
+                    "status": rider.status,
+                    "availability": rider.availability,
+                    "profile_image_url": rider.profile_image_url,
+                    "created_at": rider.created_at.isoformat() if rider.created_at else None,
+                    "updated_at": rider.updated_at.isoformat() if rider.updated_at else None
+                }
             }
         }), 200
 
@@ -418,127 +317,68 @@ def get_Rider(user_email, rider_id):
         }), 500
 
 
-
-def update_Rider(user_email, rider_id):
-
+def update_Rider(user_email, rider_id, validated_data=None):
     try:
-
-        rider = Rider.query.get(rider_id)
-
+        rider = Rider.query.filter_by(id=rider_id).first()
         if not rider:
             return jsonify({
                 "success": False,
                 "message": "Rider not found"
             }), 404
 
-        name = request.form.get("name")
-        email = request.form.get("email")
-        mobile = request.form.get("mobile")
-        vehicle_type = request.form.get("vehicle_type")
-        vehicle_number = request.form.get("vehicle_number")
-        status = request.form.get("status")
-        availability = request.form.get("availability")
+        data = validated_data or get_validated_data()
+        if not data:
+            data = request.form.to_dict() if request.form else {}
 
         profile_image = request.files.get("profile_image")
 
-        if not any([
-            name,
-            email,
-            mobile,
-            vehicle_type,
-            vehicle_number,
-            status,
-            availability,
-            profile_image
-        ]):
+        name = data.get("name")
+        email = data.get("email")
+        mobile = data.get("mobile")
+        vehicle_type = data.get("vehicle_type")
+        vehicle_number = data.get("vehicle_number")
+        status = data.get("status")
+        availability = data.get("availability")
+
+        if not any([name, email, mobile, vehicle_type, vehicle_number, status, availability, profile_image]):
             return jsonify({
                 "success": False,
                 "message": "No data provided for update"
             }), 400
 
+        # Consolidated uniqueness check for email and mobile
+        if email or mobile:
+            conflict_filters = []
+            if email:
+                conflict_filters.append(Rider.email == email)
+            if mobile:
+                conflict_filters.append(Rider.mobile == mobile)
+            
+            conflict = Rider.query.filter(or_(*conflict_filters), Rider.id != rider_id).first()
+            if conflict:
+                msg = "Rider with this email already exists" if email and conflict.email == email else "Rider with this mobile number already exists"
+                return jsonify({
+                    "success": False,
+                    "message": msg
+                }), 409
+
         if email:
-
-            if not validate_email(email):
-                return jsonify({
-                    "success": False,
-                    "message": "Invalid email format"
-                }), 400
-
-            existing_email = Rider.query.filter(
-                Rider.email == email,
-                Rider.id != rider_id
-            ).first()
-
-            if existing_email:
-                return jsonify({
-                    "success": False,
-                    "message": "Rider with this email already exists"
-                }), 409
-
             rider.email = email
-
         if mobile:
-
-            if not validate_mobile(mobile):
-                return jsonify({
-                    "success": False,
-                    "message": "Invalid mobile format"
-                }), 400
-
-            existing_mobile = Rider.query.filter(
-                Rider.mobile == mobile,
-                Rider.id != rider_id
-            ).first()
-
-            if existing_mobile:
-                return jsonify({
-                    "success": False,
-                    "message": "Rider with this mobile number already exists"
-                }), 409
-
             rider.mobile = mobile
-
         if name:
             rider.name = name
-
         if vehicle_type:
             rider.vehicle_type = vehicle_type
-
         if vehicle_number:
             rider.vehicle_number = vehicle_number
-
         if status:
-
-            allowed_status = ["active", "inactive"]
-
-            if status not in allowed_status:
-                return jsonify({
-                    "success": False,
-                    "message": "Invalid status"
-                }), 400
-
             rider.status = status
-
         if availability:
-
-            allowed_availability = [
-                "available",
-                "unavailable",
-                "busy"
-            ]
-
-            if availability not in allowed_availability:
-                return jsonify({
-                    "success": False,
-                    "message": "Invalid availability"
-                }), 400
-
             rider.availability = availability
 
         if profile_image:
-
             is_valid, error_message = validate_profile_image(profile_image)
-
             if not is_valid:
                 return jsonify({
                     "success": False,
@@ -551,7 +391,6 @@ def update_Rider(user_email, rider_id):
                 resource_type="image",
                 allowed_formats=["jpg", "jpeg", "png"]
             )
-
             rider.profile_image_url = result.get("secure_url")
 
         db.session.commit()
@@ -562,9 +401,7 @@ def update_Rider(user_email, rider_id):
         }), 200
 
     except Exception as e:
-
         db.session.rollback()
-
         return jsonify({
             "success": False,
             "message": "Failed to update rider",
@@ -574,15 +411,14 @@ def update_Rider(user_email, rider_id):
 
 def delete_Rider(rider_id):
     try:
-        rider = Rider.query.get(rider_id)
+        rider = Rider.query.filter_by(id=rider_id).first()
         if not rider:
             return jsonify({
                 "success": False,
                 "message": "Rider not found"
             }), 404
 
-        linked_order = Order.query.filter_by(rider_id = rider_id).first()
-
+        linked_order = Order.query.filter_by(rider_id=rider_id).first()
         if linked_order:
             return jsonify({
                 "success": False,
@@ -590,7 +426,6 @@ def delete_Rider(rider_id):
             }), 409
 
         db.session.delete(rider)
-
         db.session.commit()
 
         return jsonify({
@@ -600,17 +435,22 @@ def delete_Rider(rider_id):
 
     except Exception as e:
         db.session.rollback()
-
-        print("Deletion error : ", str(e))
         return jsonify({
             "success": False,
-            "message": "Server error"
+            "message": "Server error",
+            "error": str(e)
         }), 500
 
 
 def getAll_Available_riders(user_email):
     try:
-        riders = Rider.query.filter(Rider.status == "active", Rider.availability == "available").all()
+        # Optimized query: select only required columns using with_entities
+        riders = Rider.query.filter(
+            Rider.status == "active",
+            Rider.availability == "available"
+        ).with_entities(
+            Rider.id, Rider.name, Rider.email, Rider.mobile, Rider.status, Rider.availability
+        ).all()
 
         return jsonify({
             "success": True,
@@ -624,10 +464,10 @@ def getAll_Available_riders(user_email):
                     "status": rider.status,
                     "availability": rider.availability
                 }
-
                 for rider in riders
             ]
         }), 200
+
     except Exception as e:
         return jsonify({
             "success": False,
@@ -637,13 +477,22 @@ def getAll_Available_riders(user_email):
 
 
 def get_Busy_Rider():
-
     try:
-        assigned_rider_ids = db.session.query(Order.rider_id).filter(Order.rider_id.isnot(None)).distinct().all()
-
-        rider_ids = [rider_id[0] for rider_id in assigned_rider_ids]
-
-        riders = Rider.query.filter(Rider.status == "active", Rider.id.in_(rider_ids)).all()
+        # Optimized query: directly fetch active riders currently on busy availability or assigned orders
+        riders = Rider.query.filter(
+            Rider.status == "active",
+            or_(
+                Rider.availability == "busy",
+                Rider.id.in_(
+                    db.session.query(Order.rider_id).filter(
+                        Order.rider_id.isnot(None),
+                        Order.status == "assigned"
+                    )
+                )
+            )
+        ).with_entities(
+            Rider.id, Rider.name, Rider.email, Rider.mobile, Rider.status, Rider.availability
+        ).all()
 
         return jsonify({
             "success": True,
@@ -657,7 +506,6 @@ def get_Busy_Rider():
                     "status": rider.status,
                     "availability": rider.availability
                 }
-
                 for rider in riders
             ]
         }), 200

@@ -6,7 +6,6 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { PageNotFoundComponent } from './not-found/not-found.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { LayoutComponent } from './layout/layout.component';
-import { ProfileComponent } from './features/profile/profile.component';
 import { ChangePasswordComponent } from './features/change-password/change-password.component';
 import { ChangeProfileComponent } from './features/change-profile/change-profile.component';
 
@@ -49,30 +48,11 @@ const routes: Routes = [
             loadComponent: () =>
               import('./features/riders/riders.component')
                 .then(m => m.RidersComponent)
-          },
-          {
-            path: ':id',
-            data: { breadcrumb: 'Rider Profile' },
-            loadComponent: () =>
-              import('./features/riders/riders.component')
-                .then(m => m.RidersComponent)
           }
         ],
         loadComponent: () =>
           import('./features/riders/riders.component')
             .then(m => m.RidersComponent)
-      },
-      {
-        path: 'profile',
-        children: [
-          {
-            path: '',
-            data: { breadcrumb: 'User Profile' },
-            loadComponent: () =>
-              import('./features/profile/profile.component')
-                .then(m => m.ProfileComponent)
-          }
-        ]
       },
       {
         path: 'settings/profile',

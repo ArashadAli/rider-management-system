@@ -19,20 +19,7 @@
       <i-lucide name="truck" class="w-[22px] text-center text-lg" [size]="18"></i-lucide>
       <span *ngIf="sidebarExpanded || sidebarOpen">Riders</span>
     </a>
-    <a routerLink="/profile" routerLinkActive="bg-[#DC1D47] text-white font-semibold" (click)="closeOnMobile()"
-      class="flex items-center gap-3 rounded-lg px-3.5 py-3 text-sm font-medium text-[#dbe5ee] transition hover:bg-[#DC1D47] hover:text-white">
-      <i-lucide name="user-round-cog" class="w-[22px] text-center text-lg" [size]="18"></i-lucide>
-      <span *ngIf="sidebarExpanded || sidebarOpen">Profile</span>
-    </a>
   </nav>
-  <div class="border-t border-white/15 pt-5">
-    <button (click)="logoutUser()" type="button"
-      class="flex w-full items-center justify-center gap-2 rounded-lg border border-white/25 px-3.5 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:border-[#DC1D47] hover:bg-[#DC1D47] focus:outline-none focus:ring-2 focus:ring-[#DC1D47]/50">
-      <i-lucide name="log-out" [size]="18" [strokeWidth]="2">
-      </i-lucide>
-      <span *ngIf="sidebarExpanded || sidebarOpen">Logout</span>
-    </button>
-  </div>
 
 </aside>
 

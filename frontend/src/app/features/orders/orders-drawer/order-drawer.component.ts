@@ -186,9 +186,6 @@ export class OrderDrawerComponent implements OnChanges {
                     this.resetForm();
                     this.close.emit();
                     this.saved.emit();
-                },
-                error: (error) => {
-                    this.toastService.error(error?.error?.message || 'Failed to create order.');
                 }
             });
     }

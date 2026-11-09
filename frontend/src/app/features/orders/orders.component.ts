@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, Subject } from 'rxjs';
-import {  catchError, debounceTime, finalize, switchMap, takeUntil } from 'rxjs/operators';
+import { catchError, debounceTime, finalize, switchMap, takeUntil } from 'rxjs/operators';
 import { OrdersService } from 'src/app/core/services/orders.service';
 import { RidersService } from 'src/app/core/services/riders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
@@ -12,6 +12,8 @@ import { AvailableRider } from 'src/app/core/models/rider-response.model';
 import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadcrumb.component';
 import { OrderDrawerComponent } from './orders-drawer/order-drawer.component';
 import { LucideAngularModule } from 'lucide-angular';
+import { PaginationComponent } from 'src/app/shared/components/pagination/pagination.component';
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-orders',
@@ -21,7 +23,9 @@ import { LucideAngularModule } from 'lucide-angular';
     FormsModule,
     BreadcrumbComponent,
     OrderDrawerComponent,
-    LucideAngularModule
+    LucideAngularModule,
+    PaginationComponent,
+    ConfirmationDialogComponent
   ],
   templateUrl: './orders.component.html'
 })
@@ -31,15 +35,15 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   showCreateOrder = false;
   order_id: string | null = null
-  drawerMode : 'create' | 'view' = 'create'
+  drawerMode: 'create' | 'view' = 'create'
   deleteConfirmationOpen = false;
   deletingOrderId: string | null = null
-  orderToDelete: {order_id: string} | null = null
+  orderToDelete: { order_id: string } | null = null
 
   loadingRiders = false;
   assigningOrderId: string | null = null;
   updatingStatusOrderId: string | null = null;
-  currentPage : number = 1;
+  currentPage: number = 1;
   pageSize = 10;
   totalOrders = 0;
   totalPages = 0;
@@ -64,8 +68,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
     private ordersService: OrdersService,
     private ridersService: RidersService,
     private toastService: CustomToastService
-  ) { 
-    
+  ) {
+
   }
 
   ngOnInit(): void {
@@ -98,17 +102,17 @@ export class OrdersComponent implements OnInit, OnDestroy {
             this.totalPages = response.data.total_pages;
             this.hasNext = response.data.has_next;
             this.hasPrevious = response.data.has_previous;
-          } 
+          }
           else {
-            this.toastService.error( response.message || 'Failed to load orders.');
+            this.toastService.error(response.message || 'Failed to load orders.');
           }
         },
         error: (error) => {
-        this.toastService.error(error?.error?.message || 'Failed to load orders.');
+          this.toastService.error(error?.error?.message || 'Failed to load orders.');
         }
       })
 
-      this.loadOrders();
+    this.loadOrders();
   }
 
   loadOrders(): void {
@@ -132,13 +136,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
           if (response.success) {
             this.availableRiders = response.data;
             this.hasLoadedAvailableRiders = true
-          } 
-          else {
-            this.toastService.error(response.message || 'Failed to load available riders.');
           }
-        },
-        error: (error) => {
-          this.toastService.error(error?.error?.message || 'Failed to load available riders.');
         }
       });
   }
@@ -173,21 +171,20 @@ export class OrdersComponent implements OnInit, OnDestroy {
           this.loadAvailableRiders();
         },
         error: (error) => {
-          this.toastService.error(error?.error?.message || 'Failed to assign rider.');
           this.loadOrders();
         }
       });
   }
 
   updateOrderStatus(order: Order, status: string): void {
-    if ( !status || status === order.status || this.updatingStatusOrderId ) {
+    if (!status || status === order.status || this.updatingStatusOrderId) {
       return;
     }
 
-    if(status === 'cancelled') {
+    if (status === 'cancelled') {
       const confirm = window.confirm(`Are you sure you want to cancle order ${order.order_id}`)
 
-      if(!confirm) {
+      if (!confirm) {
         this.loadOrders();
         return;
       }
@@ -211,7 +208,6 @@ export class OrdersComponent implements OnInit, OnDestroy {
           this.loadOrders();
         },
         error: (error) => {
-          this.toastService.error( error?.error?.message || 'Failed to update order status.');
           this.loadOrders();
         }
       });
@@ -219,7 +215,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   openCreateOrder(): void {
     this.drawerMode = 'create',
-    this.order_id = null
+      this.order_id = null
     this.showCreateOrder = true;
   }
 
@@ -283,37 +279,20 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.loadOrders();
   }
 
-  previousPage(): void {
-    if (this.hasPrevious) {
-      this.currentPage--;
-      this.loadOrders();
-    }
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.loadOrders();
   }
 
-  nextPage(): void {
-    if (this.hasNext) {
-      this.currentPage++;
-      this.loadOrders();
-    }
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
+    this.currentPage = 1;
+    this.loadOrders();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  firstPage(): void {
-    if(this.currentPage > 1) {
-      this.currentPage = 1;
-      this.loadOrders();
-    }
-  }
-
-  lastPage(): void {
-    if(this.currentPage < this.totalPages) {
-      this.currentPage = this.totalPages;
-      this.loadOrders();
-    }
   }
 
   loadBusyRiders(): void {
@@ -333,18 +312,12 @@ export class OrdersComponent implements OnInit, OnDestroy {
           if (response.success) {
             this.busyRiders = response.data;
             this.hasLoadedBusyRiders = true
-          } 
-          else {
-            this.toastService.error(response.message || 'Failed to load busy riders.');
           }
-        },
-        error: (error) => {
-          this.toastService.error(error?.error?.message || 'Failed to load busy riders.');
         }
       });
   }
 
-  openOrderViewDrawer(order_id: string): void{
+  openOrderViewDrawer(order_id: string): void {
     this.drawerMode = 'view';
     this.order_id = order_id;
     this.showCreateOrder = true
@@ -357,43 +330,39 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.hasLoadedBusyRiders = false;
   }
 
-  confirmDeleteOrder(order: {order_id: string}): void {
+  confirmDeleteOrder(order: { order_id: string }): void {
     this.orderToDelete = order;
     this.deleteConfirmationOpen = true;
   }
 
   closeDeleteConfirmation(): void {
-    if(this.deletingOrderId) return
+    if (this.deletingOrderId) return
 
     this.deleteConfirmationOpen = false
     this.orderToDelete = null;
   }
 
   deleteSelectedOrder(): void {
-    if(!this.orderToDelete || this.deletingOrderId) {
+    if (!this.orderToDelete || this.deletingOrderId) {
       return
     }
     const orderId = this.orderToDelete.order_id;
     this.deletingOrderId = orderId;
     this.ordersService.deleteOrder(orderId)
-    .pipe(
-      finalize(() => {
-        this.deletingOrderId = null
-        this.closeDeleteConfirmation()
-      })
-    )
-    .subscribe({
-      next: (response) => {
-        if(response.success) {
-          this.toastService.success(response.message)
-          this.closeDeleteConfirmation();
-          this.applyFilters();
+      .pipe(
+        finalize(() => {
+          this.deletingOrderId = null
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.toastService.success(response.message)
+            this.closeDeleteConfirmation();
+            this.applyFilters();
+          }
         }
-      },
-      error: (error) => {
-        this.toastService.error(error?.error?.message || 'Failed to delete order')
-      }
-    })
+      })
   }
-  
+
 }

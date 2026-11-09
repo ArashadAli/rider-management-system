@@ -1,0 +1,32 @@
+<div *ngIf="visible" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="onCancel()">
+    <div role="dialog" aria-modal="true" class="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl" (click)="$event.stopPropagation()">
+        <div class="flex items-start gap-4">
+            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                <i-lucide name="trash-2" [size]="23"></i-lucide>
+            </div>
+            <div class="min-w-0 flex-1">
+                <h2 class="text-lg font-semibold text-gray-900">
+                    {{ title }}
+                </h2>
+                <p class="mt-2 text-sm leading-6 text-gray-500">
+                    {{ message }}
+                    <span *ngIf="itemName" class="font-semibold text-gray-800">
+                        {{ itemName }}
+                    </span>
+                    <span class="block mt-1">
+                        This action cannot be undone.
+                    </span>
+                </p>
+            </div>
+        </div>
+        <div class="mt-7 flex justify-end gap-3">
+            <button type="button" (click)="onCancel()" [disabled]="loading" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
+                {{ cancelText }}
+            </button>
+            <button type="button" (click)="onConfirm()" [disabled]="loading" class="inline-flex items-center gap-2 rounded-lg bg-[#DC1D47] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#c7193f] disabled:cursor-not-allowed disabled:opacity-60">
+                <span *ngIf="loading" class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white"></span>
+                {{ loading ? loadingText : confirmText }}
+            </button>
+        </div>
+    </div>
+</div>

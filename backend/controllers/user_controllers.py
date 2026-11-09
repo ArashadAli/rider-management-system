@@ -1,193 +1,144 @@
 from flask import jsonify, request
-from sqlalchemy import func
-from models.user_model import User
+from sqlalchemy import func, case
 from werkzeug.security import generate_password_hash, check_password_hash
-
 from config.connectDB import db
+from models.user_model import User
 from models.order_model import Order
 from models.rider_model import Rider
-from utils.email_mobile_validate import validate_mobile
+from schemas.base import get_validated_data
 
 def user_dashboard(user_email):
-    total_orders = db.session.query(func.count(Order.id)).scalar() or 0
+    try:
+        # Consolidated query 1: Order counts and sum in a single database roundtrip
+        order_metrics = db.session.query(
+            func.count(Order.id).label("total_orders"),
+            func.count(case((Order.status == "pending", Order.id))).label("pending_orders"),
+            func.count(case((Order.status == "delivered", Order.id))).label("delivered_orders"),
+            func.count(case((Order.status == "assigned", Order.id))).label("assigned_orders"),
+            func.count(case((Order.status == "cancelled", Order.id))).label("cancelled_orders"),
+            func.coalesce(func.sum(Order.amount), 0).label("total_order_value")
+        ).one()
 
-    pending_orders = db.session.query(
-        func.count(Order.id)
-    ).filter(
-        Order.status == "pending"
-    ).scalar() or 0
+        total_orders = order_metrics.total_orders or 0
+        pending_orders = order_metrics.pending_orders or 0
+        delivered_orders = order_metrics.delivered_orders or 0
+        assigned_orders = order_metrics.assigned_orders or 0
+        cancelled_orders = order_metrics.cancelled_orders or 0
+        total_order_value = float(order_metrics.total_order_value or 0)
 
-    delivered_orders = db.session.query(
-        func.count(Order.id)
-    ).filter(
-        Order.status == "delivered"
-    ).scalar() or 0
+        # Consolidated query 2: Rider status and availability in a single database roundtrip
+        rider_metrics = db.session.query(
+            func.count(Rider.id).label("total_riders"),
+            func.count(case((Rider.status == "active", Rider.id))).label("active_riders"),
+            func.count(case((Rider.status == "inactive", Rider.id))).label("inactive_riders"),
+            func.count(case((Rider.availability == "available", Rider.id))).label("available_riders"),
+            func.count(case((Rider.availability != "available", Rider.id))).label("unavailable_riders")
+        ).one()
 
-    assigned_orders = db.session.query(
-        func.count(Order.id)
-    ).filter(
-        Order.status == "assigned"
-    ).scalar() or 0
+        total_riders = rider_metrics.total_riders or 0
+        active_riders = rider_metrics.active_riders or 0
+        inactive_riders = rider_metrics.inactive_riders or 0
+        available_riders = rider_metrics.available_riders or 0
+        unavailable_riders = rider_metrics.unavailable_riders or 0
 
-    cancelled_orders = db.session.query(
-        func.count(Order.id)
-    ).filter(
-        Order.status == "cancelled"
-    ).scalar() or 0
+        # Percentages
+        success_rate = (delivered_orders / total_orders * 100) if total_orders > 0 else 0
+        pending_percentage = (pending_orders / total_orders * 100) if total_orders > 0 else 0
+        delivered_percentage = (delivered_orders / total_orders * 100) if total_orders > 0 else 0
+        assigned_percentage = (assigned_orders / total_orders * 100) if total_orders > 0 else 0
+        cancelled_percentage = (cancelled_orders / total_orders * 100) if total_orders > 0 else 0
 
-    total_order_value = db.session.query(
-        func.coalesce(func.sum(Order.amount), 0)
-    ).scalar()
+        # Recent records
+        recent_orders = Order.query.order_by(Order.created_at.desc()).limit(5).all()
+        recent_riders = Rider.query.order_by(
+            func.greatest(Rider.created_at, Rider.updated_at).desc()
+        ).limit(5).all()
 
-    success_rate = (
-        (delivered_orders / total_orders) * 100
-        if total_orders > 0
-        else 0
-    )
+        recent_orders_data = [
+            {
+                "id": order.id,
+                "order_id": order.order_id,
+                "order_item": order.order_item,
+                "customer_name": order.customer_name,
+                "customer_mobile": order.customer_mobile,
+                "pickup_address": order.pickup_address,
+                "delivery_address": order.delivery_address,
+                "amount": float(order.amount),
+                "status": order.status,
+                "rider_id": order.rider_id,
+                "created_at": order.created_at.isoformat() if order.created_at else None
+            }
+            for order in recent_orders
+        ]
 
-    pending_percentage = (
-        (pending_orders / total_orders) * 100
-        if total_orders > 0
-        else 0
-    )
+        recent_riders_data = [
+            {
+                "id": str(rider.id),
+                "name": rider.name,
+                "email": rider.email,
+                "mobile": rider.mobile,
+                "vehicle_type": rider.vehicle_type,
+                "vehicle_number": rider.vehicle_number,
+                "profile_image_url": rider.profile_image_url,
+                "status": rider.status,
+                "availability": rider.availability,
+                "created_at": rider.created_at.isoformat() if rider.created_at else None,
+                "updated_at": rider.updated_at.isoformat() if rider.updated_at else None
+            }
+            for rider in recent_riders
+        ]
 
-    delivered_percentage = (
-        (delivered_orders / total_orders) * 100
-        if total_orders > 0
-        else 0
-    )
-
-    assigned_percentage = (
-        (assigned_orders / total_orders) * 100
-        if total_orders > 0
-        else 0
-    )
-
-    cancelled_percentage = (
-        (cancelled_orders / total_orders) * 100
-        if total_orders > 0
-        else 0
-    )
-
-    total_riders = db.session.query(
-        func.count(Rider.id)
-    ).scalar() or 0
-
-    active_riders = db.session.query(
-        func.count(Rider.id)
-    ).filter(
-        Rider.status == "active"
-    ).scalar() or 0
-
-    inactive_riders = db.session.query(
-        func.count(Rider.id)
-    ).filter(
-        Rider.status == "inactive"
-    ).scalar() or 0
-
-    available_riders = db.session.query(
-        func.count(Rider.id)
-    ).filter(
-        Rider.availability == "available"
-    ).scalar() or 0
-
-    unavailable_riders = db.session.query(
-        func.count(Rider.id)
-    ).filter(
-        Rider.availability != "available"
-    ).scalar() or 0
-
-    recent_orders = Order.query.order_by(
-        Order.created_at.desc()
-    ).limit(5).all()
-
-    recent_riders = Rider.query.order_by(
-        func.greatest(
-            Rider.created_at,
-            Rider.updated_at
-        ).desc()
-    ).limit(5).all()
-
-    recent_orders_data = [
-        {
-            "id": order.id,
-            "order_id": order.order_id,
-            "order_item": order.order_item,
-            "customer_name": order.customer_name,
-            "customer_mobile": order.customer_mobile,
-            "pickup_address": order.pickup_address,
-            "delivery_address": order.delivery_address,
-            "amount": float(order.amount),
-            "status": order.status,
-            "rider_id": order.rider_id,
-            "created_at": order.created_at.isoformat()
-        }
-        for order in recent_orders
-    ]
-
-    recent_riders_data = [
-        {
-            "id": rider.id,
-            "name": rider.name,
-            "email": rider.email,
-            "mobile": rider.mobile,
-            "vehicle_type": rider.vehicle_type,
-            "vehicle_number": rider.vehicle_number,
-            "profile_image_url": rider.profile_image_url,
-            "status": rider.status,
-            "availability": rider.availability,
-            "created_at": rider.created_at.isoformat(),
-            "updated_at": rider.updated_at.isoformat()
-        }
-        for rider in recent_riders
-    ]
-
-    return jsonify({
-        "success": True,
-        "data": {
-            "metrics": {
-                "total_orders": total_orders,
-                "active_riders": active_riders,
-                "pending_orders": pending_orders,
-                "delivered_orders": delivered_orders,
-                "total_order_value": float(total_order_value),
-                "success_rate": round(success_rate, 2)
-            },
-            "order_overview": {
-                "pending": {
-                    "count": pending_orders,
-                    "percentage": round(pending_percentage, 2)
+        return jsonify({
+            "success": True,
+            "data": {
+                "metrics": {
+                    "total_orders": total_orders,
+                    "active_riders": active_riders,
+                    "pending_orders": pending_orders,
+                    "delivered_orders": delivered_orders,
+                    "total_order_value": total_order_value,
+                    "success_rate": round(success_rate, 2)
                 },
-                "delivered": {
-                    "count": delivered_orders,
-                    "percentage": round(delivered_percentage, 2)
+                "order_overview": {
+                    "pending": {
+                        "count": pending_orders,
+                        "percentage": round(pending_percentage, 2)
+                    },
+                    "delivered": {
+                        "count": delivered_orders,
+                        "percentage": round(delivered_percentage, 2)
+                    },
+                    "assigned": {
+                        "count": assigned_orders,
+                        "percentage": round(assigned_percentage, 2)
+                    },
+                    "cancelled": {
+                        "count": cancelled_orders,
+                        "percentage": round(cancelled_percentage, 2)
+                    }
                 },
-                "assigned": {
-                    "count": assigned_orders,
-                    "percentage": round(assigned_percentage, 2)
+                "rider_overview": {
+                    "total": total_riders,
+                    "active": active_riders,
+                    "inactive": inactive_riders,
+                    "available": available_riders,
+                    "unavailable": unavailable_riders
                 },
-                "cancelled": {
-                    "count": cancelled_orders,
-                    "percentage": round(cancelled_percentage, 2)
-                }
-            },
-            "rider_overview": {
-                "total": total_riders,
-                "active": active_riders,
-                "inactive": inactive_riders,
-                "available": available_riders,
-                "unavailable": unavailable_riders
-            },
-            "recent_orders": recent_orders_data,
-            "recent_riders": recent_riders_data
-        }
-    }), 200
+                "recent_orders": recent_orders_data,
+                "recent_riders": recent_riders_data
+            }
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "Failed to load dashboard metrics",
+            "error": str(e)
+        }), 500
+
 
 def user_profile(user_email):
-
-
     user = User.query.filter_by(email=user_email).first()
-
     if not user:
         return jsonify({
             "success": False,
@@ -205,32 +156,34 @@ def user_profile(user_email):
         }
     }), 200
 
-def update_user_profile(user_email):
+
+def update_user_profile(user_email, validated_data=None):
     try:
-        data = request.get_json()
+        data = validated_data or get_validated_data()
         if not data:
+            data = request.get_json(silent=True) or {}
+
+        user = User.query.filter_by(email=user_email).first()
+        if not user:
             return jsonify({
                 "success": False,
-                "message": "Required request body is missing"
-            }), 422
+                "message": "User not found"
+            }), 404
 
         user_name = data.get("name")
         user_mobile = data.get("mobile")
-        user = User.query.filter_by(email = user_email).first()
 
-        # print("user name : ", user.name)
-
-        if not validate_mobile(user_mobile):
-            return jsonify({
-                "success": False,
-                "message": "Invalide mobile number format"
-            }), 400
+        if user_mobile:
+            existing_mobile = User.query.filter(User.mobile == user_mobile, User.email != user_email).first()
+            if existing_mobile:
+                return jsonify({
+                    "success": False,
+                    "message": "Mobile number already in use by another account"
+                }), 409
+            user.mobile = user_mobile
 
         if user_name:
             user.name = user_name
-
-        if user_mobile:
-            user.mobile = user_mobile
 
         db.session.commit()
 
@@ -254,25 +207,27 @@ def update_user_profile(user_email):
         }), 500
 
 
-def change_user_password(user_email):
+def change_user_password(user_email, validated_data=None):
     try:
-        data = request.get_json()
+        data = validated_data or get_validated_data()
         if not data:
+            data = request.get_json(silent=True) or {}
+
+        user = User.query.filter_by(email=user_email).first()
+        if not user:
             return jsonify({
                 "success": False,
-                "message": "Request data is missing"
-            }), 422
-
-        user = User.query.filter_by(email = user_email).first()
+                "message": "User not found"
+            }), 404
 
         current_password = data.get("currentPassword")
         new_password = data.get("newPassword")
 
-        if not current_password and new_password:
+        if not current_password or not new_password:
             return jsonify({
                 "success": False,
                 "message": "current password and new password both fields are required"
-            })
+            }), 400
 
         if not check_password_hash(user.password, current_password):
             return jsonify({
@@ -280,15 +235,7 @@ def change_user_password(user_email):
                 "message": "Current password and login password mismatch"
             }), 400
 
-        if len(new_password) < 8:
-            return jsonify({
-                "success": False,
-                "message": "Length should be min of 8 characters"
-            }), 400
-
-        new_hashed_password = generate_password_hash(new_password)
-
-        user.password = new_hashed_password
+        user.password = generate_password_hash(new_password)
         db.session.commit()
 
         return jsonify({
@@ -303,4 +250,3 @@ def change_user_password(user_email):
             "message": "Server error",
             "error": str(e)
         }), 500
-    

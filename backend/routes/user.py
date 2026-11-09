@@ -1,31 +1,33 @@
 from flask import Blueprint
 from middleware.auth_middleware import token_required
 from controllers.user_controllers import user_dashboard, user_profile, update_user_profile, change_user_password
+from schemas.base import validate_request
+from schemas.user_schemas import UserProfileUpdateSchema, ChangePasswordSchema
 
 user_bp = Blueprint("api/users", __name__)
 
 
-@user_bp.route("/dashboard", methods= ["GET"])
+@user_bp.route("/dashboard", methods=["GET"])
 @token_required
-
 def dashboard(user_email):
     return user_dashboard(user_email)
 
-@user_bp.route("/me", methods= ["GET"])
-@token_required
 
+@user_bp.route("/me", methods=["GET"])
+@token_required
 def profile(user_email):
     return user_profile(user_email)
 
 
 @user_bp.route("/update-profile", methods=["PUT"])
 @token_required
+@validate_request(body_schema=UserProfileUpdateSchema())
 def update_profile(user_email):
     return update_user_profile(user_email)
 
 
 @user_bp.route("/change-password", methods=["PUT"])
 @token_required
+@validate_request(body_schema=ChangePasswordSchema())
 def change_password(user_email):
     return change_user_password(user_email)
-

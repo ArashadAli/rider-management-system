@@ -1,0 +1,35 @@
+<div class="flex flex-col justify-between gap-3 border-t border-gray-100 px-5 py-4 sm:flex-row sm:items-center">
+    <div class="flex items-center gap-2 text-sm text-gray-500">
+        <span>Show</span>
+        <select [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)" [disabled]="loading" class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-[#163758] disabled:opacity-50">
+            <option *ngFor="let size of pageSizeOptions" [ngValue]="size">
+                {{ size }}
+            </option>
+        </select>
+        <span>per page</span>
+    </div>
+    <p class="text-sm text-gray-500">
+        Showing page
+        <span class="font-medium text-gray-700">
+            {{ currentPage }}
+        </span>
+        of
+        <span class="font-medium text-gray-700">
+            {{ totalPages || 1 }}
+        </span>
+    </p>
+    <div class="flex items-center justify-center gap-2">
+        <button type="button" (click)="firstPage()" [disabled]="!hasPrevious || loading" class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+            First
+        </button>
+        <button type="button" (click)="previousPage()" [disabled]="!hasPrevious || loading" class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+            <i-lucide name="circle-arrow-left" [size]="22"></i-lucide>
+        </button>
+        <button type="button" (click)="nextPage()" [disabled]="!hasNext || loading" class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+            <i-lucide name="circle-arrow-right" [size]="22"></i-lucide>
+        </button>
+        <button type="button" (click)="lastPage()" [disabled]="!hasNext || loading" class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40">
+            Last
+        </button>
+    </div>
+</div>

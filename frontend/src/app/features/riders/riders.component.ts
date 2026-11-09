@@ -9,6 +9,8 @@ import { BreadcrumbComponent } from 'src/app/shared/components/breadcrumb/breadc
 import { CustomToastService } from 'src/app/core/services/toast.service';
 import { RiderFormComponent } from './rider-form/rider-form.component';
 import { LucideAngularModule } from 'lucide-angular';
+import { PaginationComponent } from 'src/app/shared/components/pagination/pagination.component';
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 
 
 @Component({
@@ -20,7 +22,9 @@ import { LucideAngularModule } from 'lucide-angular';
     ReactiveFormsModule,
     BreadcrumbComponent,
     RiderFormComponent,
-    LucideAngularModule
+    LucideAngularModule,
+    PaginationComponent,
+    ConfirmationDialogComponent
   ],
   templateUrl: './riders.component.html',
   styleUrls: ['./riders.component.css']
@@ -105,7 +109,7 @@ export class RidersComponent implements OnInit, OnDestroy {
           this.riders = response.data.riders;
           this.currentPage = response.pagination.page;
           this.pageSize = response.pagination.limit;
-          this.totalRiders =  response.pagination.total;
+          this.totalRiders = response.pagination.total;
           this.totalPages = response.pagination.pages;
         }
       });
@@ -162,38 +166,17 @@ export class RidersComponent implements OnInit, OnDestroy {
     });
   }
 
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.getPaginatedRiders();
-    }
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.getPaginatedRiders();
-    }
-  }
-
-  firstPage(): void {
-    if(this.currentPage > 1) {
-      this.currentPage = 1;
-      this.getPaginatedRiders()
-    }
-  }
-
-  lastPage(): void {
-    if(this.currentPage < this.totalPages) {
-      this.currentPage = this.totalPages;
-      this.getPaginatedRiders()
-    }
-  }
-
-  onPageSizeChange(): void {
+  onPageSizeChange(size: number): void {
+    this.pageSize = size;
     this.currentPage = 1;
     this.getPaginatedRiders();
   }
+
+  onPageChange(page: number): void {
+    this.currentPage = page;
+    this.getPaginatedRiders();
+  }
+
 
   toggleStatus(rider: Rider): void {
     this.loading = true;
@@ -253,16 +236,13 @@ export class RidersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response?.success) {
-            this.toastService.success( response.message || 'Rider deleted successfully.','Success' );
+            this.toastService.success(response.message || 'Rider deleted successfully.', 'Success');
             this.showDeleteConfirmation = false;
             this.selectedRiderToDelete = null;
             if (this.riders.length === 1 && this.currentPage > 1) {
               this.currentPage--;
             }
             this.getPaginatedRiders();
-          } 
-          else {
-            this.toastService.error( response?.message || 'Unable to delete rider.','Error' );
           }
         },
         error: (error) => {
@@ -306,7 +286,7 @@ export class RidersComponent implements OnInit, OnDestroy {
 
   @HostListener('document:click')
   onDocumentClick(): void {
-    if(this.openActionMenuId) this.openActionMenuId = null
+    if (this.openActionMenuId) this.openActionMenuId = null
   }
 
 }

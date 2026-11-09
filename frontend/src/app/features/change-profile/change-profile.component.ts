@@ -59,13 +59,14 @@ export class ChangeProfileComponent implements OnInit, OnDestroy {
   }
 
   updateProfile(): void {
+    console.log('Updating profile with:', this.profileForm);
     const name = this.profileForm.name.trim();
-    const mobile = this.profileForm.mobile.trim();
+    const mobile = String(this.profileForm.mobile).trim();
     if (!name || !mobile) {
       this.toastService.error('Name and mobile number are required.');
       return;
     }
-    if (this.loadingProfile) {
+    if (this.loadingProfile){
       return;
     }
     this.loadingProfile = true;
@@ -75,16 +76,11 @@ export class ChangeProfileComponent implements OnInit, OnDestroy {
         next: response => {
           if (response.success && response.user) {
             this.authService.setUser(response.user);
-
             this.toastService.success(response.message || 'Profile updated successfully.');
-          }
-           else {
-            this.toastService.error(response.message || 'Unable to update profile.');
           }
           this.loadingProfile = false;
         },
         error: error => {
-          this.toastService.error(error?.error?.message || 'Failed to update profile.');
           this.loadingProfile = false;
         }
       });
