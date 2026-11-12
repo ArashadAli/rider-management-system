@@ -41,6 +41,7 @@ export class RidersComponent implements OnInit, OnDestroy {
   totalPages = 0;
   totalRiders = 0;
   filterForm!: FormGroup;
+  showFilters = false;
   sortBy = 'created_at';
   sortOrder = 'desc';
   drawerOpen = false;
@@ -153,6 +154,24 @@ export class RidersComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
+  }
+
+  get activeFilterCount(): number {
+    if (!this.filterForm) {
+      return 0;
+    }
+    let count = 0;
+    const values = this.filterForm.value;
+    if (values.search && values.search.trim()) count++;
+    if (values.status) count++;
+    if (values.availability) count++;
+    if (values.sortBy && values.sortBy !== 'created_at') count++;
+    if (values.sortOrder && values.sortOrder !== 'desc') count++;
+    return count;
   }
 
   resetFilters(): void {

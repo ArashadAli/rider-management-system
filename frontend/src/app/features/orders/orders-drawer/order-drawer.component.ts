@@ -1,19 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, Input, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, EventEmitter, Output, Input, SimpleChanges, OnChanges, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { catchError, finalize } from 'rxjs/operators';
 import { OrdersService } from 'src/app/core/services/orders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
 import { EMPTY } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
     selector: 'app-order-drawer',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
+    imports: [CommonModule, ReactiveFormsModule, LucideAngularModule, ConfirmationDialogComponent],
     templateUrl: './order-drawer.component.html'
 })
-export class OrderDrawerComponent implements OnChanges {
+export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
 
     @Input() mode: 'create' | 'view' = 'create';
     @Input() orderId: string | null = null
@@ -31,16 +32,33 @@ export class OrderDrawerComponent implements OnChanges {
     constructor(
         private ordersService: OrdersService,
         private toastService: CustomToastService,
-        private fb: FormBuilder
+        private fb: FormBuilder,
+        private renderer: Renderer2
     ) {
         this.orderForm = this.fb.group({
             order_item: ['', Validators.required],
             customer_name: ['', Validators.required],
-            customer_mobile: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+            customer_mobile: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/), Validators.maxLength(10)]],
             pickup_address: ['', Validators.required],
             delivery_address: ['', Validators.required],
             amount: [null, [Validators.required, Validators.min(0.01)]]
         })
+    }
+
+    ngOnInit(): void {
+        this.renderer.addClass(document.body, 'overflow-hidden');
+    }
+
+    ngOnDestroy(): void {
+        this.renderer.removeClass(document.body, 'overflow-hidden');
+    }
+
+    limitMobileLength(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        // Allow only digits and maximum 10 characters
+        const value = input.value.replace(/\D/g, '').slice(0, 10);
+        input.value = value;
+        this.orderForm.get('customer_mobile')?.setValue(value);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -122,9 +140,9 @@ export class OrderDrawerComponent implements OnChanges {
     }
 
     requestCreateConfirmation(): void {
-        if(this.mode !== 'create' || this.submitting) return
-        
-        if(this.orderForm.invalid) {
+        if (this.mode !== 'create' || this.submitting) return
+
+        if (this.orderForm.invalid) {
             this.orderForm.markAllAsTouched();
             return;
         }
@@ -139,11 +157,11 @@ export class OrderDrawerComponent implements OnChanges {
         ]
 
         const hasBlankField = textFields.some(field => !String(values[field] ?? '').trim())
-        if(hasBlankField) {
+        if (hasBlankField) {
             textFields.forEach(field => {
                 const control = this.orderForm.get(field);
-                if(control && !String(control.value ?? '').trim()) {
-                    control.setErrors({...control.errors, required: true})
+                if (control && !String(control.value ?? '').trim()) {
+                    control.setErrors({ ...control.errors, required: true })
                     control.markAsTouched();
                 }
             })
@@ -191,7 +209,7 @@ export class OrderDrawerComponent implements OnChanges {
     }
 
     cancelConfirmation(): void {
-        if(!this.submitting) {
+        if (!this.submitting) {
             this.showConfirmation = false;
         }
     }

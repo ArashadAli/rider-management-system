@@ -30,12 +30,12 @@
                         Profile Image
                     </label>
                     <app-image-upload [previewUrl]="existingImageUrl" [disabled]="mode === 'view' || loading"
-                        [maxSizeMB]="5" (fileSelected)="onImageSelected($event)">
+                        [maxSizeMB]="2" (fileSelected)="onImageSelected($event)">
                     </app-image-upload>
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                        Name
+                        Name *
                     </label>
                     <input type="text" formControlName="name" placeholder="Enter rider name"
                         class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
@@ -45,7 +45,7 @@
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                        Email
+                        Email *
                     </label>
                     <input type="email" formControlName="email" placeholder="Enter email"
                         class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
@@ -55,7 +55,7 @@
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                        Mobile Number
+                        Mobile Number *
                     </label>
                     <input type="text" maxlength="10" formControlName="mobile" placeholder="Enter mobile number"
                         class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
@@ -66,7 +66,7 @@
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                            Vehicle Type
+                            Vehicle Type *
                         </label>
                         <select formControlName="vehicle_type"
                             class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100">
@@ -82,7 +82,7 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                            Vehicle Number
+                            Vehicle Number *
                         </label>
                         <input type="text" formControlName="vehicle_number" placeholder="e.g. HR01AB1234"
                             class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm uppercase outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
@@ -118,13 +118,9 @@
         </div>
     </div>
     <div class="flex shrink-0 flex-col-reverse gap-2 border-t border-gray-200 px-5 py-4 sm:flex-row sm:justify-end">
-        <button (click)="close.emit()"
-            class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 sm:w-auto">
-            Close
-        </button>
-        <button *ngIf="mode === 'view'" (click)="enableEdit()"
+        <button *ngIf="mode === 'create'" (click)="resetRider()"
             class="w-full rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#c7193f] sm:w-auto">
-            Edit Rider
+            Reset Rider
         </button>
         <button *ngIf="mode !== 'view'" (click)="submit()" [disabled]="loading"
             class="w-full rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c7193f] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto">
@@ -132,3 +128,18 @@
         </button>
     </div>
 </div>
+
+<app-confirmation-dialog
+    [visible]="showConfirmation"
+    [title]="'Confirm Rider Creation'"
+    [message]="'Are you sure you want to create rider'"
+    [itemName]="riderForm.get('name')?.value ? '&quot;' + riderForm.get('name')?.value + '&quot;?' : '?'"
+    [confirmText]="'Yes, Create Rider'"
+    [cancelText]="'Cancel'"
+    [loading]="loading"
+    [loadingText]="'Creating...'"
+    [icon]="'help-circle'"
+    [showWarningText]="false"
+    (confirmed)="confirmCreateRider()"
+    (cancelled)="cancelConfirmation()">
+</app-confirmation-dialog>

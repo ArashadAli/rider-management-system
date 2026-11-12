@@ -2,7 +2,7 @@
     <div role="dialog" aria-modal="true" class="w-full max-w-md rounded-xl bg-white p-6 shadow-2xl" (click)="$event.stopPropagation()">
         <div class="flex items-start gap-4">
             <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
-                <i-lucide name="trash-2" [size]="23"></i-lucide>
+                <i-lucide [name]="icon" [size]="23"></i-lucide>
             </div>
             <div class="min-w-0 flex-1">
                 <h2 class="text-lg font-semibold text-gray-900">
@@ -13,7 +13,7 @@
                     <span *ngIf="itemName" class="font-semibold text-gray-800">
                         {{ itemName }}
                     </span>
-                    <span class="block mt-1">
+                    <span *ngIf="showWarningText" class="block mt-1">
                         This action cannot be undone.
                     </span>
                 </p>

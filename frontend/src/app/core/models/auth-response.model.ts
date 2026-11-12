@@ -3,6 +3,7 @@ export interface User {
   name: string;
   email: string;
   mobile: string;
+  profile_image?: string | null;
 }
 
 export interface CommonResponse {

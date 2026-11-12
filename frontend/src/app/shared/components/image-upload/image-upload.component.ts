@@ -1,5 +1,5 @@
 
-import {Component,EventEmitter,Input,OnDestroy,Output} from '@angular/core';
+import {Component,ElementRef,EventEmitter,Input,OnDestroy,Output,ViewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -16,16 +16,23 @@ export class ImageUploadComponent implements OnDestroy {
 
     @Input() previewUrl: string | null = null;
     @Input() disabled = false;
-    @Input() maxSizeMB = 5;
-    @Input() accept = 'image/jpeg,image/png';
+    @Input() maxSizeMB = 2;
+    @Input() accept = 'image/jpeg,image/png,image/jpg,.jpg,.jpeg,.png';
 
     @Output() fileSelected = new EventEmitter<File | null>();
+
+    @ViewChild('fileInput') fileInput?: ElementRef<HTMLInputElement>;
 
     selectedFile: File | null = null;
     imagePreview: string | null = null;
     errorMessage = '';
 
     private objectUrl: string | null = null;
+
+    onFileInputClick(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        input.value = '';
+    }
 
     onFileSelected(event: Event): void {
         const input = event.target as HTMLInputElement;
@@ -34,8 +41,14 @@ export class ImageUploadComponent implements OnDestroy {
         }
         const file = input.files[0];
         this.errorMessage = '';
-        if (!['image/jpeg', 'image/png'].includes(file.type)) {
-            this.errorMessage = 'Only JPG and PNG images are allowed.';
+
+        const extension = file.name.split('.').pop()?.toLowerCase();
+        const validExtensions = ['jpg', 'jpeg', 'png'];
+        const validMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        const isValidFormat = validMimeTypes.includes(file.type) || validExtensions.includes(extension || '');
+
+        if (!isValidFormat) {
+            this.errorMessage = 'Only JPG, JPEG and PNG images are allowed.';
             input.value = '';
             return;
         }
@@ -53,11 +66,19 @@ export class ImageUploadComponent implements OnDestroy {
     }
 
     removeImage(): void {
+        this.reset();
+        this.fileSelected.emit(null);
+    }
+
+    /** Clears the selected file and preview without emitting an event. */
+    reset(): void {
         this.clearObjectUrl();
         this.selectedFile = null;
         this.imagePreview = null;
         this.errorMessage = '';
-        this.fileSelected.emit(null);
+        if (this.fileInput) {
+            this.fileInput.nativeElement.value = '';
+        }
     }
 
     get displayImage(): string | null {

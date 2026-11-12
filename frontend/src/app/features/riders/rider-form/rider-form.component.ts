@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subject, of } from 'rxjs';
@@ -7,6 +7,7 @@ import { RidersService } from 'src/app/core/services/riders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { ImageUploadComponent } from 'src/app/shared/components/image-upload/image-upload.component';
+import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-rider-form',
@@ -15,7 +16,8 @@ import { ImageUploadComponent } from 'src/app/shared/components/image-upload/ima
     CommonModule,
     ReactiveFormsModule,
     LucideAngularModule,
-    ImageUploadComponent
+    ImageUploadComponent,
+    ConfirmationDialogComponent
   ],
   templateUrl: './rider-form.component.html',
   styleUrls: ['./rider-form.component.css']
@@ -29,6 +31,7 @@ export class RiderFormComponent
   @Output() saved = new EventEmitter<void>();
   riderForm!: FormGroup;
   loading = false;
+  showConfirmation = false;
   selectedImage: File | null = null;
   existingImageUrl: string | null = null;
   private destroy$ = new Subject<void>();
@@ -36,10 +39,12 @@ export class RiderFormComponent
   constructor(
     private fb: FormBuilder,
     private ridersService: RidersService,
-    private toastService: CustomToastService
+    private toastService: CustomToastService,
+    private renderer: Renderer2
   ) { }
 
   ngOnInit(): void {
+    this.renderer.addClass(document.body, 'overflow-hidden');
     this.initializeForm();
     if (this.mode === 'view' || this.mode === 'edit') {
       if (this.riderId) {
@@ -129,9 +134,9 @@ export class RiderFormComponent
     return '';
   }
 
-  enableEdit(): void {
-    this.mode = 'edit';
-    this.riderForm.enable();
+  resetRider(): void {
+    this.showConfirmation = false;
+    this.riderForm.reset();
   }
 
   submit(): void {
@@ -145,11 +150,26 @@ export class RiderFormComponent
     }
 
     if (this.mode === 'create') {
-      this.createRider();
+      this.showConfirmation = true;
+      return;
     }
 
     if (this.mode === 'edit') {
       this.updateRider();
+    }
+  }
+
+  confirmCreateRider(): void {
+    if (this.mode !== 'create' || this.loading || !this.showConfirmation || this.riderForm.invalid) {
+      return;
+    }
+    this.showConfirmation = false;
+    this.createRider();
+  }
+
+  cancelConfirmation(): void {
+    if (!this.loading) {
+      this.showConfirmation = false;
     }
   }
 
@@ -235,6 +255,7 @@ export class RiderFormComponent
   }
 
   ngOnDestroy(): void {
+    this.renderer.removeClass(document.body, 'overflow-hidden');
     this.destroy$.next();
     this.destroy$.complete();
   }

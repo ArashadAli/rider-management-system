@@ -23,6 +23,8 @@ export class ConfirmationDialogComponent {
     @Input() cancelText = 'Cancel';
     @Input() loading = false;
     @Input() loadingText = 'Processing...';
+    @Input() icon = 'trash-2';
+    @Input() showWarningText = true;
     @Output() confirmed = new EventEmitter<void>();
     @Output() cancelled = new EventEmitter<void>();
 

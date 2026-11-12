@@ -53,6 +53,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   availableRiders: AvailableRider[] = [];
   busyRiders: AvailableRider[] = [];
   loadingBusyRiders = false;
+  showFilters = false;
   filters = {
     search: '',
     status: '',
@@ -257,6 +258,20 @@ export class OrdersComponent implements OnInit, OnDestroy {
     return classes[status] || 'bg-gray-100 text-gray-700';
   }
 
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
+  }
+
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.filters.search && this.filters.search.trim()) count++;
+    if (this.filters.status) count++;
+    if (this.filters.rider) count++;
+    if (this.filters.date) count++;
+    if (this.filters.sort && this.filters.sort !== 'newest') count++;
+    return count;
+  }
+
   applyFilters(): void {
     this.currentPage = 1;
     this.loadOrders();
@@ -352,6 +367,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
       .pipe(
         finalize(() => {
           this.deletingOrderId = null
+          this.closeDeleteConfirmation();
         })
       )
       .subscribe({

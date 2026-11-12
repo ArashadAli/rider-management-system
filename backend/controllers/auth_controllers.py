@@ -65,7 +65,8 @@ def loginUser(validated_data=None):
             "id": user.id,
             "name": user.name,
             "email": user.email,
-            "mobile": user.mobile
+            "mobile": user.mobile,
+            "profile_image": user.profile_image
         }
     })
 

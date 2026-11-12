@@ -9,11 +9,6 @@ class UserProfileUpdateSchema(BaseBodySchema):
         validate=validate.Regexp(MOBILE_REGEX, error="Invalid mobile number format")
     )
 
-    @validates_schema
-    def validate_at_least_one(self, data, **kwargs):
-        if not data.get("name") and not data.get("mobile"):
-            raise ValidationError("At least one field (name or mobile) is required for update", "general")
-
 
 class ChangePasswordSchema(BaseBodySchema):
     currentPassword = fields.String(
@@ -31,5 +26,5 @@ class ChangePasswordSchema(BaseBodySchema):
 class UserResponseSchema(Schema):
     id = fields.Integer()
     name = fields.String()
-    email = fields.String()
     mobile = fields.String()
+    profile_image = fields.String(allow_none=True)

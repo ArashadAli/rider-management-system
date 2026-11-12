@@ -33,7 +33,9 @@ import { LucideAngularModule, LayoutDashboard, ShoppingCartIcon, Truck, UserRoun
   Ban,
   Menu,
   ShieldCheck,
-  LoaderCircle
+  LoaderCircle,
+  HelpCircle,
+  FunnelPlus,
 } from 'lucide-angular';
 
 
@@ -91,7 +93,9 @@ import { LucideAngularModule, LayoutDashboard, ShoppingCartIcon, Truck, UserRoun
       Ban,
       Menu,
       ShieldCheck,
-      LoaderCircle
+      LoaderCircle,
+      HelpCircle,
+      FunnelPlus
     })
   ],
 

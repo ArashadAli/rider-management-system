@@ -14,6 +14,12 @@ class User(db.Model):
         nullable=False
     )
 
+    profile_image = db.Column(
+        db.Text,
+        nullable=True,
+        default=None
+    )
+
     email = db.Column(
         db.String(120),
         nullable=False,

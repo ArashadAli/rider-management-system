@@ -11,13 +11,24 @@
                 Manage all riders
             </p>
         </div>
-        <button type="button" (click)="openCreateDrawer()"
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#c7193f] focus:outline-none focus:ring-2 focus:ring-[#DC1D47]/50 focus:ring-offset-2 sm:w-auto">
-            <i-lucide name="circle-plus" [size]="18" [strokeWidth]="2"></i-lucide>
-            <span>Create Rider</span>
-        </button>
+        <div class="flex items-center gap-3">
+            <button type="button" (click)="toggleFilters()"
+                class="relative inline-flex items-center justify-center gap-2 rounded-lg bg-[#163758] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#122e49] focus:outline-none focus:ring-2 focus:ring-[#163758]/50 focus:ring-offset-2">
+                <i-lucide name="funnel-plus" [size]="18"></i-lucide>
+                <span>Filters</span>
+                <span *ngIf="activeFilterCount > 0"
+                    class="absolute -top-2 -right-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-[#DC1D47] px-1 text-[11px] font-bold text-white shadow">
+                    {{ activeFilterCount }}
+                </span>
+            </button>
+            <button type="button" (click)="openCreateDrawer()"
+                class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-[#c7193f] focus:outline-none focus:ring-2 focus:ring-[#DC1D47]/50 focus:ring-offset-2 sm:w-auto">
+                <i-lucide name="circle-plus" [size]="18" [strokeWidth]="2"></i-lucide>
+                <span>Create Rider</span>
+            </button>
+        </div>
     </div>
-    <form [formGroup]="filterForm">
+    <form [formGroup]="filterForm" *ngIf="showFilters">
         <div class="mb-6 rounded-xl bg-white p-5 shadow-sm">
             <div class="mb-4 flex items-center justify-between">
                 <h2 class="text-base font-semibold text-[#163758]">

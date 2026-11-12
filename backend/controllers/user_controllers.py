@@ -6,6 +6,9 @@ from models.user_model import User
 from models.order_model import Order
 from models.rider_model import Rider
 from schemas.base import get_validated_data
+from utils.image_validator import validate_profile_image
+from utils.cloudinary_helper import delete_cloudinary_image
+import cloudinary.uploader
 
 def user_dashboard(user_email):
     try:
@@ -152,7 +155,8 @@ def user_profile(user_email):
             "id": user.id,
             "name": user.name,
             "email": user.email,
-            "mobile": user.mobile
+            "mobile": user.mobile,
+            "profile_image": user.profile_image
         }
     }), 200
 
@@ -172,6 +176,21 @@ def update_user_profile(user_email, validated_data=None):
 
         user_name = data.get("name")
         user_mobile = data.get("mobile")
+        profile_image = request.files.get("profile_image")
+
+        if not any([user_name, user_mobile, profile_image]):
+            return jsonify({
+                "success": False,
+                "message": "At least one field (name, mobile or profile image) is required for update"
+            }), 400
+
+        if profile_image:
+            is_valid, error_message = validate_profile_image(profile_image)
+            if not is_valid:
+                return jsonify({
+                    "success": False,
+                    "message": error_message
+                }), 400
 
         if user_mobile:
             existing_mobile = User.query.filter(User.mobile == user_mobile, User.email != user_email).first()
@@ -185,7 +204,31 @@ def update_user_profile(user_email, validated_data=None):
         if user_name:
             user.name = user_name
 
-        db.session.commit()
+        old_image_url = user.profile_image
+        new_image_url = None
+
+        if profile_image:
+            result = cloudinary.uploader.upload(
+                profile_image,
+                folder="users",
+                resource_type="image",
+                allowed_formats=["jpg", "jpeg", "png"]
+            )
+            new_image_url = result.get("secure_url")
+            user.profile_image = new_image_url
+
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            # Avoid orphaning the freshly uploaded image
+            if new_image_url:
+                delete_cloudinary_image(new_image_url)
+            raise
+
+        # Remove the replaced image only after the DB update succeeded
+        if new_image_url and old_image_url and old_image_url != new_image_url:
+            delete_cloudinary_image(old_image_url)
 
         return jsonify({
             "success": True,
@@ -194,7 +237,8 @@ def update_user_profile(user_email, validated_data=None):
                 "id": user.id,
                 "name": user.name,
                 "email": user.email,
-                "mobile": user.mobile
+                "mobile": user.mobile,
+                "profile_image": user.profile_image
             }
         }), 200
 
