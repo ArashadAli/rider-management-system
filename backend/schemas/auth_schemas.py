@@ -1,7 +1,7 @@
 from marshmallow import fields, validate, validates_schema, ValidationError
 from schemas.base import BaseBodySchema
 
-EMAIL_REGEX = r"^[\w.-]+@gmail\.com$"
+EMAIL_REGEX = r"^[\w.-]+@[\w.-]+\.[a-zA-Z]{2,}$"
 MOBILE_REGEX = r"^[6-9]\d{9}$"
 
 class RegisterSchema(BaseBodySchema):
