@@ -7,15 +7,34 @@ from routes.rider import rider_bp
 from config.connectDB import db
 from dotenv import load_dotenv
 from flask_cors import CORS
-from models.order_model import Order
+from models.order_model import Order, OrderStatusHistory
 from models.rider_model import Rider
 import os
+from flask_swagger_ui import get_swaggerui_blueprint
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(os.path.join(base_dir, ".env"))
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    static_folder=os.path.join(base_dir, "static"),
+    static_url_path="/static"
+)
+
+# Swagger UI Configuration
+SWAGGER_URL = "/docs"
+API_URL = "/static/openapi.json"
+
+swagger_ui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        "app_name": "Rider Management System API",
+        "docExpansion": "none",
+        "persistAuthorization": True
+    }
+)
+app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
 # Added Flask Level request size
 app.config["MAX_CONTENT_LENGTH"] = 3 * 1024 * 1024
@@ -35,8 +54,17 @@ jwt = JWTManager(app)
 # CORS configuration
 CORS(
     app,
-    origins=["http://localhost:4200", "http://localhost:8080", "https://rider-management-system-lyart.vercel.app"],
-    supports_credentials=True
+    origins=[
+        "http://localhost:4200", 
+        "http://localhost:8080", 
+        "https://rider-management-system-lyart.vercel.app",
+        "https://rider-management-system-backend.onrender.com",
+        "http://localhost:5000",
+        "http://127.0.0.1:5000",
+        ],
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization", "X-CSRF-TOKEN"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 )
 
 # Database configuration

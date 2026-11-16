@@ -1,0 +1,1011 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Rider Management System API",
+    "description": "API documentation for the Rider Management System, featuring authentication, dashboard metrics, rider fleet management, order dispatch, and user profile management.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support"
+    }
+  },
+  "servers": [
+    {
+      "url":"/",
+      "description": "Current Server (Same origin - Local or Deployed)"
+    },
+    {
+      "url": "http://127.0.0.1:5000",
+      "description": "Local Development Server"
+    },
+    {
+        "url": "https://rider-management-system-backend.onrender.com",
+        "description": "Production Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "User registration, authentication, CSRF tokens, and session management"
+    },
+    {
+      "name": "Users",
+      "description": "User dashboard metrics, profile management, and account settings"
+    },
+    {
+      "name": "Riders",
+      "description": "Rider fleet onboarding, pagination, status & availability toggles, and profile updates"
+    },
+    {
+      "name": "Orders",
+      "description": "Order creation, pagination, rider assignment, and order lifecycle management"
+    }
+  ],
+  "paths": {
+    "/api/auth/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Register a new user",
+        "description": "Creates a new user account with hashed password.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          },
+          "409": {
+            "description": "User email or mobile already exists",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login user and issue JWT",
+        "description": "Authenticates user credentials and returns an access token, user details, and sets HTTP-only cookies.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string", "example": "Login successful" },
+                    "access_token": { "type": "string" },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "name": { "type": "string" },
+                        "email": { "type": "string" },
+                        "mobile": { "type": "string" },
+                        "profile_image": { "type": "string", "nullable": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/csrf-token": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get CSRF token",
+        "description": "Returns a CSRF token to be included in the X-CSRF-TOKEN header for state-changing requests.",
+        "responses": {
+          "200": {
+            "description": "CSRF token fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "csrf_token": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Logout user",
+        "description": "Clears authentication cookies and invalidates session.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Logout successful",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/dashboard": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Fetch dashboard metrics",
+        "description": "Retrieves real-time aggregated metrics for orders, revenue, and rider status.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dashboard metrics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_orders": { "type": "integer" },
+                    "pending_orders": { "type": "integer" },
+                    "delivered_orders": { "type": "integer" },
+                    "assigned_orders": { "type": "integer" },
+                    "cancelled_orders": { "type": "integer" },
+                    "total_order_value": { "type": "number" },
+                    "total_riders": { "type": "integer" },
+                    "active_riders": { "type": "integer" },
+                    "inactive_riders": { "type": "integer" },
+                    "available_riders": { "type": "integer" },
+                    "unavailable_riders": { "type": "integer" },
+                    "success_rate": { "type": "number" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get authenticated user profile",
+        "description": "Returns profile details for the currently logged-in user.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "User profile data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "example": true },
+                    "message": { "type": "string" },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer" },
+                        "name": { "type": "string" },
+                        "email": { "type": "string" },
+                        "mobile": { "type": "string" },
+                        "profile_image": { "type": "string", "nullable": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/update-profile": {
+      "put": {
+        "tags": ["Users"],
+        "summary": "Update user profile",
+        "description": "Updates profile details such as name, mobile number, and avatar image (uploaded to Cloudinary).",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": { "$ref": "#/components/schemas/UserProfileUpdate" }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "mobile": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/users/change-password": {
+      "put": {
+        "tags": ["Users"],
+        "summary": "Change user password",
+        "description": "Validates current password and updates to the new password.",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChangePasswordRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/riders/create": {
+      "post": {
+        "tags": ["Riders"],
+        "summary": "Register a new rider",
+        "description": "Creates a rider record with vehicle details and optional profile photo upload.",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": { "$ref": "#/components/schemas/RiderCreateRequest" }
+            },
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RiderCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Rider created successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "409": {
+            "description": "Email or mobile conflict",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/riders/paginate": {
+      "get": {
+        "tags": ["Riders"],
+        "summary": "Get paginated riders list",
+        "description": "Fetches a paginated, sorted, and filtered list of riders.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 5 } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string", "enum": ["", "active", "inactive"] } },
+          { "name": "availability", "in": "query", "schema": { "type": "string", "enum": ["", "available", "unavailable", "busy"] } },
+          { "name": "sort_by", "in": "query", "schema": { "type": "string", "default": "created_at" } },
+          { "name": "sort_order", "in": "query", "schema": { "type": "string", "enum": ["asc", "desc"], "default": "desc" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated riders retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string" },
+                          "email": { "type": "string" },
+                          "mobile": { "type": "string" },
+                          "vehicle_type": { "type": "string" },
+                          "vehicle_number": { "type": "string" },
+                          "profile_image_url": { "type": "string", "nullable": true },
+                          "status": { "type": "string" },
+                          "availability": { "type": "string" }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total_records": { "type": "integer" },
+                        "total_pages": { "type": "integer" },
+                        "current_page": { "type": "integer" },
+                        "limit": { "type": "integer" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/riders/allRiders": {
+      "get": {
+        "tags": ["Riders"],
+        "summary": "Get all riders",
+        "description": "Fetches all rider records in the database.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of all riders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "riders": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/riders/rider/{rider_id}": {
+      "get": {
+        "tags": ["Riders"],
+        "summary": "Get rider by ID",
+        "description": "Fetch details of an individual rider.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "rider_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rider details retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "rider": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/riders/rider-action/{rider_id}": {
+      "patch": {
+        "tags": ["Riders"],
+        "summary": "Toggle rider status or availability",
+        "description": "Toggles active/inactive status or cycles availability.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "rider_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rider status toggled successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/riders/active-riders": {
+      "post": {
+        "tags": ["Riders"],
+        "summary": "Filter active riders",
+        "description": "Retrieves riders based on active/inactive status filter.",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": { "type": "string", "enum": ["active", "inactive"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of filtered riders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "riders": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/riders/rider-update/{rider_id}": {
+      "put": {
+        "tags": ["Riders"],
+        "summary": "Update rider details",
+        "description": "Modifies information, vehicle details, or photo of an existing rider.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "rider_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": { "$ref": "#/components/schemas/RiderUpdateRequest" }
+            },
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RiderUpdateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rider updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/riders/delete-rider/{rider_id}": {
+      "delete": {
+        "tags": ["Riders"],
+        "summary": "Delete rider",
+        "description": "Removes a rider record and deletes their photo from Cloudinary.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "rider_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rider deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/riders/available-rider": {
+      "get": {
+        "tags": ["Riders"],
+        "summary": "Get available riders",
+        "description": "Returns list of all active riders whose availability is 'available'.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Available riders list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "riders": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/riders/busy-rider": {
+      "get": {
+        "tags": ["Riders"],
+        "summary": "Get busy riders",
+        "description": "Returns riders currently on delivery or marked as busy.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Busy riders list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "riders": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/create": {
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Create a new order",
+        "description": "Creates a delivery order record with auto-generated order_id.",
+        "security": [{ "BearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OrderCreateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "order_id": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/orders/pagination": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get paginated orders",
+        "description": "Fetches a paginated, sorted, and filtered list of customer orders.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 10 } },
+          { "name": "search", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "rider", "in": "query", "schema": { "type": "string" } },
+          { "name": "date", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["newest", "oldest", "amount_low", "amount_high"], "default": "newest" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated orders retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "orders": { "type": "array", "items": { "type": "object" } },
+                    "total_orders": { "type": "integer" },
+                    "total_pages": { "type": "integer" },
+                    "current_page": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/orders/allOrders": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get all orders",
+        "description": "Returns all orders regardless of status or pagination.",
+        "security": [{ "BearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "List of all orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "orders": { "type": "array", "items": { "type": "object" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/orders/single-order/{order_id}": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get order by ID",
+        "description": "Fetch details of a specific order.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "order_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order details retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "order": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/orders/assign-rider/{order_id}": {
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Assign rider to order",
+        "description": "Assigns an available rider to a pending order and updates their availability status.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "order_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OrderAssignRiderRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rider assigned successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/orders/update-order-status/{order_id}": {
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Update order status",
+        "description": "Updates order status (e.g. pending -> assigned -> delivered).",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "order_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OrderStatusUpdateRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/orders/delete-order/{order_id}": {
+      "delete": {
+        "tags": ["Orders"],
+        "summary": "Delete order",
+        "description": "Deletes an order record.",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "order_id", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiResponse" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT Authorization header using Bearer scheme. Enter token without 'Bearer ' prefix."
+      },
+      "CsrfHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-CSRF-TOKEN",
+        "description": "CSRF Token for state-changing requests when cookies are used"
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Unauthorized - Missing or invalid JWT token",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": false },
+                "message": { "type": "string", "example": "Unauthorized" }
+              }
+            }
+          }
+        }
+      },
+      "BadRequest": {
+        "description": "Bad Request - Validation failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": false },
+                "message": { "type": "string", "example": "Validation error" },
+                "errors": { "type": "object" }
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": { "type": "boolean", "example": false },
+                "message": { "type": "string", "example": "Resource not found" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean", "example": false },
+          "message": { "type": "string" },
+          "errors": { "type": "object" }
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["name", "email", "mobile", "password", "confirm_password"],
+        "properties": {
+          "name": { "type": "string", "example": "John Doe" },
+          "email": { "type": "string", "format": "email", "example": "john@example.com" },
+          "mobile": { "type": "string", "pattern": "^[6-9]\\d{9}$", "example": "9876543210" },
+          "password": { "type": "string", "minLength": 8, "example": "SecretPass123" },
+          "confirm_password": { "type": "string", "example": "SecretPass123" }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email", "example": "john@example.com" },
+          "password": { "type": "string", "example": "SecretPass123" }
+        }
+      },
+      "UserProfileUpdate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "John Doe Updated" },
+          "mobile": { "type": "string", "pattern": "^[6-9]\\d{9}$", "example": "9876543210" },
+          "profile_image": { "type": "string", "format": "binary", "description": "Profile picture (JPEG, PNG)" }
+        }
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "required": ["currentPassword", "newPassword"],
+        "properties": {
+          "currentPassword": { "type": "string", "example": "OldSecret123" },
+          "newPassword": { "type": "string", "minLength": 8, "example": "NewSecret456" }
+        }
+      },
+      "RiderCreateRequest": {
+        "type": "object",
+        "required": ["name", "email", "mobile", "vehicle_type", "vehicle_number"],
+        "properties": {
+          "name": { "type": "string", "example": "Alex Rider" },
+          "email": { "type": "string", "format": "email", "example": "alex@rider.com" },
+          "mobile": { "type": "string", "pattern": "^[6-9]\\d{9}$", "example": "9123456780" },
+          "vehicle_type": { "type": "string", "example": "Motorcycle" },
+          "vehicle_number": { "type": "string", "example": "KA-01-AB-1234" },
+          "status": { "type": "string", "enum": ["active", "inactive"], "default": "active" },
+          "availability": { "type": "string", "enum": ["available", "unavailable"], "default": "available" },
+          "profile_image": { "type": "string", "format": "binary", "description": "Rider photo" }
+        }
+      },
+      "RiderUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "example": "Alex Rider Updated" },
+          "email": { "type": "string", "format": "email", "example": "alex_new@rider.com" },
+          "mobile": { "type": "string", "pattern": "^[6-9]\\d{9}$", "example": "9123456780" },
+          "vehicle_type": { "type": "string", "example": "Electric Scooter" },
+          "vehicle_number": { "type": "string", "example": "KA-01-XY-9999" },
+          "status": { "type": "string", "enum": ["active", "inactive"] },
+          "availability": { "type": "string", "enum": ["available", "unavailable", "busy"] },
+          "profile_image": { "type": "string", "format": "binary" }
+        }
+      },
+      "OrderCreateRequest": {
+        "type": "object",
+        "required": ["order_item", "customer_name", "customer_mobile", "pickup_address", "delivery_address", "amount"],
+        "properties": {
+          "order_item": { "type": "string", "example": "Pizza Margherita x 2" },
+          "customer_name": { "type": "string", "example": "Alice Smith" },
+          "customer_mobile": { "type": "string", "pattern": "^\\d{10}$", "example": "9876543210" },
+          "pickup_address": { "type": "string", "example": "123 Main St, Bakery Corner" },
+          "delivery_address": { "type": "string", "example": "456 Oak Avenue, Apt 4B" },
+          "amount": { "type": "number", "minimum": 0.01, "example": 299.50 }
+        }
+      },
+      "OrderStatusUpdateRequest": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["pending", "assigned", "accepted", "picked_up", "on_the_way", "delivered", "cancelled"],
+            "example": "accepted"
+          }
+        }
+      },
+      "OrderAssignRiderRequest": {
+        "type": "object",
+        "required": ["rider_id"],
+        "properties": {
+          "rider_id": { "type": "string", "example": "3fa85f64-5717-4562-b3fc-2c963f66afa6" }
+        }
+      }
+    }
+  }
+}

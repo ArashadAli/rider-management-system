@@ -8,6 +8,15 @@ import { EMPTY } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
 
+export interface TimelineStep {
+    key: string;
+    label: string;
+    description: string;
+    status: 'completed' | 'current' | 'upcoming' | 'cancelled';
+    timestamp?: string | null;
+    note?: string | null;
+}
+
 @Component({
     selector: 'app-order-drawer',
     standalone: true,
@@ -28,6 +37,7 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
     loadingOrder = false;
     orderDetails: any = null;
     showConfirmation = false;
+    timelineSteps: TimelineStep[] = [];
 
     constructor(
         private ordersService: OrdersService,
@@ -101,6 +111,7 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
                     }
                     const order = response.data;
                     this.orderDetails = order;
+                    this.buildTimeline(order);
                     this.orderForm.patchValue({
                         order_item: order.order_item || '',
                         customer_name: order.customer_name || '',
@@ -118,7 +129,109 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
             })
     }
 
+    buildTimeline(order: any): void {
+        if (!order) {
+            this.timelineSteps = [];
+            return;
+        }
+
+        const isCancelled = order.status === 'cancelled';
+        const history: any[] = order.history || [];
+
+        const historyMap = new Map<string, any>();
+        history.forEach((h: any) => {
+            if (h.to_status) {
+                historyMap.set(h.to_status, h);
+            }
+        });
+
+        if (isCancelled) {
+            const pendingEntry = historyMap.get('pending');
+            const cancelEntry = historyMap.get('cancelled');
+            this.timelineSteps = [
+                {
+                    key: 'pending',
+                    label: 'Order Placed',
+                    description: 'Order created in system',
+                    status: 'completed',
+                    timestamp: pendingEntry?.changed_at || order.created_at,
+                    note: pendingEntry?.changed_by || null
+                },
+                {
+                    key: 'cancelled',
+                    label: 'Order Cancelled',
+                    description: 'Order was cancelled',
+                    status: 'cancelled',
+                    timestamp: cancelEntry?.changed_at || null,
+                    note: cancelEntry?.changed_by || 'Cancelled while pending'
+                }
+            ];
+            return;
+        }
+
+        const standardStages = [
+            { key: 'pending', label: 'Order Placed', desc: 'Order received and logged' },
+            { key: 'assigned', label: 'Rider Assigned', desc: order.rider_name ? `Assigned to ${order.rider_name}` : 'Awaiting rider allocation' },
+            { key: 'accepted', label: 'Order Accepted', desc: 'Rider confirmed delivery request' },
+            { key: 'picked_up', label: 'Picked Up', desc: 'Package picked up from merchant' },
+            { key: 'on_the_way', label: 'On The Way', desc: 'Rider in transit to customer' },
+            { key: 'delivered', label: 'Delivered', desc: 'Package delivered to recipient' }
+        ];
+
+        const stageOrder = ['pending', 'assigned', 'accepted', 'picked_up', 'on_the_way', 'delivered'];
+        const currentIdx = stageOrder.indexOf(order.status);
+
+        this.timelineSteps = standardStages.map((stage, idx) => {
+            const historyEntry = historyMap.get(stage.key);
+            let stepStatus: 'completed' | 'current' | 'upcoming' = 'upcoming';
+
+            if (idx < currentIdx || (idx === currentIdx && order.status === 'delivered')) {
+                stepStatus = 'completed';
+            } else if (idx === currentIdx) {
+                stepStatus = 'current';
+            } else {
+                stepStatus = 'upcoming';
+            }
+
+            return {
+                key: stage.key,
+                label: stage.label,
+                description: stage.desc,
+                status: stepStatus,
+                timestamp: historyEntry?.changed_at || (idx === 0 ? order.created_at : null),
+                note: historyEntry?.changed_by || null
+            };
+        });
+    }
+
+    getStatusBadgeClass(status: string): string {
+        const classes: Record<string, string> = {
+            pending: 'bg-amber-50 text-amber-700',
+            assigned: 'bg-indigo-50 text-indigo-700',
+            accepted: 'bg-blue-50 text-blue-700',
+            picked_up: 'bg-purple-50 text-purple-700',
+            on_the_way: 'bg-emerald-50 text-emerald-700',
+            delivered: 'bg-green-50 text-green-700',
+            cancelled: 'bg-red-50 text-red-700'
+        };
+        return classes[status] || 'bg-gray-100 text-gray-700';
+    }
+
+    formatStatusLabel(status: string): string {
+        const labels: Record<string, string> = {
+            pending: 'Pending',
+            assigned: 'Assigned',
+            accepted: 'Accepted',
+            picked_up: 'Picked Up',
+            on_the_way: 'On The Way',
+            delivered: 'Delivered',
+            cancelled: 'Cancelled'
+        };
+        return labels[status] || (status ? status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '-');
+    }
+
     resetForm(): void {
+        this.timelineSteps = [];
         this.orderForm.reset({
             order_item: '',
             customer_name: '',

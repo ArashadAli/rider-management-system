@@ -4,6 +4,7 @@ from schemas.base import BaseBodySchema, BaseQuerySchema
 ALLOWED_ORDER_STATUSES = [
     "pending",
     "assigned",
+    "accepted",
     "picked_up",
     "on_the_way",
     "delivered",

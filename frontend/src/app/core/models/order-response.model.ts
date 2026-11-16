@@ -1,3 +1,12 @@
+export interface OrderStatusHistoryItem {
+  id?: number | null;
+  order_id: string;
+  from_status: string | null;
+  to_status: string;
+  changed_at: string | null;
+  changed_by?: string | null;
+}
+
 export interface Order {
   order_id: string;
   order_item: string;
@@ -7,9 +16,11 @@ export interface Order {
   delivery_address: string;
   amount: number;
   status: string;
+  next_statuses?: string[];
+  history?: OrderStatusHistoryItem[];
   created_at: string | null;
   rider_id: string | null;
-  rider_name: string | null
+  rider_name: string | null;
 }
 
 export interface OrderResponse {

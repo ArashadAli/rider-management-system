@@ -180,24 +180,23 @@
                 </ng-template>
               </td>
               <td class="px-5 py-4">
-                <ng-container *ngIf="order.status === 'delivered' || order.status === 'cancelled'; else statusDropdown">
+                <ng-container *ngIf="order.status === 'delivered' || order.status === 'cancelled' || !order.next_statuses || order.next_statuses.length === 0; else statusDropdown">
                   <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold"
                     [ngClass]="getStatusClass(order.status)">
-                    {{ order.status | titlecase }}
+                    {{ formatStatusLabel(order.status) }}
                   </span>
                 </ng-container>
                 <ng-template #statusDropdown>
-                  <select [ngModel]="order.status" (ngModelChange)="updateOrderStatus(order, $event)"
+                  <select [ngModel]="order.status" (ngModelChange)="onStatusChange(order, $event)"
                     [disabled]="updatingStatusOrderId === order.order_id"
                     class="max-w-40 rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs font-semibold outline-none focus:border-[#DC1D47] disabled:opacity-50"
                     [ngClass]="getStatusClass(order.status)">
-                    <option value="pending">Pending</option>
-                    <option value="assigned">Assigned</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="picked_up">Picked Up</option>
-                    <option value="on_the_way">On The Way</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
+                    <option [value]="order.status" disabled selected>
+                      {{ formatStatusLabel(order.status) }} (Current)
+                    </option>
+                    <option *ngFor="let nextStatus of order.next_statuses" [value]="nextStatus">
+                      {{ nextStatus === 'assigned' ? 'Assign Rider' : formatStatusLabel(nextStatus) }}
+                    </option>
                   </select>
                 </ng-template>
               </td>

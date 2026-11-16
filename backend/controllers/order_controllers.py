@@ -1,11 +1,21 @@
 from flask import request, jsonify
 from config.connectDB import db
-from models.order_model import Order
+from models.order_model import Order, OrderStatusHistory
 from models.rider_model import Rider
 import uuid
 from datetime import datetime, timedelta
 from sqlalchemy import or_
 from schemas.base import get_validated_data, get_validated_query
+
+ORDER_TRANSITIONS = {
+    "pending": ["assigned", "cancelled"],
+    "assigned": ["accepted"],
+    "accepted": ["picked_up"],
+    "picked_up": ["on_the_way"],
+    "on_the_way": ["delivered"],
+    "delivered": [],
+    "cancelled": []
+}
 
 def create_Order(user_email, validated_data=None):
     try:
@@ -28,6 +38,15 @@ def create_Order(user_email, validated_data=None):
         )
 
         db.session.add(new_order)
+        db.session.flush()
+
+        initial_history = OrderStatusHistory(
+            order_id=new_order.order_id,
+            from_status=None,
+            to_status="pending",
+            changed_by=user_email
+        )
+        db.session.add(initial_history)
         db.session.commit()
 
         return jsonify({
@@ -71,6 +90,7 @@ def allOrders(user_email):
                 "delivery_address": order.delivery_address,
                 "amount": float(order.amount),
                 "status": order.status,
+                "next_statuses": ORDER_TRANSITIONS.get(order.status, []),
                 "created_at": order.created_at.isoformat() if order.created_at else None,
                 "rider_id": order.rider_id
             }
@@ -164,6 +184,7 @@ def getOrderForPagination(user_email, validated_query=None):
                 "delivery_address": order.delivery_address,
                 "amount": float(order.amount),
                 "status": order.status,
+                "next_statuses": ORDER_TRANSITIONS.get(order.status, []),
                 "created_at": order.created_at.isoformat() if order.created_at else None,
                 "rider_id": order.rider_id,
                 "rider_name": rider_name
@@ -213,6 +234,12 @@ def assign_Rider(order_id, validated_data=None):
                 "message": "Order not found"
             }), 404
 
+        if order.status != "pending":
+            return jsonify({
+                "success": False,
+                "message": f"Cannot assign rider to an order in '{order.status}' status. Only pending orders can be assigned."
+            }), 400
+
         rider = Rider.query.filter_by(id=rider_id).first()
         if not rider:
             return jsonify({
@@ -229,13 +256,21 @@ def assign_Rider(order_id, validated_data=None):
         if order.rider_id is not None:
             return jsonify({
                 "success": False,
-                "message": "Order is already has an assigned rider"
+                "message": "Order already has an assigned rider"
             }), 400
 
+        previous_status = order.status
         order.rider_id = rider.id
         rider.availability = "busy"
         order.status = "assigned"
 
+        history_entry = OrderStatusHistory(
+            order_id=order.order_id,
+            from_status=previous_status,
+            to_status="assigned",
+            changed_by=f"Assigned to {rider.name}"
+        )
+        db.session.add(history_entry)
         db.session.commit()
 
         return jsonify({
@@ -280,6 +315,41 @@ def update_Order_Status(order_id, validated_data=None):
                 "message": "Order not found"
             }), 404
 
+        current_status = order.status
+        allowed_next = ORDER_TRANSITIONS.get(current_status, [])
+
+        if status not in allowed_next:
+            return jsonify({
+                "success": False,
+                "message": f"Invalid status transition from '{current_status}' to '{status}'. Allowed: {allowed_next}"
+            }), 400
+
+        if status == "assigned":
+            return jsonify({
+                "success": False,
+                "message": "Please assign a rider using the assign rider action to update status to 'assigned'."
+            }), 400
+
+        if status == "cancelled":
+            if current_status != "pending":
+                return jsonify({
+                    "success": False,
+                    "message": "Orders can only be cancelled while in 'pending' status."
+                }), 400
+            order.status = "cancelled"
+            history_entry = OrderStatusHistory(
+                order_id=order.order_id,
+                from_status=current_status,
+                to_status="cancelled",
+                changed_by="Cancelled by user"
+            )
+            db.session.add(history_entry)
+            db.session.commit()
+            return jsonify({
+                "success": True,
+                "message": "Order cancelled successfully"
+            }), 200
+
         if order.rider_id is None:
             return jsonify({
                 "success": False,
@@ -288,16 +358,23 @@ def update_Order_Status(order_id, validated_data=None):
 
         order.status = status
 
-        if status.lower() in ["delivered", "cancelled"]:
+        if status.lower() == "delivered":
             rider = Rider.query.filter_by(id=order.rider_id).first()
             if rider:
                 rider.availability = "available"
 
+        history_entry = OrderStatusHistory(
+            order_id=order.order_id,
+            from_status=current_status,
+            to_status=status,
+            changed_by="Status update"
+        )
+        db.session.add(history_entry)
         db.session.commit()
 
         return jsonify({
             "success": True,
-            "message": "Order updated successfully"
+            "message": f"Order status updated to '{status}' successfully"
         }), 200
 
     except Exception as e:
@@ -324,6 +401,19 @@ def get_Single_Order(order_id):
 
         order, rider_name = result
 
+        history_records = OrderStatusHistory.query.filter_by(order_id=order.order_id).order_by(OrderStatusHistory.changed_at.asc()).all()
+        history_list = [h.to_dict() for h in history_records]
+
+        if not history_list:
+            history_list = [{
+                "id": None,
+                "order_id": order.order_id,
+                "from_status": None,
+                "to_status": order.status,
+                "changed_at": order.created_at.isoformat() if order.created_at else None,
+                "changed_by": "System"
+            }]
+
         return jsonify({
             "success": True,
             "message": "Successfully fetched",
@@ -337,6 +427,8 @@ def get_Single_Order(order_id):
                 "delivery_address": order.delivery_address,
                 "pickup_address": order.pickup_address,
                 "status": order.status,
+                "next_statuses": ORDER_TRANSITIONS.get(order.status, []),
+                "history": history_list,
                 "rider_id": order.rider_id,
                 "rider_name": rider_name
             }

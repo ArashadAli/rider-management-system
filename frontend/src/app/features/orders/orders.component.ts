@@ -172,9 +172,35 @@ export class OrdersComponent implements OnInit, OnDestroy {
           this.loadAvailableRiders();
         },
         error: (error) => {
+          this.toastService.error(error?.error?.message || 'Failed to update order status.');
           this.loadOrders();
         }
       });
+  }
+
+  formatStatusLabel(status: string): string {
+    const labels: Record<string, string> = {
+      pending: 'Pending',
+      assigned: 'Assigned',
+      accepted: 'Accepted',
+      picked_up: 'Picked Up',
+      on_the_way: 'On The Way',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled'
+    };
+    return labels[status] || (status ? status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '-');
+  }
+
+  onStatusChange(order: Order, newStatus: string): void {
+    if (!newStatus || newStatus === order.status) {
+      return;
+    }
+    if (newStatus === 'assigned') {
+      this.toastService.info('Please select a rider from the Rider column to assign this order.');
+      this.loadOrders();
+      return;
+    }
+    this.updateOrderStatus(order, newStatus);
   }
 
   updateOrderStatus(order: Order, status: string): void {
@@ -209,6 +235,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
           this.loadOrders();
         },
         error: (error) => {
+          this.toastService.error(error?.error?.message || 'Failed to update order status.');
           this.loadOrders();
         }
       });
