@@ -163,12 +163,17 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     <tr *ngIf="loading">
-                        <td colspan="10" class="px-5 py-10 text-center text-sm text-gray-500">
-                            Loading riders...
+                        <td colspan="10" class="px-5 py-12">
+                            <div class="flex flex-col items-center justify-center gap-3">
+                                <div
+                                    class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-[#163758]">
+                                </div>
+                                <p class="text-sm text-gray-500">Loading riders...</p>
+                            </div>
                         </td>
                     </tr>
                     <ng-container *ngIf="!loading">
-                        <tr *ngFor="let rider of riders" class="transition hover:bg-gray-50">
+                        <tr *ngFor="let rider of riders; let isLast = last; let i = index" class="transition hover:bg-gray-50">
                             <td class="px-5 py-4 text-sm font-mono text-gray-600">
                                 {{ rider.id }}
                             </td>
@@ -231,7 +236,8 @@
                                     </button>
                                     <!-- Dropdown menu -->
                                     <div *ngIf="openActionMenuId === rider.id"
-                                        class="absolute right-0 top-full z-50 mt-2 w-40 rounded-lg border border-gray-200 bg-white py-1 text-left shadow-lg">
+                                        [ngClass]="(i >= 2 && (isLast || i >= riders.length - 2)) ? 'bottom-full mb-2' : 'top-full mt-2'"
+                                        class="absolute right-0 z-50 w-40 rounded-lg border border-gray-200 bg-white py-1 text-left shadow-lg">
                                         <button type="button" (click)="onViewRider(rider)"
                                             class="block w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
                                             View
@@ -283,15 +289,8 @@
     </aside>
 </div>
 
-<app-confirmation-dialog
-  [visible]="showDeleteConfirmation"
-  [title]="'Delete Rider?'"
-  [message]="'Are you sure you want to delete'"
-  [itemName]="selectedRiderToDelete?.name || ''"
-  [confirmText]="'Confirm Delete'"
-  [cancelText]="'Cancel'"
-  [loading]="deletingRider"
-  [loadingText]="'Deleting...'"
-  (confirmed)="confirmDeleteRider()"
-  (cancelled)="cancelDelete()">
+<app-confirmation-dialog [visible]="showDeleteConfirmation" [title]="'Delete Rider?'"
+    [message]="'Are you sure you want to delete'" [itemName]="selectedRiderToDelete?.name || ''"
+    [confirmText]="'Confirm Delete'" [cancelText]="'Cancel'" [loading]="deletingRider" [loadingText]="'Deleting...'"
+    (confirmed)="confirmDeleteRider()" (cancelled)="cancelDelete()">
 </app-confirmation-dialog>
