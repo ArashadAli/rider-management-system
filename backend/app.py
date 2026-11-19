@@ -64,7 +64,7 @@ CORS(
         ],
     supports_credentials=True,
     allow_headers=["Content-Type", "Authorization", "X-CSRF-TOKEN"],
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 )
 
 # Database configuration
