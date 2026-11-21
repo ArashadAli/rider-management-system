@@ -3,6 +3,10 @@ from config.connectDB import db
 from models.order_model import Order, OrderStatusHistory
 from models.rider_model import Rider
 import uuid
+import os
+import json
+import urllib.request
+import urllib.parse
 from datetime import datetime, timedelta
 from sqlalchemy import or_
 from schemas.base import get_validated_data, get_validated_query
@@ -471,3 +475,65 @@ def delete_Order(order_id):
             "message": "Server error",
             "error": str(e)
         }), 500
+
+
+def autocomplete_Address():
+    try:
+        text = request.args.get("text", "").strip()
+        if not text:
+            return jsonify({
+                "success": True,
+                "data": []
+            }), 200
+
+        api_key = os.getenv("GEOAPIFY_API_KEY")
+        if not api_key:
+            return jsonify({
+                "success": False,
+                "message": "Geoapify API key is not configured"
+            }), 500
+
+        encoded_text = urllib.parse.quote(text)
+        url = f"https://api.geoapify.com/v1/geocode/autocomplete?text={encoded_text}&apiKey={api_key}"
+
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "RiderManagementSystem/1.0"}
+        )
+        with urllib.request.urlopen(req, timeout=5) as response:
+            if response.status != 200:
+                return jsonify({
+                    "success": False,
+                    "message": "Failed to fetch suggestions from map provider"
+                }), 502
+
+            raw_data = json.loads(response.read().decode("utf-8"))
+            features = raw_data.get("features", [])
+
+            suggestions = []
+            for feat in features:
+                props = feat.get("properties", {})
+                formatted = props.get("formatted")
+                if formatted:
+                    suggestions.append({
+                        "formatted": formatted,
+                        "address_line1": props.get("address_line1", formatted),
+                        "address_line2": props.get("address_line2", ""),
+                        "city": props.get("city", ""),
+                        "country": props.get("country", ""),
+                        "lat": props.get("lat"),
+                        "lon": props.get("lon")
+                    })
+
+            return jsonify({
+                "success": True,
+                "data": suggestions
+            }), 200
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": "Error fetching address autocomplete",
+            "error": str(e)
+        }), 500
+

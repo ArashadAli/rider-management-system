@@ -37,8 +37,18 @@ class RiderCreateSchema(BaseBodySchema):
     )
     availability = fields.String(
         load_default="available",
-        validate=validate.OneOf(["available", "unavailable"], error="Invalid availability")
+        validate=validate.OneOf(ALLOWED_RIDER_AVAILABILITY, error="Invalid availability")
     )
+
+    @validates_schema
+    def validate_status_and_availability(self, data, **kwargs):
+        status = data.get("status")
+        availability = data.get("availability")
+        if status == "inactive" and availability and availability != "unavailable":
+            raise ValidationError(
+                "An inactive rider can only have availability set to 'unavailable'",
+                field_name="availability"
+            )
 
 
 class RiderUpdateSchema(BaseBodySchema):
@@ -61,6 +71,16 @@ class RiderUpdateSchema(BaseBodySchema):
         allow_none=True,
         validate=validate.OneOf(ALLOWED_RIDER_AVAILABILITY, error="Invalid availability")
     )
+
+    @validates_schema
+    def validate_status_and_availability(self, data, **kwargs):
+        status = data.get("status")
+        availability = data.get("availability")
+        if status == "inactive" and availability and availability != "unavailable":
+            raise ValidationError(
+                "An inactive rider can only have availability set to 'unavailable'",
+                field_name="availability"
+            )
 
 
 class RiderPaginationQuerySchema(BaseQuerySchema):

@@ -1,92 +1,181 @@
-<div class="register-container">
-  <div class="register-card">
-    <div class="register-header">
-      <h2>Create Account</h2>
-      <p>Register to continue</p>
-    </div>
-    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="name">
-          Name
-        </label>
-        <input id="name" type="text" formControlName="name" placeholder="Enter your name" />
-        <small class="error" *ngIf="name?.touched && name?.hasError('required')">
-          Name is required
-        </small>
-      </div>
-      <div class="form-group">
-        <label for="email">
-          Email
-        </label>
-        <input id="email" type="email" formControlName="email" placeholder="Enter your email" />
-        <small class="error" *ngIf="email?.touched && email?.hasError('required')">
-          Email is required
-        </small>
-        <small class="error" *ngIf="email?.touched && email?.hasError('email')">
-          Please enter a valid email
-        </small>
-      </div>
-      <div class="form-group">
-        <label for="mobile">
-          Mobile
-        </label>
-        <input id="mobile" type="text" formControlName="mobile" placeholder="Enter 10 digit mobile number" maxlength="10" />
-        <small class="error" *ngIf="mobile?.touched && mobile?.hasError('required')">
-          Mobile number is required
-        </small>
-        <small class="error" *ngIf="mobile?.touched && mobile?.hasError('pattern')">
-          Mobile number must contain 10 digits
-        </small>
-      </div>
-      <div class="form-group">
-        <label for="password">
-          Password
-        </label>
-        <div class="password-wrapper">
-          <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter password" />
-          <button type="button" class="password-toggle" (click)="togglePassword()">
-            {{ showPassword ? 'Hide' : 'Show' }}
-          </button>
+<div class="min-h-screen w-full flex items-center justify-center bg-gray-100 p-4 sm:p-6 lg:p-0 lg:bg-white">
+  <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl sm:p-8 lg:max-w-none lg:rounded-none lg:p-0 lg:shadow-none lg:min-h-screen lg:grid lg:grid-cols-12">
+    
+    <!-- Left Visual Column (Edge-to-edge full height on large screens) -->
+    <div class="hidden lg:flex lg:col-span-5 bg-[#DC1D47] flex-col items-center justify-center p-8 lg:p-12 text-white relative lg:min-h-screen">
+      <div class="w-full max-w-sm flex flex-col items-center text-center">
+        <div class="overflow-hidden rounded-3xl bg-white/10 p-5 shadow-2xl backdrop-blur-sm">
+          <img src="/assets/JeeblyImage.png" alt="Jeebly" class="h-64 w-64 xl:h-72 xl:w-72 object-contain rounded-2xl" />
         </div>
-        <small class="error" *ngIf="password?.touched && password?.hasError('required')">
-          Password is required
-        </small>
-        <small class="error" *ngIf="password?.touched && password?.hasError('minlength')">
-          Password must be at least 8 characters
-        </small>
+        <h2 class="mt-8 text-3xl font-bold tracking-tight text-white">Jeebly RMS</h2>
+        <p class="mt-2 text-base text-white/90">Streamlined Rider & Delivery Management</p>
       </div>
-      <div class="form-group">
-        <label for="confirm_password">
-          Confirm Password
-        </label>
-        <div class="password-wrapper">
-          <input id="confirm_password" [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirm_password" placeholder="Confirm your password" />
-          <button type="button" class="password-toggle" (click)="toggleConfirmPassword()">
-            {{ showConfirmPassword ? 'Hide' : 'Show' }}
-          </button>
-        </div>
-        <small class="error" *ngIf="confirmPassword?.touched && confirmPassword?.hasError('required')">
-          Confirm password is required
-        </small>
-        <small class="error" *ngIf="confirmPassword?.touched && confirmPassword?.hasError('passwordMismatch')">
-          Passwords do not match
-        </small>
-      </div>
-      <div class="error-message" *ngIf="errorMessage">
-        {{ errorMessage }}
-      </div>
-      <div class="success-message" *ngIf="successMessage">
-        {{ successMessage }}
-      </div>
-      <button type="submit" [disabled]="isLoading">
-        {{ isLoading ? 'Registering...' : 'Register' }}
-      </button>
-    </form>
-    <div class="login-link">
-      <span>Already have an account?</span>
-      <a routerLink="/login">
-        Login
-      </a>
     </div>
+
+    <!-- Right Form Column (Full height on large screens, centered inside) -->
+    <div class="w-full lg:col-span-7 lg:min-h-screen lg:flex lg:flex-col lg:justify-center lg:items-center lg:p-10 xl:p-16 lg:overflow-y-auto">
+      <div class="w-full lg:max-w-md xl:max-w-lg">
+        <div class="mb-6 text-center lg:text-left">
+          <h1 class="text-2xl sm:text-3xl font-bold text-[#163758]">Create Account</h1>
+          <p class="mt-1.5 text-sm text-gray-500">Sign up to get started</p>
+        </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <fieldset [disabled]="isLoading" class="space-y-4 disabled:cursor-not-allowed">
+            
+            <!-- Name Field -->
+            <div>
+              <label for="name" class="mb-1 block text-sm font-medium text-[#163758]">
+                Name <span class="text-[#DC1D47]">*</span>
+              </label>
+              <input
+                id="name"
+                type="text"
+                formControlName="name"
+                placeholder="Enter your name"
+                class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+              />
+              <small *ngIf="name?.touched && name?.hasError('required')" class="mt-1 block text-xs text-[#DC1D47]">
+                Name is required
+              </small>
+            </div>
+
+            <!-- Email Field -->
+            <div>
+              <label for="email" class="mb-1 block text-sm font-medium text-[#163758]">
+                Email <span class="text-[#DC1D47]">*</span>
+              </label>
+              <input
+                id="email"
+                type="email"
+                formControlName="email"
+                placeholder="Enter your email"
+                class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+              />
+              <small *ngIf="email?.touched && email?.hasError('required')" class="mt-1 block text-xs text-[#DC1D47]">
+                Email is required
+              </small>
+              <small *ngIf="email?.touched && email?.hasError('email')" class="mt-1 block text-xs text-[#DC1D47]">
+                Please enter a valid email
+              </small>
+            </div>
+
+            <!-- Mobile Number Field -->
+            <div>
+              <label for="mobile" class="mb-1 block text-sm font-medium text-[#163758]">
+                Mobile Number <span class="text-[#DC1D47]">*</span>
+              </label>
+              <input
+                id="mobile"
+                type="text"
+                inputmode="numeric"
+                formControlName="mobile"
+                placeholder="Enter 10 digit mobile number"
+                maxlength="10"
+                (input)="limitMobileLength($event)"
+                class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+              />
+              <small *ngIf="mobile?.touched && mobile?.hasError('required')" class="mt-1 block text-xs text-[#DC1D47]">
+                Mobile number is required
+              </small>
+              <small *ngIf="mobile?.touched && mobile?.hasError('pattern')" class="mt-1 block text-xs text-[#DC1D47]">
+                Mobile number must contain 10 digits
+              </small>
+            </div>
+
+            <!-- Password Field -->
+            <div>
+              <label for="password" class="mb-1 block text-sm font-medium text-[#163758]">
+                Password <span class="text-[#DC1D47]">*</span>
+              </label>
+              <div class="relative">
+                <input
+                  id="password"
+                  [type]="showPassword ? 'text' : 'password'"
+                  formControlName="password"
+                  placeholder="Enter password"
+                  class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 pr-12 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                />
+                <button
+                  type="button"
+                  (click)="togglePassword()"
+                  [disabled]="isLoading"
+                  [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                  class="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center justify-center rounded p-1 text-[#163758] hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <i-lucide [name]="showPassword ? 'eye-closed' : 'eye'" [size]="20"></i-lucide>
+                </button>
+              </div>
+              <small *ngIf="password?.touched && password?.hasError('required')" class="mt-1 block text-xs text-[#DC1D47]">
+                Password is required
+              </small>
+              <small *ngIf="password?.touched && password?.hasError('minlength')" class="mt-1 block text-xs text-[#DC1D47]">
+                Password must be at least 8 characters
+              </small>
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div>
+              <label for="confirm_password" class="mb-1 block text-sm font-medium text-[#163758]">
+                Confirm Password <span class="text-[#DC1D47]">*</span>
+              </label>
+              <div class="relative">
+                <input
+                  id="confirm_password"
+                  [type]="showConfirmPassword ? 'text' : 'password'"
+                  formControlName="confirm_password"
+                  placeholder="Confirm your password"
+                  class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 pr-12 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
+                />
+                <button
+                  type="button"
+                  (click)="toggleConfirmPassword()"
+                  [disabled]="isLoading"
+                  [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+                  class="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center justify-center rounded p-1 text-[#163758] hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <i-lucide [name]="showConfirmPassword ? 'eye-closed' : 'eye'" [size]="20"></i-lucide>
+                </button>
+              </div>
+              <small *ngIf="confirmPassword?.touched && confirmPassword?.hasError('required')" class="mt-1 block text-xs text-[#DC1D47]">
+                Confirm password is required
+              </small>
+              <small *ngIf="confirmPassword?.touched && confirmPassword?.hasError('passwordMismatch')" class="mt-1 block text-xs text-[#DC1D47]">
+                Passwords do not match
+              </small>
+            </div>
+
+            <!-- Error Alert Banner -->
+            <div *ngIf="errorMessage" role="alert" class="rounded-lg bg-rose-50 p-3 text-sm text-[#DC1D47]">
+              {{ errorMessage }}
+            </div>
+
+            <!-- Success Alert Banner -->
+            <div *ngIf="successMessage" role="status" class="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
+              {{ successMessage }}
+            </div>
+
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              [disabled]="isLoading"
+              class="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#DC1D47] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#bd183b] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <i-lucide *ngIf="isLoading" name="loader-circle" [size]="18" class="animate-spin"></i-lucide>
+              {{ isLoading ? 'Registering...' : 'Register' }}
+            </button>
+          </fieldset>
+        </form>
+
+        <!-- Login Link -->
+        <div class="mt-6 text-center text-sm">
+          <span class="text-gray-500">Already have an account?</span>
+          <a routerLink="/login" [class.pointer-events-none]="isLoading" [class.opacity-50]="isLoading" class="ml-1 font-medium text-[#163758] hover:underline">
+            Login
+          </a>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>

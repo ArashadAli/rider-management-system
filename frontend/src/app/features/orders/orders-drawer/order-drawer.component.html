@@ -1,6 +1,6 @@
-<div class="fixed inset-0 z-50 flex justify-end bg-slate-900/50" (click)="closeDrawer()">
+﻿<div class="fixed inset-0 z-50 flex justify-end bg-slate-900/50" (click)="closeDrawer()">
     <aside class="flex h-full w-full max-w-xl flex-col bg-white shadow-2xl" role="dialog" aria-modal="true"
-        aria-labelledby="drawer-title" (click)="$event.stopPropagation()">
+        aria-labelledby="drawer-title" (click)="onDrawerClick($event)">
         <div class="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-5">
             <div>
                 <h2 id="drawer-title" class="text-xl font-bold text-[#163758]">
@@ -33,17 +33,22 @@
                 <div class="h-full space-y-5 overflow-y-auto p-6" [class.pointer-events-none]="submitting"
                     [attr.aria-busy]="submitting">
                     <div>
-                        <h3 class="mb-4 text-sm font-semibold text-[#163758]">
-                            Order Details
-                        </h3>
+                        <div class="mb-4 flex items-center gap-2.5 border-b border-gray-100 pb-2">
+                            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#163758]/10 text-[#163758]">
+                                <i-lucide name="package" [size]="16"></i-lucide>
+                            </div>
+                            <h3 class="text-sm font-bold tracking-wide text-[#163758]">
+                                Order Details
+                            </h3>
+                        </div>
                         <div class="space-y-4">
                             <div>
-                                <label for="order_item" class="mb-1.5 block text-sm font-medium text-gray-700">
-                                    Order Item *
+                                <label for="order_item" class="mb-1.5 block text-xs font-semibold text-gray-700">
+                                    Order Item <span class="text-[#DC1D47]">*</span>
                                 </label>
                                 <input id="order_item" type="text" formControlName="order_item"
                                     [readonly]="mode === 'view'" placeholder="Enter item name"
-                                    class="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
+                                    class="w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
                                     [class.border-red-500]="f['order_item'].touched && f['order_item'].invalid"
                                     [class.border-gray-300]="!f['order_item'].touched || f['order_item'].valid" />
                                 <p *ngIf="f['order_item'].touched && f['order_item'].hasError('required')"
@@ -52,12 +57,12 @@
                                 </p>
                             </div>
                             <div>
-                                <label for="amount" class="mb-1.5 block text-sm font-medium text-gray-700">
-                                    Amount *
+                                <label for="amount" class="mb-1.5 block text-xs font-semibold text-gray-700">
+                                    Amount <span class="text-[#DC1D47]">*</span>
                                 </label>
                                 <input id="amount" type="number" formControlName="amount" min="0.01" step="0.01"
                                     [readonly]="mode === 'view'" placeholder="Enter amount"
-                                    class="w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
+                                    class="w-full rounded-lg border px-3 py-2.5 text-sm outline-none transition focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100"
                                     [class.border-red-500]="f['amount'].touched && f['amount'].invalid"
                                     [class.border-gray-300]="!f['amount'].touched || f['amount'].valid" />
                                 <p *ngIf="f['amount'].touched && f['amount'].hasError('required')"
@@ -72,30 +77,35 @@
                         </div>
                     </div>
                     <div class="border-t border-gray-100 pt-5">
-                        <h3 class="mb-4 text-sm font-semibold text-[#163758]">
-                            Customer Details
-                        </h3>
+                        <div class="mb-4 flex items-center gap-2.5 border-b border-gray-100 pb-2">
+                            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#163758]/10 text-[#163758]">
+                                <i-lucide name="user" [size]="16"></i-lucide>
+                            </div>
+                            <h3 class="text-sm font-bold tracking-wide text-[#163758]">
+                                Customer Details
+                            </h3>
+                        </div>
                         <div class="space-y-4">
                             <div>
-                                <label for="customer_name" class="mb-1.5 block text-sm font-medium text-gray-700">
-                                    Customer Name *
+                                <label for="customer_name" class="mb-1.5 block text-xs font-semibold text-gray-700">
+                                    Customer Name <span class="text-[#DC1D47]">*</span>
                                 </label>
                                 <input id="customer_name" type="text" formControlName="customer_name"
                                     [readonly]="mode === 'view'" placeholder="Enter customer name"
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100" />
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100" />
                                 <p *ngIf="f['customer_name'].touched && f['customer_name'].hasError('required')"
                                     class="mt-1 text-xs text-red-600">
                                     Customer name is required.
                                 </p>
                             </div>
                             <div>
-                                <label for="customer_mobile" class="mb-1.5 block text-sm font-medium text-gray-700">
-                                    Mobile Number *
+                                <label for="customer_mobile" class="mb-1.5 block text-xs font-semibold text-gray-700">
+                                    Mobile Number <span class="text-[#DC1D47]">*</span>
                                 </label>
                                 <input id="customer_mobile" type="text" inputmode="numeric" maxlength="10"
                                     formControlName="customer_mobile" [readonly]="mode === 'view'"
                                     placeholder="10-digit mobile number" (input)="limitMobileLength($event)"
-                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100" />
+                                    class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100" />
                                 <p *ngIf="f['customer_mobile'].touched && f['customer_mobile'].hasError('required')"
                                     class="mt-1 text-xs text-red-600">
                                     Mobile number is required.
@@ -108,31 +118,87 @@
                         </div>
                     </div>
                     <div class="border-t border-gray-100 pt-5">
-                        <h3 class="mb-4 text-sm font-semibold text-[#163758]">
-                            Delivery Details
-                        </h3>
+                        <div class="mb-4 flex items-center gap-2.5 border-b border-gray-100 pb-2">
+                            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#163758]/10 text-[#163758]">
+                                <i-lucide name="truck" [size]="16"></i-lucide>
+                            </div>
+                            <h3 class="text-sm font-bold tracking-wide text-[#163758]">
+                                Delivery Details
+                            </h3>
+                        </div>
                         <div class="space-y-4">
-                            <div>
-                                <label for="pickup_address" class="mb-1.5 block text-sm font-medium text-gray-700">
-                                    Pickup Address *
+                            <!-- Pickup Address -->
+                            <div id="pickup-autocomplete-container" class="relative">
+                                <label for="pickup_address" class="mb-1.5 block text-xs font-semibold text-gray-700">
+                                    Pickup Address <span class="text-[#DC1D47]">*</span>
                                 </label>
-                                <textarea id="pickup_address" formControlName="pickup_address" rows="3"
-                                    [readonly]="mode === 'view'" placeholder="Enter pickup address"
-                                    class="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100">
-                                </textarea>
+                                <div class="relative">
+                                    <textarea id="pickup_address" formControlName="pickup_address" rows="3"
+                                        [readonly]="mode === 'view'" placeholder="Enter pickup address (type to search)"
+                                        (input)="onPickupInput($event)"
+                                        class="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100">
+                                    </textarea>
+                                    <div *ngIf="loadingPickupSuggestions" class="absolute right-3 top-3 pointer-events-none">
+                                        <svg class="animate-spin h-4 w-4 text-[#DC1D47]" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Suggestions Dropdown -->
+                                <div *ngIf="pickupSuggestions.length > 0 && mode !== 'view'"
+                                    class="absolute left-0 z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl">
+                                    <div *ngFor="let suggestion of pickupSuggestions"
+                                        (click)="selectPickupAddress(suggestion)"
+                                        class="flex cursor-pointer items-start gap-2.5 border-b border-gray-50 px-3 py-2.5 text-xs text-gray-700 transition hover:bg-red-50/60 hover:text-[#DC1D47]">
+                                        <span class="mt-0.5 text-gray-400 shrink-0">📍</span>
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="font-medium truncate">{{ suggestion.address_line1 || suggestion.formatted }}</span>
+                                            <span *ngIf="suggestion.address_line2" class="text-[11px] text-gray-400 truncate">{{ suggestion.address_line2 }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <p *ngIf="f['pickup_address'].touched && f['pickup_address'].hasError('required')"
                                     class="mt-1 text-xs text-red-600">
                                     Pickup address is required.
                                 </p>
                             </div>
-                            <div>
-                                <label for="delivery_address" class="mb-1.5 block text-sm font-medium text-gray-700">
-                                    Delivery Address *
+
+                            <!-- Delivery Address -->
+                            <div id="delivery-autocomplete-container" class="relative">
+                                <label for="delivery_address" class="mb-1.5 block text-xs font-semibold text-gray-700">
+                                    Delivery Address <span class="text-[#DC1D47]">*</span>
                                 </label>
-                                <textarea id="delivery_address" formControlName="delivery_address" rows="3"
-                                    [readonly]="mode === 'view'" placeholder="Enter delivery address"
-                                    class="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100">
-                                </textarea>
+                                <div class="relative">
+                                    <textarea id="delivery_address" formControlName="delivery_address" rows="3"
+                                        [readonly]="mode === 'view'" placeholder="Enter delivery address (type to search)"
+                                        (input)="onDeliveryInput($event)"
+                                        class="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100">
+                                    </textarea>
+                                    <div *ngIf="loadingDeliverySuggestions" class="absolute right-3 top-3 pointer-events-none">
+                                        <svg class="animate-spin h-4 w-4 text-[#DC1D47]" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
+
+                                <!-- Suggestions Dropdown -->
+                                <div *ngIf="deliverySuggestions.length > 0 && mode !== 'view'"
+                                    class="absolute left-0 z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-xl">
+                                    <div *ngFor="let suggestion of deliverySuggestions"
+                                        (click)="selectDeliveryAddress(suggestion)"
+                                        class="flex cursor-pointer items-start gap-2.5 border-b border-gray-50 px-3 py-2.5 text-xs text-gray-700 transition hover:bg-red-50/60 hover:text-[#DC1D47]">
+                                        <span class="mt-0.5 text-gray-400 shrink-0">📍</span>
+                                        <div class="flex flex-col min-w-0">
+                                            <span class="font-medium truncate">{{ suggestion.address_line1 || suggestion.formatted }}</span>
+                                            <span *ngIf="suggestion.address_line2" class="text-[11px] text-gray-400 truncate">{{ suggestion.address_line2 }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <p *ngIf="f['delivery_address'].touched && f['delivery_address'].hasError('required')"
                                     class="mt-1 text-xs text-red-600">
                                     Delivery address is required.
@@ -141,9 +207,14 @@
                         </div>
                     </div>
                     <div *ngIf="mode === 'view' && orderDetails" class="border-t border-gray-100 pt-5">
-                        <h3 class="mb-4 text-sm font-semibold text-[#163758]">
-                            Order Information
-                        </h3>
+                        <div class="mb-4 flex items-center gap-2.5 border-b border-gray-100 pb-2">
+                            <div class="flex h-7 w-7 items-center justify-center rounded-lg bg-[#163758]/10 text-[#163758]">
+                                <i-lucide name="package-check" [size]="16"></i-lucide>
+                            </div>
+                            <h3 class="text-sm font-bold tracking-wide text-[#163758]">
+                                Order Information
+                            </h3>
+                        </div>
                         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <div>
                                 <p class="text-xs text-gray-500">Order ID</p>
@@ -269,8 +340,8 @@
             [visible]="showConfirmation"
             [title]="'Confirm Order Creation'"
             [message]="'Are you sure you want to create this order? Please verify the order and customer details before proceeding.'"
-            [confirmText]="'Yes, Create Order'"
-            [cancelText]="'No, Go Back'"
+            [confirmText]="'Yes'"
+            [cancelText]="'No'"
             [loading]="submitting"
             [loadingText]="'Creating...'"
             [icon]="'help-circle'"

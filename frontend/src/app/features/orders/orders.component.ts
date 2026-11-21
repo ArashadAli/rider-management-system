@@ -14,6 +14,7 @@ import { OrderDrawerComponent } from './orders-drawer/order-drawer.component';
 import { LucideAngularModule } from 'lucide-angular';
 import { PaginationComponent } from 'src/app/shared/components/pagination/pagination.component';
 import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
+import { SearchableSelectComponent } from 'src/app/shared/components/searchable-select/searchable-select.component';
 
 @Component({
   selector: 'app-orders',
@@ -25,7 +26,8 @@ import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmat
     OrderDrawerComponent,
     LucideAngularModule,
     PaginationComponent,
-    ConfirmationDialogComponent
+    ConfirmationDialogComponent,
+    SearchableSelectComponent
   ],
   templateUrl: './orders.component.html'
 })
@@ -302,6 +304,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
   applyFilters(): void {
     this.currentPage = 1;
     this.loadOrders();
+  }
+
+  onFilterRiderChange(riderId: string): void {
+    this.filters.rider = riderId || '';
+    this.applyFilters();
   }
 
   clearFilters(): void {

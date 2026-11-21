@@ -1,48 +1,70 @@
+<div class="min-h-screen w-full flex items-center justify-center bg-gray-100 p-4 sm:p-6 lg:p-0 lg:bg-white">
+  <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl sm:p-8 lg:max-w-none lg:rounded-none lg:p-0 lg:shadow-none lg:min-h-screen lg:grid lg:grid-cols-12">
+    
+    <!-- Left Visual Column (Edge-to-edge full height on large screens) -->
+    <div class="hidden lg:flex lg:col-span-5 bg-[#DC1D47] flex-col items-center justify-center p-8 lg:p-12 text-white relative lg:min-h-screen">
+      <div class="w-full max-w-sm flex flex-col items-center text-center">
+        <div class="overflow-hidden rounded-3xl bg-white/10 p-5 shadow-2xl backdrop-blur-sm">
+          <img src="/assets/JeeblyImage.png" alt="Jeebly" class="h-64 w-64 xl:h-72 xl:w-72 object-contain rounded-2xl" />
+        </div>
+        <h2 class="mt-8 text-3xl font-bold tracking-tight text-white">Jeebly RMS</h2>
+        <p class="mt-2 text-base text-white/90">Streamlined Rider & Delivery Management</p>
+      </div>
+    </div>
 
-<div class="flex min-h-screen items-center justify-center bg-gray-100 p-5">
-  <div class="w-full max-w-[420px] rounded-xl bg-white p-6 shadow-lg sm:p-8">
-    <div class="mb-7 text-center">
-      <h2 class="text-2xl font-bold text-[#163758]">Welcome Back</h2>
-      <p class="mt-1 text-sm text-gray-500">Login to your account</p>
-    </div>
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <fieldset [disabled]="isLoading" class="min-w-0 space-y-5 disabled:cursor-not-allowed">
-        <div>
-          <label for="email" class="mb-1.5 block text-sm font-medium text-[#163758]">Email</label>
-          <input id="email" type="email" formControlName="email" placeholder="Enter your email"
-            class="w-full rounded-lg border border-gray-300 px-3 py-3 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500" />
-          <small *ngIf="email?.touched && email?.hasError('required')" class="mt-1 block text-xs text-[#dc1d47]">Email is required</small>
-          <small *ngIf="email?.touched && email?.hasError('email')" class="mt-1 block text-xs text-[#dc1d47]">Please enter a valid email</small>
+    <!-- Right Form Column (Full height on large screens, centered inside) -->
+    <div class="w-full lg:col-span-7 lg:min-h-screen lg:flex lg:flex-col lg:justify-center lg:items-center lg:p-10 xl:p-16 lg:overflow-y-auto">
+      <div class="w-full lg:max-w-md xl:max-w-lg">
+        <div class="mb-6 text-center lg:text-left">
+          <h1 class="text-2xl sm:text-3xl font-bold text-[#163758]">Welcome Back</h1>
+          <p class="mt-1.5 text-sm text-gray-500">Login to your account</p>
         </div>
-        <div>
-          <label for="password" class="mb-1.5 block text-sm font-medium text-[#163758]">Password</label>
-          <div class="relative">
-            <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter your password"
-              class="w-full rounded-lg border border-gray-300 px-3 py-3 pr-12 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500" />
-            <button type="button" (click)="togglePassword()" [disabled]="isLoading" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
-              class="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded p-1 text-[#163758] hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50">
-              <i-lucide [name]="showPassword ? 'eye-closed' : 'eye'" [size]="20"></i-lucide>
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+          <fieldset [disabled]="isLoading" class="min-w-0 space-y-4 disabled:cursor-not-allowed">
+            <div>
+              <label for="email" class="mb-1 block text-sm font-medium text-[#163758]">
+                Email <span class="text-[#DC1D47]">*</span>
+              </label>
+              <input id="email" type="email" formControlName="email" placeholder="Enter your email"
+                class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500" />
+              <small *ngIf="email?.touched && email?.hasError('required')" class="mt-1 block text-xs text-[#DC1D47]">Email is required</small>
+              <small *ngIf="email?.touched && email?.hasError('email')" class="mt-1 block text-xs text-[#DC1D47]">Please enter a valid email</small>
+            </div>
+
+            <div>
+              <label for="password" class="mb-1 block text-sm font-medium text-[#163758]">
+                Password <span class="text-[#DC1D47]">*</span>
+              </label>
+              <div class="relative">
+                <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Enter your password"
+                  class="w-full rounded-lg border border-gray-300 px-3.5 py-2.5 pr-12 text-sm outline-none transition focus:border-[#163758] focus:ring-2 focus:ring-[#163758]/10 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500" />
+                <button type="button" (click)="togglePassword()" [disabled]="isLoading" [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+                  class="absolute right-2.5 top-1/2 flex -translate-y-1/2 items-center justify-center rounded p-1 text-[#163758] hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50">
+                  <i-lucide [name]="showPassword ? 'eye-closed' : 'eye'" [size]="20"></i-lucide>
+                </button>
+              </div>
+              <small *ngIf="password?.touched && password?.hasError('required')" class="mt-1 block text-xs text-[#DC1D47]">Password is required</small>
+            </div>
+
+            <div *ngIf="errorMessage" role="alert" class="rounded-lg bg-rose-50 p-3 text-sm text-[#DC1D47]">
+              {{ errorMessage }}
+            </div>
+
+            <button type="submit" [disabled]="isLoading"
+              class="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-[#DC1D47] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#bd183b] disabled:cursor-not-allowed disabled:opacity-60">
+              <i-lucide *ngIf="isLoading" name="loader-circle" [size]="18" class="animate-spin"></i-lucide>
+              {{ isLoading ? 'Logging in...' : 'Login' }}
             </button>
-          </div>
-          <small *ngIf="password?.touched && password?.hasError('required')" class="mt-1 block text-xs text-[#dc1d47]">Password is required</small>
+          </fieldset>
+        </form>
+
+        <div class="mt-6 text-center text-sm">
+          <span class="text-gray-500">Don't have an account?</span>
+          <a routerLink="/register" [class.pointer-events-none]="isLoading" [class.opacity-50]="isLoading" class="ml-1 font-medium text-[#163758] hover:underline">Register</a>
         </div>
-        <label class="flex w-fit items-center gap-2 text-sm text-gray-600" [class.cursor-not-allowed]="isLoading" [class.cursor-pointer]="!isLoading">
-          <input type="checkbox" formControlName="rememberMe" class="h-4 w-4 accent-[#163758] disabled:cursor-not-allowed" />
-          <span>Remember Me</span>
-        </label>
-        <div *ngIf="errorMessage" role="alert" class="rounded-lg bg-rose-50 p-3 text-sm text-[#dc1d47]">
-          {{ errorMessage }}
-        </div>
-        <button type="submit" [disabled]="isLoading"
-          class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#dc1d47] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#bd183b] disabled:cursor-not-allowed disabled:opacity-60">
-          <i-lucide *ngIf="isLoading" name="loader-circle" [size]="18" class="animate-spin"></i-lucide>
-          {{ isLoading ? 'Logging in...' : 'Login' }}
-        </button>
-      </fieldset>
-    </form>
-    <div class="mt-6 text-center text-sm">
-      <span class="text-gray-500">Don't have an account?</span>
-      <a routerLink="/register" [class.pointer-events-none]="isLoading" [class.opacity-50]="isLoading" class="ml-1 font-medium text-[#163758] hover:underline">Register</a>
+      </div>
     </div>
+
   </div>
 </div>

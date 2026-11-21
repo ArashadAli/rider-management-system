@@ -8,6 +8,7 @@ import { CustomToastService } from 'src/app/core/services/toast.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { ImageUploadComponent } from 'src/app/shared/components/image-upload/image-upload.component';
 import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
+import { limitMobileNumber, scrollToFirstInvalidControl } from 'src/app/shared/utils/validation.utils';
 
 @Component({
   selector: 'app-rider-form',
@@ -66,6 +67,16 @@ export class RiderFormComponent
       status: ['active', Validators.required],
       availability: ['available', Validators.required]
     });
+
+    this.riderForm.get('status')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(status => {
+        if (status === 'inactive') {
+          this.riderForm.get('availability')?.setValue('unavailable');
+        } else if (status === 'active' && this.riderForm.get('availability')?.value === 'unavailable') {
+          this.riderForm.get('availability')?.setValue('available');
+        }
+      });
   }
 
   getRider(id: string): void {
@@ -139,6 +150,10 @@ export class RiderFormComponent
     this.riderForm.reset();
   }
 
+  limitMobileLength(event: Event): void {
+    limitMobileNumber(event, this.riderForm.get('mobile'));
+  }
+
   submit(): void {
     if (this.mode === 'view') {
       return;
@@ -146,6 +161,7 @@ export class RiderFormComponent
 
     if (this.riderForm.invalid) {
       this.riderForm.markAllAsTouched();
+      scrollToFirstInvalidControl(this.riderForm);
       return;
     }
 

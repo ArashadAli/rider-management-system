@@ -171,16 +171,17 @@
         <div class="flex justify-center">
           <div class="relative w-36 h-36 flex-shrink-0">
             <div class="w-full h-full rounded-full" [style.background]="
-                'conic-gradient(#DC1D47 0deg ' +
+                (dashboard?.rider_overview?.total ?? 0) > 0 ?
+                ('conic-gradient(#16a34a 0deg ' +
                 ((dashboard?.rider_overview?.active ?? 0) /
                 (dashboard?.rider_overview?.total || 1) * 360) +
-                'deg, #e5e7eb ' +
+                'deg, #DC1D47 ' +
                 ((dashboard?.rider_overview?.active ?? 0) /
                 (dashboard?.rider_overview?.total || 1) * 360) +
-                'deg 360deg)'
+                'deg 360deg)') : '#e5e7eb'
               "></div>
             <div class="absolute inset-4 bg-white rounded-full flex flex-col items-center justify-center">
-              <span class="text-2xl font-bold" style="color: #163758;">
+              <span class="text-2xl font-bold" style="color: #16a34a;">
                 {{ dashboard?.rider_overview?.active ?? 0 }}
               </span>
               <span class="text-xs text-gray-500">
@@ -192,7 +193,7 @@
         <div class="w-full space-y-5">
           <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: #DC1D47;"></span>
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: #16a34a;"></span>
               <span class="text-sm text-gray-600">
                 Active Riders
               </span>
@@ -203,7 +204,7 @@
           </div>
           <div class="flex items-center justify-between gap-4">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="w-2.5 h-2.5 rounded-full bg-gray-300 flex-shrink-0"></span>
+              <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background-color: #DC1D47;"></span>
               <span class="text-sm text-gray-600">
                 Inactive Riders
               </span>

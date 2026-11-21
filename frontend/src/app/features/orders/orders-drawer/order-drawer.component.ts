@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Output, Input, SimpleChanges, OnChanges, OnInit, OnDestroy, Renderer2 } from '@angular/core';
+import { Component, EventEmitter, Output, Input, SimpleChanges, OnChanges, OnInit, OnDestroy, Renderer2, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { catchError, finalize } from 'rxjs/operators';
+import { catchError, debounceTime, distinctUntilChanged, finalize, switchMap, takeUntil } from 'rxjs/operators';
 import { OrdersService } from 'src/app/core/services/orders.service';
 import { CustomToastService } from 'src/app/core/services/toast.service';
-import { EMPTY } from 'rxjs';
+import { EMPTY, Subject, of } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { ConfirmationDialogComponent } from 'src/app/shared/components/confirmation-dialog/confirmation-dialog.component';
+import { limitMobileNumber, scrollToFirstInvalidControl } from 'src/app/shared/utils/validation.utils';
 
 export interface TimelineStep {
     key: string;
@@ -39,6 +40,14 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
     showConfirmation = false;
     timelineSteps: TimelineStep[] = [];
 
+    pickupSuggestions: any[] = [];
+    deliverySuggestions: any[] = [];
+    loadingPickupSuggestions = false;
+    loadingDeliverySuggestions = false;
+    private pickupSearch$ = new Subject<string>();
+    private deliverySearch$ = new Subject<string>();
+    private destroy$ = new Subject<void>();
+
     constructor(
         private ordersService: OrdersService,
         private toastService: CustomToastService,
@@ -55,20 +64,110 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
         })
     }
 
+    onDrawerClick(event: MouseEvent): void {
+        event.stopPropagation();
+        const target = event.target as HTMLElement;
+
+        if (!target.closest('#pickup-autocomplete-container')) {
+            this.pickupSuggestions = [];
+        }
+        if (!target.closest('#delivery-autocomplete-container')) {
+            this.deliverySuggestions = [];
+        }
+    }
+
+    @HostListener('document:keydown.escape')
+    onEscape(): void {
+        this.pickupSuggestions = [];
+        this.deliverySuggestions = [];
+    }
+
     ngOnInit(): void {
         this.renderer.addClass(document.body, 'overflow-hidden');
+
+        this.pickupSearch$
+            .pipe(
+                debounceTime(300),
+                distinctUntilChanged(),
+                switchMap(term => {
+                    const query = (term || '').trim();
+                    if (query.length < 3) {
+                        this.pickupSuggestions = [];
+                        this.loadingPickupSuggestions = false;
+                        return of({ success: true, data: [] });
+                    }
+                    this.loadingPickupSuggestions = true;
+                    return this.ordersService.searchAddress(query).pipe(
+                        catchError(() => of({ success: false, data: [] })),
+                        finalize(() => {
+                            this.loadingPickupSuggestions = false;
+                        })
+                    );
+                }),
+                takeUntil(this.destroy$)
+            )
+            .subscribe(res => {
+                this.pickupSuggestions = (res && res.data) || [];
+            });
+
+        this.deliverySearch$
+            .pipe(
+                debounceTime(300),
+                distinctUntilChanged(),
+                switchMap(term => {
+                    const query = (term || '').trim();
+                    if (query.length < 3) {
+                        this.deliverySuggestions = [];
+                        this.loadingDeliverySuggestions = false;
+                        return of({ success: true, data: [] });
+                    }
+                    this.loadingDeliverySuggestions = true;
+                    return this.ordersService.searchAddress(query).pipe(
+                        catchError(() => of({ success: false, data: [] })),
+                        finalize(() => {
+                            this.loadingDeliverySuggestions = false;
+                        })
+                    );
+                }),
+                takeUntil(this.destroy$)
+            )
+            .subscribe(res => {
+                this.deliverySuggestions = (res && res.data) || [];
+            });
     }
 
     ngOnDestroy(): void {
         this.renderer.removeClass(document.body, 'overflow-hidden');
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
+
+    onPickupInput(event: Event): void {
+        if (this.mode === 'view') return;
+        const val = (event.target as HTMLTextAreaElement).value;
+        this.pickupSearch$.next(val);
+    }
+
+    onDeliveryInput(event: Event): void {
+        if (this.mode === 'view') return;
+        const val = (event.target as HTMLTextAreaElement).value;
+        this.deliverySearch$.next(val);
+    }
+
+    selectPickupAddress(suggestion: any): void {
+        this.orderForm.get('pickup_address')?.setValue(suggestion.formatted);
+        this.orderForm.get('pickup_address')?.markAsDirty();
+        this.pickupSuggestions = [];
+    }
+
+    selectDeliveryAddress(suggestion: any): void {
+        this.orderForm.get('delivery_address')?.setValue(suggestion.formatted);
+        this.orderForm.get('delivery_address')?.markAsDirty();
+        this.deliverySuggestions = [];
     }
 
     limitMobileLength(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        // Allow only digits and maximum 10 characters
-        const value = input.value.replace(/\D/g, '').slice(0, 10);
-        input.value = value;
-        this.orderForm.get('customer_mobile')?.setValue(value);
+        limitMobileNumber(event, this.orderForm.get('customer_mobile'));
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -232,6 +331,8 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
 
     resetForm(): void {
         this.timelineSteps = [];
+        this.pickupSuggestions = [];
+        this.deliverySuggestions = [];
         this.orderForm.reset({
             order_item: '',
             customer_name: '',
@@ -257,6 +358,7 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
 
         if (this.orderForm.invalid) {
             this.orderForm.markAllAsTouched();
+            scrollToFirstInvalidControl(this.orderForm);
             return;
         }
 
@@ -278,6 +380,7 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
                     control.markAsTouched();
                 }
             })
+            scrollToFirstInvalidControl(this.orderForm);
             return
         }
         this.showConfirmation = true;

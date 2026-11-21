@@ -1,0 +1,130 @@
+<div class="relative w-full" [ngClass]="customClass">
+  <!-- Trigger Button -->
+  <button type="button" (click)="toggleDropdown($event)" [disabled]="disabled" [ngClass]="{
+      'h-[42px] px-3 py-2 text-sm': size === 'md',
+      'px-2.5 py-1.5 text-xs min-w-[140px]': size === 'sm',
+      'border-[#DC1D47] ring-2 ring-red-100': isOpen,
+      'border-gray-300': !isOpen,
+      'opacity-50 cursor-not-allowed': disabled,
+      'hover:border-gray-400': !disabled && !isOpen
+    }"
+    class="w-full flex items-center justify-between rounded-lg border bg-white text-left transition focus:outline-none select-none">
+
+    <span class="truncate pr-2" [ngClass]="isSelected ? 'font-medium text-gray-800' : 'text-gray-500'">
+      {{ displayLabel }}
+    </span>
+
+    <div class="flex items-center gap-1 shrink-0 text-gray-400">
+      <!-- Loading spinner -->
+      <svg *ngIf="loading" class="animate-spin h-3.5 w-3.5 text-[#DC1D47]" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+        </path>
+      </svg>
+
+      <!-- Clear Button (when value is present and clearable is true) -->
+      <button *ngIf="!loading && clearable && isSelected" type="button" (click)="clearSelection($event)"
+        class="p-0.5 rounded-full hover:bg-gray-100 hover:text-gray-600 transition" title="Clear selection">
+        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+            clip-rule="evenodd" />
+        </svg>
+      </button>
+
+      <!-- Chevron -->
+      <svg *ngIf="!loading" class="h-4 w-4 transition-transform duration-200" [ngClass]="{ 'rotate-180': isOpen }"
+        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  </button>
+
+  <!-- Dropdown Panel -->
+  <div *ngIf="isOpen" [ngClass]="{
+      'top-full mt-1.5': openDirection === 'down',
+      'bottom-full mb-1.5': openDirection === 'up'
+    }"
+    class="absolute left-0 z-50 w-full min-w-[220px] rounded-xl border border-gray-200 bg-white shadow-xl overflow-hidden">
+
+    <!-- Search Bar Pinned at Top -->
+    <div class="p-2 border-b border-gray-100 bg-gray-50/70">
+      <div class="relative flex items-center">
+        <!-- Search icon -->
+        <svg class="absolute left-2.5 h-3.5 w-3.5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+
+        <input type="text" [(ngModel)]="searchTerm" [placeholder]="searchPlaceholder" (click)="$event.stopPropagation()"
+          class="w-full rounded-lg border border-gray-200 bg-white pl-8 pr-7 py-1.5 text-xs text-gray-700 outline-none focus:border-[#DC1D47] focus:ring-1 focus:ring-red-100" />
+
+        <!-- Clear search term button -->
+        <button *ngIf="searchTerm" type="button" (click)="searchTerm = ''; $event.stopPropagation()"
+          class="absolute right-2 text-gray-400 hover:text-gray-600">
+          <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+              clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Items List (Scrollable) -->
+    <div class="max-h-56 overflow-y-auto p-1 divide-y divide-gray-50">
+      <!-- "All Option" (if specified) -->
+      <div *ngIf="allOptionLabel && !searchTerm" (click)="selectItem('', $event)"
+        [ngClass]="!value ? 'bg-red-50 text-[#DC1D47] font-semibold' : 'text-gray-700 hover:bg-gray-50'"
+        class="flex items-center justify-between px-3 py-2 text-xs rounded-lg cursor-pointer transition">
+        <span>{{ allOptionLabel }}</span>
+        <svg *ngIf="!value" class="h-3.5 w-3.5 text-[#DC1D47]" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+            clip-rule="evenodd" />
+        </svg>
+      </div>
+
+      <!-- Item rows -->
+      <div *ngFor="let item of filteredItems" (click)="selectItem(item.id, $event)"
+        [ngClass]="value === item.id ? 'bg-red-50 text-[#DC1D47] font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-[#163758]'"
+        class="flex items-center justify-between px-3 py-2 text-xs rounded-lg cursor-pointer transition">
+        <div class="flex flex-col min-w-0 pr-2">
+          <span class="truncate font-medium">{{ item.name }}</span>
+          <span *ngIf="item.mobile" class="text-[11px] text-gray-400">
+            {{ item.mobile }}
+          </span>
+        </div>
+
+        <svg *ngIf="value === item.id" class="h-3.5 w-3.5 text-[#DC1D47] shrink-0" viewBox="0 0 20 20"
+          fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+            clip-rule="evenodd" />
+        </svg>
+      </div>
+
+      <!-- Empty / Loading States -->
+      <div *ngIf="loading && filteredItems.length === 0" class="px-3 py-4 text-center text-xs text-gray-400">
+        <svg class="animate-spin h-4 w-4 mx-auto mb-1 text-[#DC1D47]" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+          </path>
+        </svg>
+        <span>Loading riders...</span>
+      </div>
+
+      <div *ngIf="!loading && items.length === 0" class="px-3 py-4 text-center text-xs text-gray-400">
+        No riders available
+      </div>
+
+      <div *ngIf="!loading && items.length > 0 && filteredItems.length === 0"
+        class="px-3 py-4 text-center text-xs text-gray-400">
+        No rider matches "{{ searchTerm }}"
+      </div>
+    </div>
+  </div>
+</div>

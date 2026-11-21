@@ -79,4 +79,11 @@ export class OrdersService {
     )
   }
 
+  searchAddress(text: string): Observable<{ success: boolean; data: any[] }> {
+    const params = new URLSearchParams({ text: text || '' });
+    return this.apiService.get<{ success: boolean; data: any[] }>(
+      `/orders/address-autocomplete?${params.toString()}`
+    );
+  }
+
 }

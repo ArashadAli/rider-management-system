@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import {AbstractControl,FormBuilder,FormGroup,Validators} from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { limitMobileNumber, scrollToFirstInvalidControl } from 'src/app/shared/utils/validation.utils';
 
 @Component({
   selector: 'app-register',
@@ -54,6 +55,7 @@ export class RegisterComponent {
     this.errorMessage = '';
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
+      scrollToFirstInvalidControl(this.registerForm);
       return;
     }
     this.isLoading = true;
@@ -84,6 +86,10 @@ export class RegisterComponent {
 
   get mobile() {
     return this.registerForm.get('mobile');
+  }
+
+  limitMobileLength(event: Event): void {
+    limitMobileNumber(event, this.registerForm.get('mobile'));
   }
 
   get password() {

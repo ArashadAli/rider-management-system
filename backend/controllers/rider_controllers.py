@@ -21,6 +21,20 @@ def create_Rider(user_email, validated_data=None):
         status = data.get("status") or "active"
         availability = data.get("availability") or "available"
 
+        if status == "inactive":
+            if availability and availability != "unavailable":
+                return jsonify({
+                    "success": False,
+                    "message": "An inactive rider can only have availability set to 'unavailable'"
+                }), 400
+            availability = "unavailable"
+        elif status == "active":
+            if availability not in ["available", "busy", "unavailable"]:
+                return jsonify({
+                    "success": False,
+                    "message": "Invalid availability for active rider"
+                }), 400
+
         # Consolidated single uniqueness check for email and mobile
         conflict = Rider.query.filter(or_(Rider.email == email, Rider.mobile == mobile)).first()
         if conflict:
@@ -362,6 +376,25 @@ def update_Rider(user_email, rider_id, validated_data=None):
                     "message": msg
                 }), 409
 
+        # Enforce status and availability consistency
+        target_status = status if status is not None else rider.status
+        target_availability = availability if availability is not None else rider.availability
+
+        if target_status == "inactive":
+            if availability and availability != "unavailable":
+                return jsonify({
+                    "success": False,
+                    "message": "An inactive rider can only have availability set to 'unavailable'"
+                }), 400
+            if status == "inactive" and not availability:
+                target_availability = "unavailable"
+        elif target_status == "active":
+            if target_availability not in ["available", "busy", "unavailable"]:
+                return jsonify({
+                    "success": False,
+                    "message": "Invalid availability for active rider"
+                }), 400
+
         if email:
             rider.email = email
         if mobile:
@@ -373,9 +406,9 @@ def update_Rider(user_email, rider_id, validated_data=None):
         if vehicle_number:
             rider.vehicle_number = vehicle_number
         if status:
-            rider.status = status
-        if availability:
-            rider.availability = availability
+            rider.status = target_status
+        if availability or (status == "inactive" and not availability):
+            rider.availability = target_availability
 
         if profile_image:
             is_valid, error_message = validate_profile_image(profile_image)

@@ -7,7 +7,8 @@ from controllers.order_controllers import (
     assign_Rider,
     update_Order_Status,
     get_Single_Order,
-    delete_Order
+    delete_Order,
+    autocomplete_Address
 )
 from schemas.base import validate_request
 from schemas.order_schemas import (
@@ -64,3 +65,9 @@ def get_single_order(user_email, order_id):
 @token_required
 def delete_order(user_email, order_id):
     return delete_Order(order_id)
+
+
+@order_bp.route("/address-autocomplete", methods=["GET"])
+@token_required
+def address_autocomplete(user_email):
+    return autocomplete_Address()

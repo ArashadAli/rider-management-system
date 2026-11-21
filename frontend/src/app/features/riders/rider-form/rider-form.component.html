@@ -35,7 +35,7 @@
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                        Name *
+                        Name <span class="text-[#DC1D47]">*</span>
                     </label>
                     <input type="text" formControlName="name" placeholder="Enter rider name"
                         class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
@@ -45,7 +45,7 @@
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                        Email *
+                        Email <span class="text-[#DC1D47]">*</span>
                     </label>
                     <input type="email" formControlName="email" placeholder="Enter email"
                         class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
@@ -55,9 +55,10 @@
                 </div>
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                        Mobile Number *
+                        Mobile Number <span class="text-[#DC1D47]">*</span>
                     </label>
-                    <input type="text" maxlength="10" formControlName="mobile" placeholder="Enter mobile number"
+                    <input type="text" inputmode="numeric" maxlength="10" formControlName="mobile" placeholder="Enter mobile number"
+                        (input)="limitMobileLength($event)"
                         class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
                     <p *ngIf="isInvalid('mobile')" class="mt-1 text-xs text-red-500">
                         {{ getErrorMessage('mobile') }}
@@ -66,7 +67,7 @@
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                            Vehicle Type *
+                            Vehicle Type <span class="text-[#DC1D47]">*</span>
                         </label>
                         <select formControlName="vehicle_type"
                             class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100">
@@ -82,7 +83,7 @@
                     </div>
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-gray-700">
-                            Vehicle Number *
+                            Vehicle Number <span class="text-[#DC1D47]">*</span>
                         </label>
                         <input type="text" formControlName="vehicle_number" placeholder="e.g. HR01AB1234"
                             class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm uppercase outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100" />
@@ -108,9 +109,13 @@
                         </label>
                         <select formControlName="availability"
                             class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100">
-                            <option value="available">Available</option>
-                            <option value="unavailable">Unavailable</option>
-                            <option value="busy">Busy</option>
+                            <ng-container *ngIf="riderForm.get('status')?.value === 'active'">
+                                <option value="available">Available</option>
+                                <option value="busy">Busy</option>
+                            </ng-container>
+                            <ng-container *ngIf="riderForm.get('status')?.value === 'inactive'">
+                                <option value="unavailable">Unavailable</option>
+                            </ng-container>
                         </select>
                     </div>
                 </div>
