@@ -34,3 +34,8 @@
   border-radius: 12px !important;
   opacity: 1 !important;
 }
+
+input::-ms-reveal,
+input::-ms-clear {
+  display: none;
+}
