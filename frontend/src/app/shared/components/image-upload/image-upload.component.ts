@@ -1,5 +1,5 @@
 
-import {Component,ElementRef,EventEmitter,Input,OnDestroy,Output,ViewChild} from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -27,7 +27,10 @@ export class ImageUploadComponent implements OnDestroy {
     imagePreview: string | null = null;
     errorMessage = '';
 
-    private objectUrl: string | null = null;
+    private activeReader: FileReader | null = null;
+    private readToken = 0;
+
+    constructor(private cdr: ChangeDetectorRef) {}
 
     onFileInputClick(event: Event): void {
         const input = event.target as HTMLInputElement;
@@ -58,10 +61,40 @@ export class ImageUploadComponent implements OnDestroy {
             input.value = '';
             return;
         }
-        this.clearObjectUrl();
+
+        this.abortActiveReader();
         this.selectedFile = file;
-        this.imagePreview = URL.createObjectURL(file);
-        this.objectUrl = this.imagePreview;
+        const currentToken = ++this.readToken;
+        const reader = new FileReader();
+        this.activeReader = reader;
+
+        reader.onload = () => {
+            if (currentToken !== this.readToken) {
+                return;
+            }
+            let result = typeof reader.result === 'string' ? reader.result : null;
+            if (result && !result.startsWith('data:image/')) {
+                const base64Index = result.indexOf(';base64,');
+                if (base64Index !== -1) {
+                    const mime = extension === 'png' ? 'image/png' : 'image/jpeg';
+                    result = `data:${mime}${result.slice(base64Index)}`;
+                }
+            }
+            this.imagePreview = result;
+            this.activeReader = null;
+            this.cdr.markForCheck();
+        };
+
+        reader.onerror = () => {
+            if (currentToken !== this.readToken) {
+                return;
+            }
+            this.errorMessage = 'Unable to preview the selected image.';
+            this.activeReader = null;
+            this.cdr.markForCheck();
+        };
+
+        reader.readAsDataURL(file);
         this.fileSelected.emit(file);
     }
 
@@ -72,7 +105,8 @@ export class ImageUploadComponent implements OnDestroy {
 
     /** Clears the selected file and preview without emitting an event. */
     reset(): void {
-        this.clearObjectUrl();
+        this.readToken++;
+        this.abortActiveReader();
         this.selectedFile = null;
         this.imagePreview = null;
         this.errorMessage = '';
@@ -85,14 +119,15 @@ export class ImageUploadComponent implements OnDestroy {
         return this.imagePreview || this.previewUrl;
     }
 
-    private clearObjectUrl(): void {
-        if (this.objectUrl) {
-            URL.revokeObjectURL(this.objectUrl);
-            this.objectUrl = null;
+    private abortActiveReader(): void {
+        if (this.activeReader && this.activeReader.readyState === FileReader.LOADING) {
+            this.activeReader.abort();
         }
+        this.activeReader = null;
     }
 
     ngOnDestroy(): void {
-        this.clearObjectUrl();
+        this.readToken++;
+        this.abortActiveReader();
     }
 }

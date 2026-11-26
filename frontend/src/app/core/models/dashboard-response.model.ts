@@ -14,14 +14,14 @@ export interface DashboardData {
 export interface DashboardMetrics {
   total_orders: number;
   active_riders: number;
-  pending_orders: number;
+  created_orders: number;
   delivered_orders: number;
   total_order_value: number;
   success_rate: number;
 }
 
 export interface OrderOverview {
-  pending: StatusOverview;
+  created: StatusOverview;
   delivered: StatusOverview;
   assigned: StatusOverview;
   cancelled: StatusOverview;

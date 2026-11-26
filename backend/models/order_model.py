@@ -51,7 +51,7 @@ class Order(db.Model):
     status = db.Column(
         db.String(30),
         nullable=False,
-        default="pending",
+        default="created",
         index=True
     )
 

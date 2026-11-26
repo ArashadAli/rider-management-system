@@ -18,7 +18,10 @@
                 <h2 class="truncate text-lg font-semibold text-[#163758]">
                     {{ profileForm.name || 'Your Profile' }}
                 </h2>
-                <p class="text-sm text-gray-500">
+                <p *ngIf="user?.email" class="truncate text-sm text-gray-500">
+                    {{ user?.email }}
+                </p>
+                <p class="mt-0.5 text-xs text-gray-400">
                     Administrator
                 </p>
             </div>

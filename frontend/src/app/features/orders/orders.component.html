@@ -34,7 +34,7 @@
         Clear filters
       </button>
     </div>
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       <div>
         <label class="mb-1.5 block text-xs font-semibold text-gray-600">
           Search
@@ -49,7 +49,7 @@
         <select [(ngModel)]="filters.status" (change)="applyFilters()"
           class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]">
           <option value="">All Statuses</option>
-          <option value="pending">Pending</option>
+          <option value="created">Created</option>
           <option value="assigned">Rider Assigned</option>
           <option value="accepted">Accepted</option>
           <option value="picked_up">Picked Up</option>
@@ -76,9 +76,16 @@
       </div>
       <div>
         <label class="mb-1.5 block text-xs font-semibold text-gray-600">
-          Date
+          From Date
         </label>
-        <input type="date" [(ngModel)]="filters.date" (change)="applyFilters()"
+        <input type="date" [(ngModel)]="filters.startDate" [max]="filters.endDate" (change)="applyFilters()"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]" />
+      </div>
+      <div>
+        <label class="mb-1.5 block text-xs font-semibold text-gray-600">
+          To Date
+        </label>
+        <input type="date" [(ngModel)]="filters.endDate" [min]="filters.startDate" (change)="applyFilters()"
           class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#DC1D47]" />
       </div>
       <div>
@@ -207,7 +214,7 @@
                     class="max-w-40 rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs font-semibold outline-none focus:border-[#DC1D47] disabled:opacity-50"
                     [ngClass]="getStatusClass(order.status)">
                     <option [value]="order.status" disabled selected>
-                      {{ formatStatusLabel(order.status) }} (Current)
+                      {{ formatStatusLabel(order.status) }}
                     </option>
                     <option *ngFor="let nextStatus of order.next_statuses" [value]="nextStatus">
                       {{ nextStatus === 'assigned' ? 'Assign Rider' : formatStatusLabel(nextStatus) }}
@@ -219,8 +226,9 @@
                 <div class="flex items-center gap-2">
 
                   <button type="button" (click)="openOrderViewDrawer(order.order_id)"
-                    class="inline-flex items-center rounded-lg border border-[#DC1D47]/20 bg-[#DC1D47]/5 px-3 py-1.5 text-sm font-semibold text-[#DC1D47] transition hover:bg-[#DC1D47] hover:text-white">
-                    View
+                    [attr.aria-label]="'View order ' + order.order_id" title="View order"
+                    class="inline-flex items-center justify-center rounded-lg border border-[#163758]/20 bg-[#163758]/5 p-2 text-[#163758] transition hover:bg-[#163758] hover:text-white">
+                    <i-lucide name="eye" [size]="16"></i-lucide>
                   </button>
 
                   <button *ngIf="order.status === 'delivered' || order.status === 'cancelled'" type="button"
@@ -255,7 +263,7 @@
 
   <app-confirmation-dialog [visible]="deleteConfirmationOpen" [title]="'Delete Order?'"
     [message]="'Are you sure you want to delete order'" [itemName]="orderToDelete?.order_id || ''"
-    [confirmText]="'Delete Order'" [cancelText]="'Cancel'" [loading]="!!deletingOrderId" [loadingText]="'Deleting...'"
+    [confirmText]="'Yes'" [cancelText]="'No'" [loading]="!!deletingOrderId" [loadingText]="'Deleting...'"
     (confirmed)="deleteSelectedOrder()" (cancelled)="closeDeleteConfirmation()">
   </app-confirmation-dialog>
 </div>

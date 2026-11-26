@@ -4,7 +4,7 @@
       Dashboard
     </h1>
     <p class="mt-1 text-sm text-gray-500">
-      Welcome back! Here's an overview of your operations.
+      Welcome back!
     </p>
   </div>
   <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5 mb-6">
@@ -48,10 +48,10 @@
       <div class="flex items-center justify-between gap-4">
         <div class="min-w-0">
           <p class="text-sm font-medium text-gray-500">
-            Pending Orders
+            Created Orders
           </p>
           <h2 class="mt-2 text-3xl font-bold" style="color: #163758;">
-            {{ dashboard?.metrics?.pending_orders ?? 0 }}
+            {{ dashboard?.metrics?.created_orders ?? 0 }}
           </h2>
           <p class="mt-1 text-xs text-gray-400">
             Awaiting completion
@@ -95,17 +95,17 @@
         <div>
           <div class="flex justify-between items-center gap-3 mb-2">
             <span class="text-sm font-medium text-gray-600">
-              Pending
+              Created
             </span>
             <span class="text-sm font-semibold text-gray-700">
-              {{ dashboard?.order_overview?.pending?.count ?? 0 }}
+              {{ dashboard?.order_overview?.created?.count ?? 0 }}
               <span class="text-gray-400 font-normal">
-                ({{ dashboard?.order_overview?.pending?.percentage ?? 0 }}%)
+                ({{ dashboard?.order_overview?.created?.percentage ?? 0 }}%)
               </span>
             </span>
           </div>
           <div class="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-            <div class="h-full rounded-full transition-all duration-500" style="background-color: #DC1D47;" [style.width.%]="dashboard?.order_overview?.pending?.percentage ?? 0"></div>
+            <div class="h-full rounded-full transition-all duration-500" style="background-color: #DC1D47;" [style.width.%]="dashboard?.order_overview?.created?.percentage ?? 0"></div>
           </div>
         </div>
         <div>
@@ -255,10 +255,10 @@
       </div>
       <div class="rounded-lg bg-amber-50 p-4">
         <p class="text-xs text-amber-700">
-          Pending
+          Created
         </p>
         <p class="mt-1 text-xl font-bold text-amber-700">
-          {{ dashboard?.metrics?.pending_orders ?? 0 }}
+          {{ dashboard?.metrics?.created_orders ?? 0 }}
         </p>
       </div>
       <div class="rounded-lg bg-green-50 p-4">

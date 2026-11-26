@@ -27,7 +27,8 @@ export class OrdersService {
       search: string,
       status: string,
       rider: string,
-      date: string,
+      startDate: string,
+      endDate: string,
       sort: string
     }
   ): Observable<OrderResponse> {
@@ -38,7 +39,8 @@ export class OrdersService {
       search: filters.search || '',
       status: filters.status || '',
       rider: filters.rider || '',
-      date: filters.date || '',
+      start_date: filters.startDate || '',
+      end_date: filters.endDate || '',
       sort: filters.sort || 'newest'
     })
 

@@ -61,7 +61,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       case 'delivered':
         return 'bg-green-50 text-green-700';
 
-      case 'pending':
+      case 'created':
         return 'bg-amber-50 text-amber-700';
 
       case 'cancelled':

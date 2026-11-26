@@ -198,18 +198,25 @@ export class RidersComponent implements OnInit, OnDestroy {
 
 
   toggleStatus(rider: Rider): void {
+    if (this.loading) {
+      return;
+    }
     this.loading = true;
-    this.ridersService.updateRiderStatus(rider.id).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.toastService.success(response.message)
-          this.getPaginatedRiders();
+    this.ridersService.updateRiderStatus(rider.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          if (response?.success) {
+            this.toastService.success(response.message);
+            this.getPaginatedRiders();
+          } else {
+            this.loading = false;
+          }
+        },
+        error: () => {
+          this.loading = false;
         }
-      },
-      error: (error) => {
-        this.loading = false;
-      }
-    })
+      });
   }
 
   openCreateDrawer(): void {

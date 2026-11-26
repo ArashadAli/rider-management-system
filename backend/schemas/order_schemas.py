@@ -1,8 +1,8 @@
-from marshmallow import fields, validate, Schema
+from marshmallow import fields, validate, Schema, validates_schema, ValidationError
 from schemas.base import BaseBodySchema, BaseQuerySchema
 
 ALLOWED_ORDER_STATUSES = [
-    "pending",
+    "created",
     "assigned",
     "accepted",
     "picked_up",
@@ -69,6 +69,14 @@ class OrderPaginationQuerySchema(BaseQuerySchema):
     search = fields.String(load_default="")
     status = fields.String(load_default="")
     rider = fields.String(load_default="")
+    start_date = fields.Date(
+        load_default=None,
+        error_messages={"invalid": "Invalid start date format. Use YYYY-MM-DD."}
+    )
+    end_date = fields.Date(
+        load_default=None,
+        error_messages={"invalid": "Invalid end date format. Use YYYY-MM-DD."}
+    )
     date = fields.Date(
         load_default=None,
         error_messages={"invalid": "Invalid date format. Use YYYY-MM-DD."}
@@ -80,6 +88,16 @@ class OrderPaginationQuerySchema(BaseQuerySchema):
             error="Invalid sort option"
         )
     )
+
+    @validates_schema
+    def validate_date_range(self, data, **kwargs):
+        start_date = data.get("start_date")
+        end_date = data.get("end_date")
+        if start_date and end_date and start_date > end_date:
+            raise ValidationError(
+                "Start date cannot be after end date.",
+                field_name="start_date"
+            )
 
 
 class OrderResponseSchema(Schema):

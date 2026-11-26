@@ -29,11 +29,12 @@ def create_Rider(user_email, validated_data=None):
                 }), 400
             availability = "unavailable"
         elif status == "active":
-            if availability not in ["available", "busy", "unavailable"]:
+            if availability and availability != "available":
                 return jsonify({
                     "success": False,
-                    "message": "Invalid availability for active rider"
+                    "message": "An active rider can only be created with availability set to 'available'"
                 }), 400
+            availability = "available"
 
         # Consolidated single uniqueness check for email and mobile
         conflict = Rider.query.filter(or_(Rider.email == email, Rider.mobile == mobile)).first()
@@ -233,13 +234,23 @@ def update_Rider_Status(user_email, rider_id):
                 "message": "Rider not found"
             }), 404
 
+        ongoing_order = Order.query.filter(
+            Order.rider_id == rider.id,
+            Order.status.notin_(["delivered", "cancelled"])
+        ).first()
+
         # Toggle status
         if rider.status == "active":
+            if ongoing_order:
+                return jsonify({
+                    "success": False,
+                    "message": f"Cannot deactivate rider while assigned to ongoing order ({ongoing_order.order_id})."
+                }), 409
             rider.status = "inactive"
             rider.availability = "unavailable"
         else:
             rider.status = "active"
-            rider.availability = "available"
+            rider.availability = "busy" if ongoing_order else "available"
 
         db.session.commit()
 
@@ -379,6 +390,23 @@ def update_Rider(user_email, rider_id, validated_data=None):
         # Enforce status and availability consistency
         target_status = status if status is not None else rider.status
         target_availability = availability if availability is not None else rider.availability
+
+        ongoing_order = Order.query.filter(
+            Order.rider_id == rider.id,
+            Order.status.notin_(["delivered", "cancelled"])
+        ).first()
+
+        if ongoing_order:
+            if target_status == "inactive":
+                return jsonify({
+                    "success": False,
+                    "message": f"Cannot deactivate rider while assigned to ongoing order ({ongoing_order.order_id})."
+                }), 409
+            if availability and availability != "busy":
+                return jsonify({
+                    "success": False,
+                    "message": f"Cannot change availability while rider is assigned to ongoing order ({ongoing_order.order_id})."
+                }), 409
 
         if target_status == "inactive":
             if availability and availability != "unavailable":

@@ -244,32 +244,8 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
             }
         });
 
-        if (isCancelled) {
-            const pendingEntry = historyMap.get('pending');
-            const cancelEntry = historyMap.get('cancelled');
-            this.timelineSteps = [
-                {
-                    key: 'pending',
-                    label: 'Order Placed',
-                    description: 'Order created in system',
-                    status: 'completed',
-                    timestamp: pendingEntry?.changed_at || order.created_at,
-                    note: pendingEntry?.changed_by || null
-                },
-                {
-                    key: 'cancelled',
-                    label: 'Order Cancelled',
-                    description: 'Order was cancelled',
-                    status: 'cancelled',
-                    timestamp: cancelEntry?.changed_at || null,
-                    note: cancelEntry?.changed_by || 'Cancelled while pending'
-                }
-            ];
-            return;
-        }
-
         const standardStages = [
-            { key: 'pending', label: 'Order Placed', desc: 'Order received and logged' },
+            { key: 'created', label: 'Order Placed', desc: 'Order received and logged' },
             { key: 'assigned', label: 'Rider Assigned', desc: order.rider_name ? `Assigned to ${order.rider_name}` : 'Awaiting rider allocation' },
             { key: 'accepted', label: 'Order Accepted', desc: 'Rider confirmed delivery request' },
             { key: 'picked_up', label: 'Picked Up', desc: 'Package picked up from merchant' },
@@ -277,7 +253,54 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
             { key: 'delivered', label: 'Delivered', desc: 'Package delivered to recipient' }
         ];
 
-        const stageOrder = ['pending', 'assigned', 'accepted', 'picked_up', 'on_the_way', 'delivered'];
+        const stageOrder = ['created', 'assigned', 'accepted', 'picked_up', 'on_the_way', 'delivered'];
+
+        if (isCancelled) {
+            const cancelEntry = historyMap.get('cancelled');
+            let cancelledFromIdx = cancelEntry?.from_status
+                ? stageOrder.indexOf(cancelEntry.from_status)
+                : -1;
+
+            if (cancelledFromIdx === -1) {
+                for (let i = stageOrder.length - 1; i >= 0; i--) {
+                    if (historyMap.has(stageOrder[i])) {
+                        cancelledFromIdx = i;
+                        break;
+                    }
+                }
+            }
+            if (cancelledFromIdx === -1) {
+                cancelledFromIdx = 0;
+            }
+
+            const completedSteps: TimelineStep[] = standardStages
+                .slice(0, cancelledFromIdx + 1)
+                .map((stage, idx) => {
+                    const historyEntry = historyMap.get(stage.key);
+                    return {
+                        key: stage.key,
+                        label: stage.label,
+                        description: stage.desc,
+                        status: 'completed',
+                        timestamp: historyEntry?.changed_at || (idx === 0 ? order.created_at : null),
+                        note: historyEntry?.changed_by || null
+                    };
+                });
+
+            const cancelledFromKey = stageOrder[cancelledFromIdx] || 'created';
+            completedSteps.push({
+                key: 'cancelled',
+                label: 'Order Cancelled',
+                description: `Order was cancelled (${this.formatStatusLabel(cancelledFromKey)})`,
+                status: 'cancelled',
+                timestamp: cancelEntry?.changed_at || null,
+                note: cancelEntry?.changed_by || `Cancelled while ${this.formatStatusLabel(cancelledFromKey).toLowerCase()}`
+            });
+
+            this.timelineSteps = completedSteps;
+            return;
+        }
+
         const currentIdx = stageOrder.indexOf(order.status);
 
         this.timelineSteps = standardStages.map((stage, idx) => {
@@ -305,7 +328,7 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
 
     getStatusBadgeClass(status: string): string {
         const classes: Record<string, string> = {
-            pending: 'bg-amber-50 text-amber-700',
+            created: 'bg-amber-50 text-amber-700',
             assigned: 'bg-indigo-50 text-indigo-700',
             accepted: 'bg-blue-50 text-blue-700',
             picked_up: 'bg-purple-50 text-purple-700',
@@ -318,7 +341,7 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
 
     formatStatusLabel(status: string): string {
         const labels: Record<string, string> = {
-            pending: 'Pending',
+            created: 'Created',
             assigned: 'Assigned',
             accepted: 'Accepted',
             picked_up: 'Picked Up',

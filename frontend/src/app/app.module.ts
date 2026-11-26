@@ -37,6 +37,7 @@ import { LucideAngularModule, LayoutDashboard, ShoppingCartIcon, Truck, UserRoun
   HelpCircle,
   FunnelPlus,
   MapPinHouse,
+  X
 } from 'lucide-angular';
 
 
@@ -97,7 +98,8 @@ import { LucideAngularModule, LayoutDashboard, ShoppingCartIcon, Truck, UserRoun
       LoaderCircle,
       HelpCircle,
       FunnelPlus,
-      MapPinHouse
+      MapPinHouse,
+      X
     })
   ],
 

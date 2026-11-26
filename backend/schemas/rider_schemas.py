@@ -37,7 +37,7 @@ class RiderCreateSchema(BaseBodySchema):
     )
     availability = fields.String(
         load_default="available",
-        validate=validate.OneOf(ALLOWED_RIDER_AVAILABILITY, error="Invalid availability")
+        validate=validate.OneOf(["available", "unavailable"], error="Invalid availability for rider creation")
     )
 
     @validates_schema
@@ -47,6 +47,11 @@ class RiderCreateSchema(BaseBodySchema):
         if status == "inactive" and availability and availability != "unavailable":
             raise ValidationError(
                 "An inactive rider can only have availability set to 'unavailable'",
+                field_name="availability"
+            )
+        if status == "active" and availability and availability != "available":
+            raise ValidationError(
+                "An active rider can only be created with availability set to 'available'",
                 field_name="availability"
             )
 

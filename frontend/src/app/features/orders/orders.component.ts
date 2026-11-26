@@ -60,7 +60,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
     search: '',
     status: '',
     rider: '',
-    date: '',
+    startDate: '',
+    endDate: '',
     sort: 'newest'
   };
   loadingOrders = false;
@@ -182,7 +183,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   formatStatusLabel(status: string): string {
     const labels: Record<string, string> = {
-      pending: 'Pending',
+      created: 'Created',
       assigned: 'Assigned',
       accepted: 'Accepted',
       picked_up: 'Picked Up',
@@ -211,7 +212,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
     }
 
     if (status === 'cancelled') {
-      const confirm = window.confirm(`Are you sure you want to cancle order ${order.order_id}`)
+      const confirm = window.confirm(`Are you sure you want to cancel order ${order.order_id}?`)
 
       if (!confirm) {
         this.loadOrders();
@@ -234,6 +235,9 @@ export class OrdersComponent implements OnInit, OnDestroy {
             return;
           }
           this.toastService.success(response.message || 'Order status updated successfully.');
+          if (status === 'cancelled' || status === 'delivered') {
+            this.refreshRiderLists();
+          }
           this.loadOrders();
         },
         error: (error) => {
@@ -275,7 +279,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: string): string {
     const classes: Record<string, string> = {
-      pending: 'bg-amber-50 text-amber-700',
+      created: 'bg-amber-50 text-amber-700',
       'rider assigned': 'bg-indigo-50 text-indigo-700',
       assigned: 'bg-indigo-50 text-indigo-700',
       accepted: 'bg-blue-50 text-blue-700',
@@ -296,12 +300,17 @@ export class OrdersComponent implements OnInit, OnDestroy {
     if (this.filters.search && this.filters.search.trim()) count++;
     if (this.filters.status) count++;
     if (this.filters.rider) count++;
-    if (this.filters.date) count++;
+    if (this.filters.startDate) count++;
+    if (this.filters.endDate) count++;
     if (this.filters.sort && this.filters.sort !== 'newest') count++;
     return count;
   }
 
   applyFilters(): void {
+    if (this.filters.startDate && this.filters.endDate && this.filters.startDate > this.filters.endDate) {
+      this.toastService.error('From Date cannot be after To Date.');
+      return;
+    }
     this.currentPage = 1;
     this.loadOrders();
   }
@@ -316,7 +325,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
       search: '',
       status: '',
       rider: '',
-      date: '',
+      startDate: '',
+      endDate: '',
       sort: 'newest'
     };
     this.currentPage = 1;

@@ -111,7 +111,7 @@
                             class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-[#163758] focus:ring-1 focus:ring-[#163758] disabled:bg-gray-100">
                             <ng-container *ngIf="riderForm.get('status')?.value === 'active'">
                                 <option value="available">Available</option>
-                                <option value="busy">Busy</option>
+                                <option *ngIf="mode !== 'create'" value="busy">Busy</option>
                             </ng-container>
                             <ng-container *ngIf="riderForm.get('status')?.value === 'inactive'">
                                 <option value="unavailable">Unavailable</option>
@@ -125,11 +125,11 @@
     <div class="flex shrink-0 flex-col-reverse gap-2 border-t border-gray-200 px-5 py-4 sm:flex-row sm:justify-end">
         <button *ngIf="mode === 'create'" (click)="resetRider()"
             class="w-full rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#c7193f] sm:w-auto">
-            Reset Rider
+            Reset
         </button>
         <button *ngIf="mode !== 'view'" (click)="submit()" [disabled]="loading"
             class="w-full rounded-lg bg-[#DC1D47] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#c7193f] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto">
-            {{ mode === 'create' ? 'Create Rider' : 'Update Rider' }}
+            {{ mode === 'create' ? 'Create' : 'Update' }}
         </button>
     </div>
 </div>
@@ -139,7 +139,7 @@
     [title]="'Confirm Rider Creation'"
     [message]="'Are you sure you want to create rider'"
     [itemName]="riderForm.get('name')?.value ? '&quot;' + riderForm.get('name')?.value + '&quot;?' : '?'"
-    [confirmText]="'Yes, Create Rider'"
+    [confirmText]="'Yes'"
     [cancelText]="'Cancel'"
     [loading]="loading"
     [loadingText]="'Creating...'"

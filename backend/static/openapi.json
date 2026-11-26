@@ -187,7 +187,7 @@
                   "type": "object",
                   "properties": {
                     "total_orders": { "type": "integer" },
-                    "pending_orders": { "type": "integer" },
+                    "created_orders": { "type": "integer" },
                     "delivered_orders": { "type": "integer" },
                     "assigned_orders": { "type": "integer" },
                     "cancelled_orders": { "type": "integer" },
@@ -469,7 +469,7 @@
       "patch": {
         "tags": ["Riders"],
         "summary": "Toggle rider status or availability",
-        "description": "Toggles active/inactive status or cycles availability.",
+        "description": "Toggles active/inactive status and updates availability. Cannot deactivate a rider assigned to an ongoing order.",
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "rider_id", "in": "path", "required": true, "schema": { "type": "string" } }
@@ -483,7 +483,15 @@
               }
             }
           },
-          "404": { "$ref": "#/components/responses/NotFound" }
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "409": {
+            "description": "Conflict - Rider has an ongoing order and cannot be deactivated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ErrorResponse" }
+              }
+            }
+          }
         }
       }
     },
@@ -675,7 +683,8 @@
           { "name": "search", "in": "query", "schema": { "type": "string" } },
           { "name": "status", "in": "query", "schema": { "type": "string" } },
           { "name": "rider", "in": "query", "schema": { "type": "string" } },
-          { "name": "date", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "start_date", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Filter orders created on or after this date (YYYY-MM-DD)" },
+          { "name": "end_date", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Filter orders created on or before this date (YYYY-MM-DD)" },
           { "name": "sort", "in": "query", "schema": { "type": "string", "enum": ["newest", "oldest", "amount_low", "amount_high"], "default": "newest" } }
         ],
         "responses": {
@@ -757,7 +766,7 @@
       "post": {
         "tags": ["Orders"],
         "summary": "Assign rider to order",
-        "description": "Assigns an available rider to a pending order and updates their availability status.",
+        "description": "Assigns an available rider to a created order and updates their availability status.",
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "order_id", "in": "path", "required": true, "schema": { "type": "string" } }
@@ -788,7 +797,7 @@
       "post": {
         "tags": ["Orders"],
         "summary": "Update order status",
-        "description": "Updates order status (e.g. pending -> assigned -> delivered).",
+        "description": "Updates order status (e.g. created -> assigned -> delivered, or cancel at any stage prior to delivered).",
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "name": "order_id", "in": "path", "required": true, "schema": { "type": "string" } }
@@ -994,7 +1003,7 @@
         "properties": {
           "status": {
             "type": "string",
-            "enum": ["pending", "assigned", "accepted", "picked_up", "on_the_way", "delivered", "cancelled"],
+            "enum": ["created", "assigned", "accepted", "picked_up", "on_the_way", "delivered", "cancelled"],
             "example": "accepted"
           }
         }

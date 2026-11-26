@@ -12,11 +12,11 @@ from sqlalchemy import or_
 from schemas.base import get_validated_data, get_validated_query
 
 ORDER_TRANSITIONS = {
-    "pending": ["assigned", "cancelled"],
-    "assigned": ["accepted"],
-    "accepted": ["picked_up"],
-    "picked_up": ["on_the_way"],
-    "on_the_way": ["delivered"],
+    "created": ["assigned", "cancelled"],
+    "assigned": ["accepted", "cancelled"],
+    "accepted": ["picked_up", "cancelled"],
+    "picked_up": ["on_the_way", "cancelled"],
+    "on_the_way": ["delivered", "cancelled"],
     "delivered": [],
     "cancelled": []
 }
@@ -37,7 +37,7 @@ def create_Order(user_email, validated_data=None):
             pickup_address=data["pickup_address"].strip(),
             delivery_address=data["delivery_address"].strip(),
             amount=float(data["amount"]),
-            status="pending",
+            status="created",
             rider_id=None
         )
 
@@ -47,7 +47,7 @@ def create_Order(user_email, validated_data=None):
         initial_history = OrderStatusHistory(
             order_id=new_order.order_id,
             from_status=None,
-            to_status="pending",
+            to_status="created",
             changed_by=user_email
         )
         db.session.add(initial_history)
@@ -124,6 +124,8 @@ def getOrderForPagination(user_email, validated_query=None):
         search = query_params.get("search", "")
         status = query_params.get("status", "")
         rider_id = query_params.get("rider", "")
+        start_date = query_params.get("start_date")
+        end_date = query_params.get("end_date")
         selected_date = query_params.get("date")
         sort = query_params.get("sort", "newest")
 
@@ -153,18 +155,34 @@ def getOrderForPagination(user_email, validated_query=None):
         if rider_id:
             query = query.filter(Order.rider_id == rider_id)
 
-        if selected_date:
-            if isinstance(selected_date, str):
-                try:
-                    selected_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
-                except ValueError:
-                    return jsonify({
-                        "success": False,
-                        "message": "Invalid date format. Use YYYY-MM-DD."
-                    }), 400
-            start_date = datetime.combine(selected_date, datetime.min.time())
-            end_date = start_date + timedelta(days=1)
-            query = query.filter(Order.created_at >= start_date, Order.created_at < end_date)
+        if selected_date and not start_date and not end_date:
+            start_date = selected_date
+            end_date = selected_date
+
+        try:
+            if isinstance(start_date, str):
+                start_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+            if isinstance(end_date, str):
+                end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+        except ValueError:
+            return jsonify({
+                "success": False,
+                "message": "Invalid date format. Use YYYY-MM-DD."
+            }), 400
+
+        if start_date and end_date and start_date > end_date:
+            return jsonify({
+                "success": False,
+                "message": "Start date cannot be after end date."
+            }), 400
+
+        if start_date:
+            start_dt = datetime.combine(start_date, datetime.min.time())
+            query = query.filter(Order.created_at >= start_dt)
+
+        if end_date:
+            end_dt = datetime.combine(end_date, datetime.min.time()) + timedelta(days=1)
+            query = query.filter(Order.created_at < end_dt)
 
         if sort == "oldest":
             query = query.order_by(Order.created_at.asc())
@@ -238,10 +256,10 @@ def assign_Rider(order_id, validated_data=None):
                 "message": "Order not found"
             }), 404
 
-        if order.status != "pending":
+        if order.status != "created":
             return jsonify({
                 "success": False,
-                "message": f"Cannot assign rider to an order in '{order.status}' status. Only pending orders can be assigned."
+                "message": f"Cannot assign rider to an order in '{order.status}' status. Only created orders can be assigned."
             }), 400
 
         rider = Rider.query.filter_by(id=rider_id).first()
@@ -335,12 +353,24 @@ def update_Order_Status(order_id, validated_data=None):
             }), 400
 
         if status == "cancelled":
-            if current_status != "pending":
+            if current_status in ["delivered", "cancelled"]:
                 return jsonify({
                     "success": False,
-                    "message": "Orders can only be cancelled while in 'pending' status."
+                    "message": f"Orders cannot be cancelled once in '{current_status}' status."
                 }), 400
+
             order.status = "cancelled"
+            if order.rider_id is not None:
+                rider = Rider.query.filter_by(id=order.rider_id).first()
+                if rider and rider.status == "active":
+                    other_active_order = Order.query.filter(
+                        Order.rider_id == rider.id,
+                        Order.order_id != order.order_id,
+                        Order.status.notin_(["delivered", "cancelled"])
+                    ).first()
+                    if not other_active_order:
+                        rider.availability = "available"
+
             history_entry = OrderStatusHistory(
                 order_id=order.order_id,
                 from_status=current_status,
@@ -364,8 +394,14 @@ def update_Order_Status(order_id, validated_data=None):
 
         if status.lower() == "delivered":
             rider = Rider.query.filter_by(id=order.rider_id).first()
-            if rider:
-                rider.availability = "available"
+            if rider and rider.status == "active":
+                other_active_order = Order.query.filter(
+                    Order.rider_id == rider.id,
+                    Order.order_id != order.order_id,
+                    Order.status.notin_(["delivered", "cancelled"])
+                ).first()
+                if not other_active_order:
+                    rider.availability = "available"
 
         history_entry = OrderStatusHistory(
             order_id=order.order_id,

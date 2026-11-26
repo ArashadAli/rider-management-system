@@ -256,7 +256,7 @@
                             <td class="px-5 py-4 text-center">
                                 <button type="button" role="switch" [attr.aria-checked]="rider.status === 'active'"
                                     [disabled]="loading" (click)="toggleStatus(rider)"
-                                    [title]="rider.status === 'active' ? 'Click to deactivate' : 'Click to activate'"
+                                    [title]="rider.status === 'active' ? (rider.availability === 'busy' ? 'Rider has an ongoing order' : 'Click to deactivate') : 'Click to activate'"
                                     class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#163758]/20 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50"
                                     [ngClass]="rider.status === 'active' ? 'bg-emerald-500' : 'bg-gray-300'">
                                     <span class="sr-only">{{ rider.status === 'active' ? 'Deactivate rider' : 'Activate rider' }}</span>

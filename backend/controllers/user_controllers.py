@@ -15,7 +15,7 @@ def user_dashboard(user_email):
         # Consolidated query 1: Order counts and sum in a single database roundtrip
         order_metrics = db.session.query(
             func.count(Order.id).label("total_orders"),
-            func.count(case((Order.status == "pending", Order.id))).label("pending_orders"),
+            func.count(case((Order.status == "created", Order.id))).label("created_orders"),
             func.count(case((Order.status == "delivered", Order.id))).label("delivered_orders"),
             func.count(case((Order.status == "assigned", Order.id))).label("assigned_orders"),
             func.count(case((Order.status == "cancelled", Order.id))).label("cancelled_orders"),
@@ -23,7 +23,7 @@ def user_dashboard(user_email):
         ).one()
 
         total_orders = order_metrics.total_orders or 0
-        pending_orders = order_metrics.pending_orders or 0
+        created_orders = order_metrics.created_orders or 0
         delivered_orders = order_metrics.delivered_orders or 0
         assigned_orders = order_metrics.assigned_orders or 0
         cancelled_orders = order_metrics.cancelled_orders or 0
@@ -46,7 +46,7 @@ def user_dashboard(user_email):
 
         # Percentages
         success_rate = (delivered_orders / total_orders * 100) if total_orders > 0 else 0
-        pending_percentage = (pending_orders / total_orders * 100) if total_orders > 0 else 0
+        created_percentage = (created_orders / total_orders * 100) if total_orders > 0 else 0
         delivered_percentage = (delivered_orders / total_orders * 100) if total_orders > 0 else 0
         assigned_percentage = (assigned_orders / total_orders * 100) if total_orders > 0 else 0
         cancelled_percentage = (cancelled_orders / total_orders * 100) if total_orders > 0 else 0
@@ -97,15 +97,15 @@ def user_dashboard(user_email):
                 "metrics": {
                     "total_orders": total_orders,
                     "active_riders": active_riders,
-                    "pending_orders": pending_orders,
+                    "created_orders": created_orders,
                     "delivered_orders": delivered_orders,
                     "total_order_value": total_order_value,
                     "success_rate": round(success_rate, 2)
                 },
                 "order_overview": {
-                    "pending": {
-                        "count": pending_orders,
-                        "percentage": round(pending_percentage, 2)
+                    "created": {
+                        "count": created_orders,
+                        "percentage": round(created_percentage, 2)
                     },
                     "delivered": {
                         "count": delivered_orders,

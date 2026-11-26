@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, Renderer2 } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, Renderer2, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Subject, of } from 'rxjs';
@@ -35,6 +35,7 @@ export class RiderFormComponent
   showConfirmation = false;
   selectedImage: File | null = null;
   existingImageUrl: string | null = null;
+  @ViewChild(ImageUploadComponent) imageUpload?: ImageUploadComponent;
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -73,8 +74,10 @@ export class RiderFormComponent
       .subscribe(status => {
         if (status === 'inactive') {
           this.riderForm.get('availability')?.setValue('unavailable');
-        } else if (status === 'active' && this.riderForm.get('availability')?.value === 'unavailable') {
-          this.riderForm.get('availability')?.setValue('available');
+        } else if (status === 'active') {
+          if (this.mode === 'create' || this.riderForm.get('availability')?.value === 'unavailable') {
+            this.riderForm.get('availability')?.setValue('available');
+          }
         }
       });
   }
@@ -147,7 +150,17 @@ export class RiderFormComponent
 
   resetRider(): void {
     this.showConfirmation = false;
-    this.riderForm.reset();
+    this.selectedImage = null;
+    this.imageUpload?.reset();
+    this.riderForm.reset({
+      name: '',
+      email: '',
+      mobile: '',
+      vehicle_type: '',
+      vehicle_number: '',
+      status: 'active',
+      availability: 'available'
+    });
   }
 
   limitMobileLength(event: Event): void {
