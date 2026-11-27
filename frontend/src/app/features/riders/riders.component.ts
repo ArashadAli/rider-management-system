@@ -51,6 +51,8 @@ export class RidersComponent implements OnInit, OnDestroy {
   showDeleteConfirmation = false;
   selectedRiderToDelete: Rider | null = null;
   deletingRider = false;
+  highlightedRiderId: string | null = sessionStorage.getItem('rms_highlighted_rider_id');
+  private pendingScrollRiderId: string | null = null;
 
   constructor(
     private ridersService: RidersService,
@@ -148,6 +150,13 @@ export class RidersComponent implements OnInit, OnDestroy {
         this.pageSize = response.pagination.limit;
         this.totalRiders = response.pagination.total;
         this.totalPages = response.pagination.pages;
+        if (this.pendingScrollRiderId) {
+          const targetId = this.pendingScrollRiderId;
+          this.pendingScrollRiderId = null;
+          setTimeout(() => {
+            document.getElementById(`rider-row-${targetId}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }, 50);
+        }
       });
   }
 
@@ -208,6 +217,7 @@ export class RidersComponent implements OnInit, OnDestroy {
         next: (response) => {
           if (response?.success) {
             this.toastService.success(response.message);
+            this.setHighlightedRider(rider.id);
             this.getPaginatedRiders();
           } else {
             this.loading = false;
@@ -217,6 +227,26 @@ export class RidersComponent implements OnInit, OnDestroy {
           this.loading = false;
         }
       });
+  }
+
+  setHighlightedRider(riderId: string | null): void {
+    this.highlightedRiderId = riderId;
+    this.pendingScrollRiderId = riderId;
+    if (riderId) {
+      sessionStorage.setItem('rms_highlighted_rider_id', riderId);
+    } else {
+      sessionStorage.removeItem('rms_highlighted_rider_id');
+    }
+  }
+
+  onRiderSaved(event: { id: string; mode: 'create' | 'edit' }): void {
+    if (event.mode === 'create') {
+      this.currentPage = 1;
+    }
+    if (event.id) {
+      this.setHighlightedRider(event.id);
+    }
+    this.getPaginatedRiders();
   }
 
   openCreateDrawer(): void {
@@ -262,6 +292,9 @@ export class RidersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response?.success) {
+            if (this.highlightedRiderId === rider.id) {
+              this.setHighlightedRider(null);
+            }
             this.toastService.success(response.message || 'Rider deleted successfully.', 'Success');
             this.showDeleteConfirmation = false;
             this.selectedRiderToDelete = null;

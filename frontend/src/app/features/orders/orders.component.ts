@@ -42,6 +42,17 @@ export class OrdersComponent implements OnInit, OnDestroy {
   deletingOrderId: string | null = null
   orderToDelete: { order_id: string } | null = null
 
+  cancelConfirmationOpen = false;
+  cancellingOrderId: string | null = null;
+  orderToCancel: Order | null = null;
+  readonly cancellationQuickReasons: string[] = [
+    'Customer requested',
+    'Item out of stock',
+    'Rider unavailable',
+    'Incorrect address',
+    'Duplicate order'
+  ];
+
   loadingRiders = false;
   assigningOrderId: string | null = null;
   updatingStatusOrderId: string | null = null;
@@ -67,6 +78,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
   loadingOrders = false;
   hasLoadedAvailableRiders = false;
   hasLoadedBusyRiders = false;
+  highlightedOrderId: string | null = sessionStorage.getItem('rms_highlighted_order_id');
+  private pendingScrollOrderId: string | null = null;
 
   constructor(
     private ordersService: OrdersService,
@@ -106,6 +119,13 @@ export class OrdersComponent implements OnInit, OnDestroy {
             this.totalPages = response.data.total_pages;
             this.hasNext = response.data.has_next;
             this.hasPrevious = response.data.has_previous;
+            if (this.pendingScrollOrderId) {
+              const targetId = this.pendingScrollOrderId;
+              this.pendingScrollOrderId = null;
+              setTimeout(() => {
+                document.getElementById(`order-row-${targetId}`)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }, 50);
+            }
           }
           else {
             this.toastService.error(response.message || 'Failed to load orders.');
@@ -121,6 +141,16 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   loadOrders(): void {
     this.loadOrders$.next();
+  }
+
+  setHighlightedOrder(orderId: string | null): void {
+    this.highlightedOrderId = orderId;
+    this.pendingScrollOrderId = orderId;
+    if (orderId) {
+      sessionStorage.setItem('rms_highlighted_order_id', orderId);
+    } else {
+      sessionStorage.removeItem('rms_highlighted_order_id');
+    }
   }
 
   loadAvailableRiders(): void {
@@ -170,6 +200,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
             return;
           }
           this.toastService.success(response.message || 'Rider assigned successfully.');
+          this.setHighlightedOrder(order.order_id);
           this.refreshRiderLists();
           this.loadOrders();
           this.loadAvailableRiders();
@@ -194,30 +225,86 @@ export class OrdersComponent implements OnInit, OnDestroy {
     return labels[status] || (status ? status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : '-');
   }
 
-  onStatusChange(order: Order, newStatus: string): void {
+  onStatusSelectChange(order: Order, event: Event): void {
+    const selectEl = event.target as HTMLSelectElement;
+    const newStatus = selectEl.value;
     if (!newStatus || newStatus === order.status) {
       return;
     }
     if (newStatus === 'assigned') {
+      selectEl.value = order.status;
       this.toastService.info('Please select a rider from the Rider column to assign this order.');
-      this.loadOrders();
+      return;
+    }
+    if (newStatus === 'cancelled') {
+      selectEl.value = order.status;
+      this.openCancelConfirmation(order);
       return;
     }
     this.updateOrderStatus(order, newStatus);
   }
 
+  openCancelConfirmation(order: Order): void {
+    if (this.updatingStatusOrderId || this.cancellingOrderId) {
+      return;
+    }
+    this.orderToCancel = order;
+    this.cancelConfirmationOpen = true;
+  }
+
+  closeCancelConfirmation(): void {
+    if (this.cancellingOrderId) {
+      return;
+    }
+    this.cancelConfirmationOpen = false;
+    this.orderToCancel = null;
+  }
+
+  confirmCancelOrder(reason: string): void {
+    if (!this.orderToCancel || this.cancellingOrderId) {
+      return;
+    }
+    const trimmedReason = (reason || '').trim();
+    if (!trimmedReason) {
+      this.toastService.error('Please enter a reason for cancellation.');
+      return;
+    }
+    const orderId = this.orderToCancel.order_id;
+    this.cancellingOrderId = orderId;
+    this.updatingStatusOrderId = orderId;
+
+    this.ordersService.updateOrderStatus(orderId, 'cancelled', trimmedReason)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.cancellingOrderId = null;
+          this.updatingStatusOrderId = null;
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          if (!response.success) {
+            this.toastService.error(response.message || 'Failed to cancel order.');
+            this.loadOrders();
+            return;
+          }
+          this.toastService.success(response.message || 'Order cancelled successfully.');
+          this.setHighlightedOrder(orderId);
+          this.cancelConfirmationOpen = false;
+          this.orderToCancel = null;
+          this.refreshRiderLists();
+          this.loadOrders();
+        },
+        error: (error) => {
+          this.toastService.error(error?.error?.message || 'Failed to cancel order.');
+          this.loadOrders();
+        }
+      });
+  }
+
   updateOrderStatus(order: Order, status: string): void {
     if (!status || status === order.status || this.updatingStatusOrderId) {
       return;
-    }
-
-    if (status === 'cancelled') {
-      const confirm = window.confirm(`Are you sure you want to cancel order ${order.order_id}?`)
-
-      if (!confirm) {
-        this.loadOrders();
-        return;
-      }
     }
     this.updatingStatusOrderId = order.order_id;
     this.ordersService.updateOrderStatus(order.order_id, status)
@@ -235,7 +322,8 @@ export class OrdersComponent implements OnInit, OnDestroy {
             return;
           }
           this.toastService.success(response.message || 'Order status updated successfully.');
-          if (status === 'cancelled' || status === 'delivered') {
+          this.setHighlightedOrder(order.order_id);
+          if (status === 'delivered') {
             this.refreshRiderLists();
           }
           this.loadOrders();
@@ -258,7 +346,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
     this.order_id = null
   }
 
-  onOrderCreated(): void {
+  onOrderCreated(orderId?: string): void {
+    if (orderId) {
+      this.setHighlightedOrder(orderId);
+    }
     this.currentPage = 1;
     this.loadOrders();
   }
@@ -417,6 +508,9 @@ export class OrdersComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           if (response.success) {
+            if (this.highlightedOrderId === orderId) {
+              this.setHighlightedOrder(null);
+            }
             this.toastService.success(response.message)
             this.closeDeleteConfirmation();
             this.applyFilters();

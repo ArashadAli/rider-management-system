@@ -1005,6 +1005,12 @@
             "type": "string",
             "enum": ["created", "assigned", "accepted", "picked_up", "on_the_way", "delivered", "cancelled"],
             "example": "accepted"
+          },
+          "cancellation_reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Required when status is 'cancelled'.",
+            "example": "Customer requested cancellation"
           }
         }
       },

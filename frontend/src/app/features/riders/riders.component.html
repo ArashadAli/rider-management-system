@@ -173,7 +173,10 @@
                         </td>
                     </tr>
                     <ng-container *ngIf="!loading">
-                        <tr *ngFor="let rider of riders; let isLast = last; let i = index" class="transition hover:bg-gray-50">
+                        <tr *ngFor="let rider of riders; let isLast = last; let i = index"
+                            [attr.id]="'rider-row-' + rider.id"
+                            [class.row-highlighted]="rider.id === highlightedRiderId"
+                            class="transition hover:bg-gray-50">
                             <td class="px-5 py-4 text-sm font-mono text-gray-600">
                                 {{ rider.id }}
                             </td>
@@ -288,7 +291,7 @@
         class="absolute right-0 top-0 flex h-full w-full flex-col overflow-hidden bg-white shadow-2xl sm:w-[85%] md:w-[600px] lg:w-[680px]"
         (click)="$event.stopPropagation()">
         <app-rider-form class="flex h-full min-h-0 flex-col" [mode]="drawerMode" [riderId]="selectedRiderId"
-            (close)="closeDrawer()" (saved)="getPaginatedRiders()">
+            (close)="closeDrawer()" (saved)="onRiderSaved($event)">
         </app-rider-form>
     </aside>
 </div>

@@ -52,7 +52,7 @@ def assign_rider(user_email, order_id):
 @token_required
 @validate_request(body_schema=OrderStatusUpdateSchema())
 def update_order_status(user_email, order_id):
-    return update_Order_Status(order_id)
+    return update_Order_Status(order_id, user_email=user_email)
 
 
 @order_bp.route("/single-order/<string:order_id>", methods=["GET"])

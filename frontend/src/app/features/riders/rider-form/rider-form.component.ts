@@ -29,7 +29,7 @@ export class RiderFormComponent
   @Input() mode: 'create' | 'view' | 'edit' = 'create';
   @Input() riderId: string | null = null;
   @Output() close = new EventEmitter<void>();
-  @Output() saved = new EventEmitter<void>();
+  @Output() saved = new EventEmitter<{ id: string; mode: 'create' | 'edit' }>();
   riderForm!: FormGroup;
   loading = false;
   showConfirmation = false;
@@ -217,8 +217,9 @@ export class RiderFormComponent
       .subscribe({
         next: response => {
           if (response.success) {
+            const createdRiderId = response.data?.rider?.id || '';
             this.toastService.success(response.message);
-            this.saved.emit();
+            this.saved.emit({ id: createdRiderId, mode: 'create' });
             this.close.emit();
           }
         }
@@ -239,7 +240,7 @@ export class RiderFormComponent
           next: response => {
             if (response.success) {
               this.toastService.success(response.message);
-              this.saved.emit();
+              this.saved.emit({ id: this.riderId || '', mode: 'edit' });
               this.close.emit();
             }
           }

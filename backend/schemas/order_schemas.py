@@ -53,6 +53,21 @@ class OrderStatusUpdateSchema(BaseBodySchema):
         error_messages={"required": "Status is required"},
         validate=validate.OneOf(ALLOWED_ORDER_STATUSES, error="Invalid status")
     )
+    cancellation_reason = fields.String(
+        load_default=None,
+        allow_none=True,
+        validate=validate.Length(max=500, error="Cancellation reason cannot exceed 500 characters")
+    )
+
+    @validates_schema
+    def validate_cancellation_reason(self, data, **kwargs):
+        if data.get("status") == "cancelled":
+            reason = (data.get("cancellation_reason") or "").strip()
+            if not reason:
+                raise ValidationError(
+                    "Cancellation reason is required when cancelling an order.",
+                    field_name="cancellation_reason"
+                )
 
 
 class OrderAssignRiderSchema(BaseBodySchema):
@@ -109,6 +124,7 @@ class OrderResponseSchema(Schema):
     delivery_address = fields.String()
     amount = fields.Float()
     status = fields.String()
+    cancellation_reason = fields.String(allow_none=True)
     rider_id = fields.String(allow_none=True)
     rider_name = fields.String(allow_none=True)
     created_at = fields.Method("format_created_at")

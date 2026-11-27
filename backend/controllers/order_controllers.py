@@ -94,6 +94,7 @@ def allOrders(user_email):
                 "delivery_address": order.delivery_address,
                 "amount": float(order.amount),
                 "status": order.status,
+                "cancellation_reason": order.cancellation_reason,
                 "next_statuses": ORDER_TRANSITIONS.get(order.status, []),
                 "created_at": order.created_at.isoformat() if order.created_at else None,
                 "rider_id": order.rider_id
@@ -206,6 +207,7 @@ def getOrderForPagination(user_email, validated_query=None):
                 "delivery_address": order.delivery_address,
                 "amount": float(order.amount),
                 "status": order.status,
+                "cancellation_reason": order.cancellation_reason,
                 "next_statuses": ORDER_TRANSITIONS.get(order.status, []),
                 "created_at": order.created_at.isoformat() if order.created_at else None,
                 "rider_id": order.rider_id,
@@ -317,7 +319,7 @@ def assign_Rider(order_id, validated_data=None):
         }), 500
 
 
-def update_Order_Status(order_id, validated_data=None):
+def update_Order_Status(order_id, validated_data=None, user_email=None):
     try:
         data = validated_data or get_validated_data()
         if not data:
@@ -359,7 +361,15 @@ def update_Order_Status(order_id, validated_data=None):
                     "message": f"Orders cannot be cancelled once in '{current_status}' status."
                 }), 400
 
+            cancellation_reason = (data.get("cancellation_reason") or "").strip()
+            if not cancellation_reason:
+                return jsonify({
+                    "success": False,
+                    "message": "Cancellation reason is required when cancelling an order."
+                }), 400
+
             order.status = "cancelled"
+            order.cancellation_reason = cancellation_reason
             if order.rider_id is not None:
                 rider = Rider.query.filter_by(id=order.rider_id).first()
                 if rider and rider.status == "active":
@@ -375,7 +385,8 @@ def update_Order_Status(order_id, validated_data=None):
                 order_id=order.order_id,
                 from_status=current_status,
                 to_status="cancelled",
-                changed_by="Cancelled by user"
+                changed_by=f"Cancelled by {user_email}" if user_email else "Cancelled by user",
+                reason=cancellation_reason
             )
             db.session.add(history_entry)
             db.session.commit()
@@ -529,6 +540,7 @@ def get_Single_Order(order_id):
                 "delivery_address": order.delivery_address,
                 "pickup_address": order.pickup_address,
                 "status": order.status,
+                "cancellation_reason": order.cancellation_reason,
                 "next_statuses": ORDER_TRANSITIONS.get(order.status, []),
                 "history": history_list,
                 "rider_id": order.rider_id,

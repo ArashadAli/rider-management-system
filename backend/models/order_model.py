@@ -62,6 +62,11 @@ class Order(db.Model):
         index=True
     )
 
+    cancellation_reason = db.Column(
+        db.Text,
+        nullable=True
+    )
+
     created_at = db.Column(
         db.DateTime(timezone=True),
         nullable=False,
@@ -118,6 +123,11 @@ class OrderStatusHistory(db.Model):
         nullable=True
     )
 
+    reason = db.Column(
+        db.Text,
+        nullable=True
+    )
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -125,6 +135,7 @@ class OrderStatusHistory(db.Model):
             "from_status": self.from_status,
             "to_status": self.to_status,
             "changed_at": self.changed_at.isoformat() if self.changed_at else None,
-            "changed_by": self.changed_by
+            "changed_by": self.changed_by,
+            "reason": self.reason
         }
 

@@ -76,7 +76,11 @@ db.init_app(app)
 with app.app_context():
     try:
         db.create_all()
+        db.session.execute(db.text("ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancellation_reason TEXT"))
+        db.session.execute(db.text("ALTER TABLE order_status_history ADD COLUMN IF NOT EXISTS reason TEXT"))
+        db.session.commit()
     except Exception as e:
+        db.session.rollback()
         print("Note: db.create_all() deferred:", e)
 
 # Auth Route

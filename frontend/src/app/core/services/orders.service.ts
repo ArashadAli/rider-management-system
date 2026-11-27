@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { ApiService } from './api.service';
-import { OrderResponse, AllOrdersResponse, RiderResponse, SingleOrderResponse } from '../models/order-response.model';
+import { OrderResponse, AllOrdersResponse, RiderResponse, SingleOrderResponse, CreateOrderResponse } from '../models/order-response.model';
 import { AvailableRiderResponse, AssignRiderResponse } from '../models/rider-response.model';
 import { CommonResponse } from '../models/auth-response.model';
 
@@ -13,8 +13,8 @@ export class OrdersService {
 
   constructor(private apiService: ApiService) {}
 
-  createOrder(orderDetails: any): Observable<OrderResponse> {
-    return this.apiService.post<OrderResponse>(
+  createOrder(orderDetails: any): Observable<CreateOrderResponse> {
+    return this.apiService.post<CreateOrderResponse>(
       '/orders/create',
       orderDetails
     );
@@ -62,10 +62,14 @@ export class OrdersService {
     )
   }
 
-  updateOrderStatus(order_id: string, status: string): Observable<RiderResponse> {
+  updateOrderStatus(order_id: string, status: string, cancellation_reason?: string): Observable<RiderResponse> {
+    const payload: { status: string; cancellation_reason?: string } = { status };
+    if (cancellation_reason !== undefined) {
+      payload.cancellation_reason = cancellation_reason;
+    }
     return this.apiService.post<RiderResponse>(
       `/orders/update-order-status/${order_id}`,
-      {status}
+      payload
     )
   }
 

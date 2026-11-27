@@ -5,6 +5,7 @@ export interface OrderStatusHistoryItem {
   to_status: string;
   changed_at: string | null;
   changed_by?: string | null;
+  reason?: string | null;
 }
 
 export interface Order {
@@ -16,6 +17,7 @@ export interface Order {
   delivery_address: string;
   amount: number;
   status: string;
+  cancellation_reason?: string | null;
   next_statuses?: string[];
   history?: OrderStatusHistoryItem[];
   created_at: string | null;
@@ -47,6 +49,15 @@ export interface AllOrdersResponse {
 export interface RiderResponse {
   success: boolean,
   message: string
+}
+
+export interface CreateOrderResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    order_id: string;
+    [key: string]: any;
+  };
 }
 
 export interface SingleOrderResponse {

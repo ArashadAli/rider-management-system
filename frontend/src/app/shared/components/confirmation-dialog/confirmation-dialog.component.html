@@ -19,7 +19,35 @@
                 </p>
             </div>
         </div>
-        <div class="mt-7 flex justify-end gap-3">
+        <div *ngIf="showReasonInput" class="mt-4">
+            <label for="confirmation-reason" class="mb-1.5 block text-xs font-semibold text-gray-700">
+                {{ reasonLabel }} <span *ngIf="reasonRequired" class="text-[#DC1D47]">*</span>
+            </label>
+            <div *ngIf="quickReasons.length > 0" class="mb-2.5 flex flex-wrap gap-1.5">
+                <button *ngFor="let chip of quickReasons" type="button" [disabled]="loading"
+                    (click)="selectQuickReason(chip)"
+                    class="rounded-full border px-2.5 py-1 text-xs font-medium transition disabled:opacity-50"
+                    [ngClass]="reason === chip ? 'border-[#DC1D47] bg-red-50 text-[#DC1D47]' : 'border-gray-200 bg-gray-50 text-gray-600 hover:border-gray-300 hover:bg-gray-100'">
+                    {{ chip }}
+                </button>
+            </div>
+            <textarea id="confirmation-reason" [(ngModel)]="reason" (blur)="reasonTouched = true"
+                [disabled]="loading" [attr.maxlength]="reasonMaxLength" rows="3"
+                [placeholder]="reasonPlaceholder"
+                class="w-full resize-none rounded-lg border px-3 py-2 text-sm text-gray-800 outline-none transition focus:border-[#DC1D47] focus:ring-2 focus:ring-red-100 disabled:bg-gray-50 disabled:opacity-60"
+                [ngClass]="hasReasonError ? 'border-red-500' : 'border-gray-300'">
+            </textarea>
+            <div class="mt-1 flex items-center justify-between gap-2">
+                <p *ngIf="hasReasonError; else spacer" class="text-xs text-red-600">
+                    {{ reasonLabel }} is required.
+                </p>
+                <ng-template #spacer><span></span></ng-template>
+                <span class="text-[11px] text-gray-400">
+                    {{ reason.length }}/{{ reasonMaxLength }}
+                </span>
+            </div>
+        </div>
+        <div class="mt-6 flex justify-end gap-3">
             <button type="button" (click)="onCancel()" [disabled]="loading" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50">
                 {{ cancelText }}
             </button>

@@ -16,6 +16,7 @@ export interface TimelineStep {
     status: 'completed' | 'current' | 'upcoming' | 'cancelled';
     timestamp?: string | null;
     note?: string | null;
+    reason?: string | null;
 }
 
 @Component({
@@ -30,7 +31,7 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
     @Input() orderId: string | null = null
 
     @Output() close = new EventEmitter<void>();
-    @Output() saved = new EventEmitter<void>();
+    @Output() saved = new EventEmitter<string>();
 
     orderForm: FormGroup
 
@@ -188,6 +189,17 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
         return this.orderForm.controls;
     }
 
+    get cancellationReasonText(): string | null {
+        if (!this.orderDetails || this.orderDetails.status !== 'cancelled') {
+            return null;
+        }
+        if (this.orderDetails.cancellation_reason?.trim()) {
+            return this.orderDetails.cancellation_reason.trim();
+        }
+        const cancelHistory = (this.orderDetails.history || []).find((h: any) => h.to_status === 'cancelled');
+        return cancelHistory?.reason?.trim() || null;
+    }
+
     loadSingleOrder(orderId: string): void {
         this.loadingOrder = true;
         this.orderDetails = null;
@@ -288,13 +300,15 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
                 });
 
             const cancelledFromKey = stageOrder[cancelledFromIdx] || 'created';
+            const cancellationReason = (order.cancellation_reason || cancelEntry?.reason || '').trim() || null;
             completedSteps.push({
                 key: 'cancelled',
                 label: 'Order Cancelled',
                 description: `Order was cancelled (${this.formatStatusLabel(cancelledFromKey)})`,
                 status: 'cancelled',
                 timestamp: cancelEntry?.changed_at || null,
-                note: cancelEntry?.changed_by || `Cancelled while ${this.formatStatusLabel(cancelledFromKey).toLowerCase()}`
+                note: cancelEntry?.changed_by || `Cancelled while ${this.formatStatusLabel(cancelledFromKey).toLowerCase()}`,
+                reason: cancellationReason
             });
 
             this.timelineSteps = completedSteps;
@@ -439,10 +453,11 @@ export class OrderDrawerComponent implements OnInit, OnChanges, OnDestroy {
                         return;
                     }
 
+                    const createdOrderId = response.data?.order_id || '';
                     this.toastService.success(response.message || 'Order created successfully.');
                     this.resetForm();
                     this.close.emit();
-                    this.saved.emit();
+                    this.saved.emit(createdOrderId);
                 }
             });
     }

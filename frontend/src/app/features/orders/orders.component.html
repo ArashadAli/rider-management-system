@@ -145,7 +145,9 @@
             </td>
           </tr>
           <ng-container *ngIf="!loadingOrders">
-            <tr *ngFor="let order of orders" class="border-b border-gray-100 transition hover:bg-gray-50/70">
+            <tr *ngFor="let order of orders" [attr.id]="'order-row-' + order.order_id"
+              [class.row-highlighted]="order.order_id === highlightedOrderId"
+              class="border-b border-gray-100 transition hover:bg-gray-50/70">
               <td class="px-5 py-4">
                 <span class="font-semibold">{{ order.order_id }}</span>
               </td>
@@ -209,7 +211,7 @@
                   </span>
                 </ng-container>
                 <ng-template #statusDropdown>
-                  <select [ngModel]="order.status" (ngModelChange)="onStatusChange(order, $event)"
+                  <select [ngModel]="order.status" (change)="onStatusSelectChange(order, $event)"
                     [disabled]="updatingStatusOrderId === order.order_id"
                     class="max-w-40 rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-xs font-semibold outline-none focus:border-[#DC1D47] disabled:opacity-50"
                     [ngClass]="getStatusClass(order.status)">
@@ -261,6 +263,15 @@
     </app-pagination>
   </div>
 
+  <app-confirmation-dialog [visible]="cancelConfirmationOpen" [title]="'Cancel Order?'"
+    [message]="'Are you sure you want to cancel order'" [itemName]="orderToCancel?.order_id || ''"
+    [confirmText]="'Cancel Order'" [cancelText]="'Keep Order'" [loading]="!!cancellingOrderId"
+    [loadingText]="'Cancelling...'" [icon]="'ban'" [showReasonInput]="true"
+    [reasonLabel]="'Cancellation Reason'" [reasonPlaceholder]="'Enter the reason for cancelling this order...'"
+    [quickReasons]="cancellationQuickReasons"
+    (confirmed)="confirmCancelOrder($event)" (cancelled)="closeCancelConfirmation()">
+  </app-confirmation-dialog>
+
   <app-confirmation-dialog [visible]="deleteConfirmationOpen" [title]="'Delete Order?'"
     [message]="'Are you sure you want to delete order'" [itemName]="orderToDelete?.order_id || ''"
     [confirmText]="'Yes'" [cancelText]="'No'" [loading]="!!deletingOrderId" [loadingText]="'Deleting...'"
@@ -268,5 +279,5 @@
   </app-confirmation-dialog>
 </div>
 
-<app-order-drawer *ngIf="showCreateOrder" (close)="closeCreateOrder()" (saved)="onOrderCreated()" [mode]="drawerMode"
+<app-order-drawer *ngIf="showCreateOrder" (close)="closeCreateOrder()" (saved)="onOrderCreated($event)" [mode]="drawerMode"
   [orderId]="order_id"></app-order-drawer>

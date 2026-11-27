@@ -243,6 +243,22 @@
                                 </p>
                             </div>
                         </div>
+                        <div *ngIf="orderDetails.status === 'cancelled'"
+                            class="mt-4 rounded-xl border border-red-200 bg-red-50/70 p-3.5">
+                            <div class="flex items-start gap-2.5">
+                                <div class="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600">
+                                    <i-lucide name="ban" [size]="14"></i-lucide>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-bold uppercase tracking-wide text-red-700">
+                                        Cancellation Reason
+                                    </p>
+                                    <p class="mt-1 break-words text-sm font-medium text-red-900">
+                                        {{ cancellationReasonText || 'No reason recorded' }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                         <!-- Order Lifecycle Timeline -->
                         <div class="mt-6 rounded-xl border border-gray-100 bg-gray-50/70 p-5">
                             <div class="mb-4 flex items-center justify-between">
@@ -300,6 +316,9 @@
                                         </div>
                                         <p class="mt-0.5 text-xs text-gray-500">
                                             {{ step.description }}
+                                        </p>
+                                        <p *ngIf="step.reason" class="mt-1.5 rounded-md border border-red-100 bg-red-50/80 px-2.5 py-1.5 text-xs font-medium text-red-700 break-words">
+                                            Reason: {{ step.reason }}
                                         </p>
                                         <p *ngIf="step.note && step.note !== step.description" class="mt-0.5 text-[11px] text-gray-400">
                                             {{ step.note }}
